@@ -1,81 +1,136 @@
-/* Переменные */
+/* ===========================
+   ПРЕМИАЛЬНАЯ ПАЛИТРА
+   =========================== */
 :root {
-  --primary-color: #8b4513;
-  --secondary-color: #d4af37;
-  --accent-color: #2c5530;
-  --text-dark: #2c2c2c;
-  --text-light: #666;
-  --background: #f8f5f2;
+  --primary-color: #8b4513;            /* Кожаный коричневый */
+  --secondary-color: #d4af37;          /* Классическое золото */
+  --gold-color: #e5c76b;               /* Мягкое золото */
+  --accent-color: #2c5530;             /* Тёмный зелёный */
+  --text-dark: #1a1a1a;
+  --text-light: #777;
+  --background: #f6f3ef;
+  --dark-bg: #0d0d0d;
   --white: #ffffff;
-  --border: #e0e0e0;
-  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  --border: #dfd6c8;
+  --shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  --gold-shadow: 0 0 15px rgba(212, 175, 55, 0.35);
 }
 
-/* Сброс стилей */
+/* ===========================
+   СБРОС СТИЛЕЙ
+   =========================== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* Основные стили */
+/* ===========================
+   ОСНОВА
+   =========================== */
 body {
   font-family: 'Georgia', 'Times New Roman', serif;
-  line-height: 1.6;
-  color: var(--text-dark);
   background-color: var(--background);
+  color: var(--text-dark);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.7;
 }
 
-/* Контейнер с ограниченной шириной */
+/* ОГРАНИЧЕННЫЙ КОНТЕЙНЕР */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 2rem;
 }
 
-/* Адаптивная сетка для продуктов */
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2rem;
-  width: 100%;
+/* ===========================
+   СТИЛИ СЕКЦИЙ И ЗАГОЛОВКОВ
+   =========================== */
+.section-title {
+  text-align: center;
+  margin-bottom: 3.5rem;
+  color: var(--text-dark);
 }
 
-/* Центрирование контента */
-.text-center {
-  text-align: center;
+.section-title h2 {
+  font-size: 2.6rem;
+  margin-bottom: 1.2rem;
+  position: relative;
+  letter-spacing: 1px;
 }
-/* Кнопки */
+
+.section-title h2::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90px;
+  height: 3px;
+  background: var(--gold-color);
+  border-radius: 2px;
+}
+
+.section-title p {
+  color: var(--text-light);
+  font-size: 1.15rem;
+  opacity: 0.9;
+}
+
+/* ===========================
+   КАРТОЧКИ
+   =========================== */
+.card {
+  background: var(--white);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: 0.4s ease;
+}
+
+.card:hover {
+  transform: translateY(-7px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+/* ===========================
+   КНОПКИ
+   =========================== */
 .btn {
   display: inline-block;
-  padding: 12px 30px;
+  padding: 12px 32px;
   background: var(--primary-color);
   color: var(--white);
-  text-decoration: none;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 1rem;
   font-family: inherit;
-  transition: all 0.3s ease;
+  transition: 0.3s ease;
   text-align: center;
+  letter-spacing: 0.4px;
 }
 
 .btn:hover {
   background: #6b3710;
   transform: translateY(-2px);
+  box-shadow: var(--gold-shadow);
 }
 
 .btn-secondary {
-  background: var(--secondary-color);
+  background: var(--gold-color);
   color: var(--text-dark);
 }
 
 .btn-secondary:hover {
-  background: #b8941f;
+  background: var(--secondary-color);
+  box-shadow: var(--gold-shadow);
 }
 
-/* Сетка */
+/* ===========================
+   СЕТКА ДЛЯ ТОВАРОВ
+   =========================== */
 .products-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -83,81 +138,43 @@ body {
   padding: 2rem 0;
 }
 
-/* Заголовки разделов */
-.section-title {
+/* ===========================
+   УТИЛИТЫ
+   =========================== */
+.text-center {
   text-align: center;
-  margin-bottom: 3rem;
-  color: var(--text-dark);
 }
 
-.section-title h2 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  position: relative;
-}
-
-.section-title h2::after {
-  content: '';
-  position: absolute;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
-  height: 3px;
-  background: var(--secondary-color);
-}
-
-.section-title p {
-  color: var(--text-light);
-  font-size: 1.1rem;
-}
-
-/* Карточки */
-.card {
-  background: var(--white);
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-
-/* Адаптивность */
+/* ===========================
+   АДАПТИВНОСТЬ
+   =========================== */
 @media (max-width: 1200px) {
   .container {
     padding: 0 1.5rem;
   }
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
   .container {
     padding: 0 1rem;
   }
 
   .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   }
 
   .section-title h2 {
-    font-size: 2rem;
-  }
-
-  .products-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
+    font-size: 2.1rem;
   }
 }
 
 @media (max-width: 480px) {
   .products-grid {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 1.2rem;
+  }
+
+  .section-title h2 {
+    font-size: 1.8rem;
   }
 }

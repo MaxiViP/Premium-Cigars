@@ -1,41 +1,57 @@
 <template>
-  <div class="product-card">
-    <div class="product-image">
+  <div :class="['product-card', { 'catalog-view': catalogView }]">
+    <div class="product-image-container">
+
+      <!-- Быстрые действия -->
+      <div class="quick-actions">
+        <button class="qa-btn" @click.prevent>❤</button>
+        <button class="qa-btn" @click.prevent>⇄</button>
+      </div>
+
       <ProductImage
         :src="product.images[0]"
         :alt="product.name"
-        class="product-img"
+        class="product-image"
       />
-      <div class="product-overlay">
-        <router-link :to="`/product/${product.id}`" class="view-details">
-          Подробнее
-        </router-link>
+
+      <!-- Метка наличия -->
+      <div :class="product.inStock ? 'in-stock-badge' : 'out-of-stock-badge'">
+        {{ product.inStock ? 'В наличии' : 'Нет в наличии' }}
       </div>
     </div>
 
     <div class="product-info">
+      <div class="product-brand">{{ product.brand }}</div>
       <h3 class="product-name">{{ product.name }}</h3>
-      <p class="product-brand">{{ product.brand }}</p>
-      <p class="product-price">{{ formatPrice(product.price) }}</p>
 
+      <!-- Характеристики (опционально) -->
       <div v-if="product.category === 'cigars'" class="product-specs">
-        <span class="spec">{{ product.strength }}</span>
-        <span class="spec">{{ product.format }}</span>
-        <span class="spec">{{ product.ringGauge }} RG</span>
+        <div class="spec-item"><span>Крепость:</span><span>{{ product.strength }}</span></div>
+        <div class="spec-item"><span>Формат:</span><span>{{ product.format }}</span></div>
+        <div class="spec-item"><span>Размер:</span><span>{{ product.ringGauge }} RG / {{ product.length }}mm</span></div>
       </div>
 
-      <div v-else class="product-specs">
-        <span class="spec">{{ (product as any).type }}</span>
-        <span class="spec">{{ (product as any).material }}</span>
-      </div>
+      <div class="product-footer">
+        <div class="left">
+          <div class="product-price">{{ formatPrice(product.price) }}</div>
+          <div class="product-rating">
+            <span class="rating-stars">★★★★★</span>
+            <span class="rating-value">{{ product.rating }}</span>
+          </div>
+        </div>
 
-      <div class="product-rating">
-        <span class="rating-stars">★★★★★</span>
-        <span class="rating-value">{{ product.rating }}</span>
+        <div class="right">
+          <router-link :to="`/product/${product.id}`" class="details-btn">
+            Подробнее
+          </router-link>
+
+          <button v-if="product.inStock" class="add-cart-btn">В корзину</button>
+        </div>
       </div>
     </div>
   </div>
 </template>
+
 
 <script setup lang="ts">
 import type { Product, Accessory } from '@/types/Product'
@@ -44,172 +60,200 @@ import ProductImage from './ProductImage.vue'
 
 interface Props {
   product: Product | Accessory
+  catalogView?: boolean
 }
 
-defineProps<Props>()
+withDefaults(defineProps<Props>(), {
+  catalogView: false
+})
 </script>
+
 <style scoped>
-
-.product-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.product-card:hover .product-img {
-  transform: scale(1.05);
-}
-
-
-.product-card {
-  background: var(--white);
-  border-radius: 12px;
+.product-card.catalog-view {
+  background: #fff;
+  border-radius: 14px;
   overflow: hidden;
-  box-shadow: var(--shadow);
-  transition: all 0.3s ease;
-  max-width: 320px;
-  width: 100%;
-  margin: 0 auto;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+  transition: all .25s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
-.product-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+.product-card.catalog-view:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+}
+
+/* Изображение */
+.product-image-container {
+  position: relative;
+  height: 260px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .product-image {
-  position: relative;
-  height: 220px;
-  overflow: hidden;
-  background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
-}
-
-.product-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: transform .3s ease;
 }
 
-.product-card:hover .product-image img {
-  transform: scale(1.05);
+.product-card.catalog-view:hover .product-image {
+  transform: scale(1.06);
 }
 
-.product-overlay {
+/* Быстрые действия */
+.quick-actions {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  right: 12px;
+  top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 2;
+}
+
+.qa-btn {
+  background: white;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: background .2s ease;
 }
 
-.product-card:hover .product-overlay {
-  opacity: 1;
+.qa-btn:hover {
+  background: #fafafa;
 }
 
-.view-details {
-  background: var(--secondary-color);
-  color: var(--text-dark);
-  padding: 12px 24px;
-  text-decoration: none;
-  border-radius: 6px;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
+/* Наличие */
+.in-stock-badge,
+.out-of-stock-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  z-index: 2;
 }
 
-.view-details:hover {
-  background: #b8941f;
-  transform: translateY(-2px);
+.in-stock-badge {
+  background: #10b981;
+}
+.out-of-stock-badge {
+  background: #ef4444;
 }
 
+/* Info */
 .product-info {
   padding: 1.5rem;
-}
-
-.product-name {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.1rem;
-  color: var(--text-dark);
-  font-weight: bold;
-  line-height: 1.3;
-  height: 2.6rem;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .product-brand {
-  margin: 0 0 0.5rem 0;
-  color: var(--text-light);
-  font-size: 0.9rem;
+  font-size: .9rem;
+  color: #777;
+  text-transform: uppercase;
   font-weight: 500;
+  margin-bottom: .4rem;
+}
+
+.product-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 1rem;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Specs */
+.product-specs {
+  border-top: 1px dashed #eee;
+  border-bottom: 1px dashed #eee;
+  padding: 1rem 0;
+  margin-bottom: 1.2rem;
+}
+
+.spec-item {
+  display: flex;
+  justify-content: space-between;
+  padding: .25rem 0;
+  font-size: .85rem;
+}
+
+.spec-item span:first-child {
+  color: #666;
+}
+
+/* Footer */
+.product-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
 }
 
 .product-price {
-  margin: 0 0 1rem 0;
-  font-size: 1.3rem;
-  font-weight: bold;
+  font-size: 1.35rem;
+  font-weight: 700;
   color: var(--primary-color);
 }
 
-.product-specs {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-}
-
-.spec {
-  background: var(--background);
-  padding: 0.3rem 0.6rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  color: var(--text-light);
-  font-weight: 500;
-}
-
 .product-rating {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  margin-top: 4px;
 }
 
 .rating-stars {
   color: var(--secondary-color);
-  font-size: 0.9rem;
+  font-size: .9rem;
 }
 
-.rating-value {
-  color: var(--text-light);
-  font-size: 0.8rem;
-  font-weight: 500;
+.details-btn {
+  background: #f6f6f6;
+  padding: .6rem 1rem;
+  font-weight: 600;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background .2s ease;
+  white-space: nowrap;
 }
 
-/* Обеспечиваем одинаковую высоту карточек */
-@media (min-width: 769px) {
-  .product-card {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .product-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .product-rating {
-    margin-top: auto;
-  }
+.details-btn:hover {
+  background: #e9e9e9;
 }
+
+/* Кнопка в корзину */
+.add-cart-btn {
+  background: var(--primary-color);
+  color: white;
+  padding: .6rem 1.1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity .2s ease;
+  white-space: nowrap;
+}
+
+.add-cart-btn:hover {
+  opacity: 0.85;
+}
+
 </style>

@@ -8,6 +8,17 @@ export interface Product {
   format: string
   ringGauge: number
   length: number
+  smokingTime: 'до 15 минут' | 'до 20 минут' | 'до 30 минут' | 'до 45 минут' | 'до 60 минут'
+  flavorNotes: string[]
+  flavorFamily:
+    | 'Древесные'
+    | 'Пряные'
+    | 'Цитрусовые'
+    | 'Цветочные'
+    | 'Ореховые'
+    | 'Фруктовые'
+    | 'Землистые'
+    | 'Сладкие'
   description: string
   price: number
   images: string[]
