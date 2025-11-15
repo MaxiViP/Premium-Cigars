@@ -15,7 +15,7 @@
           <div class="filter-toggle" @click="toggleFilters">
             <span>Фильтры</span>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M4 6l4 4 4-4"/>
+              <path d="M4 6l4 4 4-4" />
             </svg>
           </div>
           <div class="sort-control">
@@ -30,6 +30,12 @@
       </div>
 
       <div class="catalog-layout">
+        <div
+          class="filters-overlay"
+          :class="{ 'filters-overlay--active': showFilters }"
+          @click="closeFilters"
+        ></div>
+
         <!-- Боковая панель фильтров -->
         <aside class="filters-sidebar" :class="{ 'filters-sidebar--open': showFilters }">
           <div class="filters-header">
@@ -63,7 +69,7 @@
                     v-model.number="minPrice"
                     @change="applyFilters"
                     class="price-input"
-                  >
+                  />
                 </div>
                 <div class="price-input-group">
                   <label>до</label>
@@ -72,7 +78,7 @@
                     v-model.number="maxPrice"
                     @change="applyFilters"
                     class="price-input"
-                  >
+                  />
                 </div>
               </div>
               <div class="price-slider">
@@ -83,7 +89,7 @@
                   v-model.number="minPrice"
                   @input="applyFilters"
                   class="range-slider"
-                >
+                />
                 <input
                   type="range"
                   :min="availableMinPrice"
@@ -91,7 +97,7 @@
                   v-model.number="maxPrice"
                   @input="applyFilters"
                   class="range-slider"
-                >
+                />
               </div>
               <div class="price-range">
                 <span>{{ formatPrice(minPrice) }}</span>
@@ -111,7 +117,7 @@
                   :value="brand"
                   v-model="selectedBrands"
                   @change="applyFilters"
-                >
+                />
                 <span class="checkmark"></span>
                 <span class="option-text">{{ brand }}</span>
                 <span class="option-count">({{ getBrandCount(brand) }})</span>
@@ -129,7 +135,7 @@
                   :value="country"
                   v-model="selectedCountries"
                   @change="applyFilters"
-                >
+                />
                 <span class="checkmark"></span>
                 <span class="option-text">{{ country }}</span>
                 <span class="option-count">({{ getCountryCount(country) }})</span>
@@ -147,7 +153,7 @@
                   :value="format"
                   v-model="selectedFormats"
                   @change="applyFilters"
-                >
+                />
                 <span class="checkmark"></span>
                 <span class="option-text">{{ format }}</span>
                 <span class="option-count">({{ getFormatCount(format) }})</span>
@@ -165,7 +171,7 @@
                   :value="strength"
                   v-model="selectedStrengths"
                   @change="applyFilters"
-                >
+                />
                 <span class="checkmark"></span>
                 <span class="option-text">{{ strength }}</span>
                 <span class="option-count">({{ getStrengthCount(strength) }})</span>
@@ -183,7 +189,7 @@
                   :value="time"
                   v-model="selectedSmokingTimes"
                   @change="applyFilters"
-                >
+                />
                 <span class="checkmark"></span>
                 <span class="option-text">{{ time }}</span>
                 <span class="option-count">({{ getSmokingTimeCount(time) }})</span>
@@ -201,7 +207,7 @@
                   :value="family"
                   v-model="selectedFlavorFamilies"
                   @change="applyFilters"
-                >
+                />
                 <span class="checkmark"></span>
                 <span class="option-text">{{ family }}</span>
                 <span class="option-count">({{ getFlavorFamilyCount(family) }})</span>
@@ -216,7 +222,10 @@
               <button
                 v-for="note in flavorNotes"
                 :key="note"
-                :class="['flavor-tag', { 'flavor-tag--active': selectedFlavorNotes.includes(note) }]"
+                :class="[
+                  'flavor-tag',
+                  { 'flavor-tag--active': selectedFlavorNotes.includes(note) },
+                ]"
                 @click="toggleFlavorNote(note)"
               >
                 {{ note }}
@@ -239,7 +248,7 @@
                 v-model="minLength"
                 @change="applyFilters"
                 class="range-slider"
-              >
+              />
               <input
                 type="range"
                 :min="availableMinLength"
@@ -247,7 +256,7 @@
                 v-model="maxLength"
                 @change="applyFilters"
                 class="range-slider"
-              >
+              />
             </div>
           </div>
 
@@ -266,7 +275,7 @@
                 v-model="minRingGauge"
                 @change="applyFilters"
                 class="range-slider"
-              >
+              />
               <input
                 type="range"
                 :min="availableMinRingGauge"
@@ -274,22 +283,18 @@
                 v-model="maxRingGauge"
                 @change="applyFilters"
                 class="range-slider"
-              >
+              />
             </div>
           </div>
 
           <!-- Кнопка сброса фильтров -->
-          <button class="reset-filters-btn" @click="resetFilters">
-            Сбросить все фильтры
-          </button>
+          <button class="reset-filters-btn" @click="resetFilters">Сбросить все фильтры</button>
         </aside>
 
         <!-- Основной контент - ТОВАРЫ СПРАВА -->
         <main class="catalog-main">
           <!-- Статистика -->
-          <div class="products-stats">
-            Найдено товаров: {{ filteredProducts.length }}
-          </div>
+          <div class="products-stats">Найдено товаров: {{ filteredProducts.length }}</div>
 
           <!-- Сетка товаров -->
           <div class="products-grid">
@@ -342,40 +347,40 @@ const maxRingGauge = ref(60)
 
 // Получаем уникальные значения для фильтров
 const cigars = computed(() => {
-  return productsStore.products.filter(p => p.category === 'cigars') as Product[]
+  return productsStore.products.filter((p) => p.category === 'cigars') as Product[]
 })
 
 // Диапазоны цен
 const availableMinPrice = computed(() => {
-  return Math.min(...cigars.value.map(p => p.price))
+  return Math.min(...cigars.value.map((p) => p.price))
 })
 
 const availableMaxPrice = computed(() => {
-  return Math.max(...cigars.value.map(p => p.price))
+  return Math.max(...cigars.value.map((p) => p.price))
 })
 
 const brands = computed(() => {
-  const allBrands = cigars.value.map(p => p.brand)
+  const allBrands = cigars.value.map((p) => p.brand)
   return [...new Set(allBrands)].sort()
 })
 
 const countries = computed(() => {
-  const allCountries = cigars.value.map(p => p.country)
+  const allCountries = cigars.value.map((p) => p.country)
   return [...new Set(allCountries)].sort()
 })
 
 const formats = computed(() => {
-  const allFormats = cigars.value.map(p => p.format)
+  const allFormats = cigars.value.map((p) => p.format)
   return [...new Set(allFormats)].sort()
 })
 
 const strengths = computed(() => {
-  const allStrengths = cigars.value.map(p => p.strength)
+  const allStrengths = cigars.value.map((p) => p.strength)
   return [...new Set(allStrengths)]
 })
 
 const smokingTimes = computed(() => {
-  const allTimes = cigars.value.map(p => p.smokingTime)
+  const allTimes = cigars.value.map((p) => p.smokingTime)
   return [...new Set(allTimes)].sort((a, b) => {
     const timeOrder = ['до 15 минут', 'до 20 минут', 'до 30 минут', 'до 45 минут', 'до 60 минут']
     return timeOrder.indexOf(a) - timeOrder.indexOf(b)
@@ -383,55 +388,55 @@ const smokingTimes = computed(() => {
 })
 
 const flavorFamilies = computed(() => {
-  const allFamilies = cigars.value.map(p => p.flavorFamily)
+  const allFamilies = cigars.value.map((p) => p.flavorFamily)
   return [...new Set(allFamilies)].sort()
 })
 
 const flavorNotes = computed(() => {
-  const allNotes = cigars.value.flatMap(p => p.flavorNotes)
+  const allNotes = cigars.value.flatMap((p) => p.flavorNotes)
   return [...new Set(allNotes)].sort()
 })
 
 // Диапазоны для слайдеров
 const availableMinLength = computed(() => {
-  return Math.min(...cigars.value.map(p => p.length))
+  return Math.min(...cigars.value.map((p) => p.length))
 })
 
 const availableMaxLength = computed(() => {
-  return Math.max(...cigars.value.map(p => p.length))
+  return Math.max(...cigars.value.map((p) => p.length))
 })
 
 const availableMinRingGauge = computed(() => {
-  return Math.min(...cigars.value.map(p => p.ringGauge))
+  return Math.min(...cigars.value.map((p) => p.ringGauge))
 })
 
 const availableMaxRingGauge = computed(() => {
-  return Math.max(...cigars.value.map(p => p.ringGauge))
+  return Math.max(...cigars.value.map((p) => p.ringGauge))
 })
 
 // Функции для подсчета
 const getBrandCount = (brand: string) => {
-  return cigars.value.filter(p => p.brand === brand).length
+  return cigars.value.filter((p) => p.brand === brand).length
 }
 
 const getCountryCount = (country: string) => {
-  return cigars.value.filter(p => p.country === country).length
+  return cigars.value.filter((p) => p.country === country).length
 }
 
 const getFormatCount = (format: string) => {
-  return cigars.value.filter(p => p.format === format).length
+  return cigars.value.filter((p) => p.format === format).length
 }
 
 const getStrengthCount = (strength: string) => {
-  return cigars.value.filter(p => p.strength === strength).length
+  return cigars.value.filter((p) => p.strength === strength).length
 }
 
 const getSmokingTimeCount = (time: string) => {
-  return cigars.value.filter(p => p.smokingTime === time).length
+  return cigars.value.filter((p) => p.smokingTime === time).length
 }
 
 const getFlavorFamilyCount = (family: string) => {
-  return cigars.value.filter(p => p.flavorFamily === family).length
+  return cigars.value.filter((p) => p.flavorFamily === family).length
 }
 
 // Активные фильтры
@@ -443,35 +448,35 @@ const activeFilters = computed(() => {
     filters.push({
       key: 'price',
       value: `${minPrice.value}-${maxPrice.value}`,
-      label: `Цена: ${formatPrice(minPrice.value)} - ${formatPrice(maxPrice.value)}`
+      label: `Цена: ${formatPrice(minPrice.value)} - ${formatPrice(maxPrice.value)}`,
     })
   }
 
-  selectedBrands.value.forEach(brand => {
+  selectedBrands.value.forEach((brand) => {
     filters.push({ key: 'brand', value: brand, label: `Бренд: ${brand}` })
   })
 
-  selectedCountries.value.forEach(country => {
+  selectedCountries.value.forEach((country) => {
     filters.push({ key: 'country', value: country, label: `Страна: ${country}` })
   })
 
-  selectedFormats.value.forEach(format => {
+  selectedFormats.value.forEach((format) => {
     filters.push({ key: 'format', value: format, label: `Формат: ${format}` })
   })
 
-  selectedStrengths.value.forEach(strength => {
+  selectedStrengths.value.forEach((strength) => {
     filters.push({ key: 'strength', value: strength, label: `Крепость: ${strength}` })
   })
 
-  selectedSmokingTimes.value.forEach(time => {
+  selectedSmokingTimes.value.forEach((time) => {
     filters.push({ key: 'smokingTime', value: time, label: `Время: ${time}` })
   })
 
-  selectedFlavorFamilies.value.forEach(family => {
+  selectedFlavorFamilies.value.forEach((family) => {
     filters.push({ key: 'flavorFamily', value: family, label: `Вкус: ${family}` })
   })
 
-  selectedFlavorNotes.value.forEach(note => {
+  selectedFlavorNotes.value.forEach((note) => {
     filters.push({ key: 'flavorNote', value: note, label: `Нота: ${note}` })
   })
 
@@ -479,15 +484,18 @@ const activeFilters = computed(() => {
     filters.push({
       key: 'length',
       value: `${minLength.value}-${maxLength.value}`,
-      label: `Длина: ${minLength.value}-${maxLength.value}мм`
+      label: `Длина: ${minLength.value}-${maxLength.value}мм`,
     })
   }
 
-  if (minRingGauge.value > availableMinRingGauge.value || maxRingGauge.value < availableMaxRingGauge.value) {
+  if (
+    minRingGauge.value > availableMinRingGauge.value ||
+    maxRingGauge.value < availableMaxRingGauge.value
+  ) {
     filters.push({
       key: 'ringGauge',
       value: `${minRingGauge.value}-${maxRingGauge.value}`,
-      label: `Калибр: ${minRingGauge.value}-${maxRingGauge.value}RG`
+      label: `Калибр: ${minRingGauge.value}-${maxRingGauge.value}RG`,
     })
   }
 
@@ -501,47 +509,43 @@ const filteredProducts = computed(() => {
   let filtered = [...cigars.value]
 
   // Фильтр по цене
-  filtered = filtered.filter(p =>
-    p.price >= minPrice.value && p.price <= maxPrice.value
-  )
+  filtered = filtered.filter((p) => p.price >= minPrice.value && p.price <= maxPrice.value)
 
   // Остальные фильтры
   if (selectedBrands.value.length > 0) {
-    filtered = filtered.filter(p => selectedBrands.value.includes(p.brand))
+    filtered = filtered.filter((p) => selectedBrands.value.includes(p.brand))
   }
 
   if (selectedCountries.value.length > 0) {
-    filtered = filtered.filter(p => selectedCountries.value.includes(p.country))
+    filtered = filtered.filter((p) => selectedCountries.value.includes(p.country))
   }
 
   if (selectedFormats.value.length > 0) {
-    filtered = filtered.filter(p => selectedFormats.value.includes(p.format))
+    filtered = filtered.filter((p) => selectedFormats.value.includes(p.format))
   }
 
   if (selectedStrengths.value.length > 0) {
-    filtered = filtered.filter(p => selectedStrengths.value.includes(p.strength))
+    filtered = filtered.filter((p) => selectedStrengths.value.includes(p.strength))
   }
 
   if (selectedSmokingTimes.value.length > 0) {
-    filtered = filtered.filter(p => selectedSmokingTimes.value.includes(p.smokingTime))
+    filtered = filtered.filter((p) => selectedSmokingTimes.value.includes(p.smokingTime))
   }
 
   if (selectedFlavorFamilies.value.length > 0) {
-    filtered = filtered.filter(p => selectedFlavorFamilies.value.includes(p.flavorFamily))
+    filtered = filtered.filter((p) => selectedFlavorFamilies.value.includes(p.flavorFamily))
   }
 
   if (selectedFlavorNotes.value.length > 0) {
-    filtered = filtered.filter(p =>
-      selectedFlavorNotes.value.some(note => p.flavorNotes.includes(note))
+    filtered = filtered.filter((p) =>
+      selectedFlavorNotes.value.some((note) => p.flavorNotes.includes(note)),
     )
   }
 
-  filtered = filtered.filter(p =>
-    p.length >= minLength.value && p.length <= maxLength.value
-  )
+  filtered = filtered.filter((p) => p.length >= minLength.value && p.length <= maxLength.value)
 
-  filtered = filtered.filter(p =>
-    p.ringGauge >= minRingGauge.value && p.ringGauge <= maxRingGauge.value
+  filtered = filtered.filter(
+    (p) => p.ringGauge >= minRingGauge.value && p.ringGauge <= maxRingGauge.value,
   )
 
   return filtered
@@ -569,6 +573,10 @@ const sortedProducts = computed(() => {
 const applyFilters = () => {
   // Фильтры применяются автоматически через computed
 }
+
+// const closeFilters = () => {
+//   showFilters.value = false
+// }
 
 const resetFilters = () => {
   selectedBrands.value = []
@@ -610,25 +618,25 @@ const removeFilter = (key: string, value: string) => {
       maxPrice.value = availableMaxPrice.value
       break
     case 'brand':
-      selectedBrands.value = selectedBrands.value.filter(b => b !== value)
+      selectedBrands.value = selectedBrands.value.filter((b) => b !== value)
       break
     case 'country':
-      selectedCountries.value = selectedCountries.value.filter(c => c !== value)
+      selectedCountries.value = selectedCountries.value.filter((c) => c !== value)
       break
     case 'format':
-      selectedFormats.value = selectedFormats.value.filter(f => f !== value)
+      selectedFormats.value = selectedFormats.value.filter((f) => f !== value)
       break
     case 'strength':
-      selectedStrengths.value = selectedStrengths.value.filter(s => s !== value)
+      selectedStrengths.value = selectedStrengths.value.filter((s) => s !== value)
       break
     case 'smokingTime':
-      selectedSmokingTimes.value = selectedSmokingTimes.value.filter(t => t !== value)
+      selectedSmokingTimes.value = selectedSmokingTimes.value.filter((t) => t !== value)
       break
     case 'flavorFamily':
-      selectedFlavorFamilies.value = selectedFlavorFamilies.value.filter(f => f !== value)
+      selectedFlavorFamilies.value = selectedFlavorFamilies.value.filter((f) => f !== value)
       break
     case 'flavorNote':
-      selectedFlavorNotes.value = selectedFlavorNotes.value.filter(n => n !== value)
+      selectedFlavorNotes.value = selectedFlavorNotes.value.filter((n) => n !== value)
       break
     case 'length':
       minLength.value = availableMinLength.value
@@ -653,6 +661,24 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.filters-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.filters-overlay--active {
+  opacity: 1;
+  visibility: visible;
+}
+
 .catalog-page {
   min-height: 100vh;
   background: #ffffff;
@@ -1117,8 +1143,7 @@ onMounted(() => {
   }
 
   .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   }
 }
 
@@ -1154,7 +1179,7 @@ onMounted(() => {
     position: fixed;
     top: 0;
     left: -100%;
-    width: 100%;
+    width: 80%;
     height: 100vh;
     z-index: 1001;
     border-radius: 0;
@@ -1171,8 +1196,18 @@ onMounted(() => {
   }
 
   .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-header,
+  .breadcrumbs {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 999;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f0f0f0;
   }
 }
 

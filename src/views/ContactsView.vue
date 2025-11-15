@@ -132,6 +132,7 @@ const submitForm = () => {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  padding: 2rem;
 }
 
 .contact-item h3 {

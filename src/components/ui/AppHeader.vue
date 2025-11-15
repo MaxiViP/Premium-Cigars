@@ -3,7 +3,7 @@
     <nav class="navbar">
       <div class="container">
         <router-link to="/" class="logo">
-          <div class="logo-icon">🚬</div>
+          <div class="logo-icon">LOGO</div>
           <div class="logo-text">
             <h1>Premium Cigars</h1>
             <p class="logo-subtitle">Элитные табачные изделия</p>
@@ -126,10 +126,8 @@ const closeMobileMenu = () => {
 }
 
 .logo-icon {
-  font-size: 2rem;
+  /* font-size: 2rem; */
   background: linear-gradient(45deg, var(--gold-color), var(--gold-light));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
 }
 
@@ -251,7 +249,7 @@ const closeMobileMenu = () => {
   top: 100%;
   left: 0;
   right: 0;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2c1f0e 100%);
+  background: linear-gradient(135deg, #6b6868 0%, #2c1f0e 100%);
   backdrop-filter: blur(20px);
   box-shadow: 0 10px 30px rgba(0,0,0,0.6);
   transition: all 0.4s ease;
