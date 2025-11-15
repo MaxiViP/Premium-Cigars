@@ -171,7 +171,7 @@ import { formatPrice } from '@/utils/formatters'
 import type { Product } from '@/types/Product'
 
 const route = useRoute()
-const router = useRouter()
+
 const productsStore = useProductsStore()
 const mainImage = ref('')
 
@@ -221,7 +221,8 @@ const addToCart = () => {
 
 onMounted(() => {
   if (product.value && product.value.images.length > 0) {
-    mainImage.value = product.value.images[0]
+    mainImage.value = product.value?.images[0] ?? ''
+
   }
 })
 </script>
