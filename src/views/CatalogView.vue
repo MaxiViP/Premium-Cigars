@@ -1209,7 +1209,7 @@ onMounted(() => {
 .products-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
+  gap: 8px;
   margin-bottom: 15px;
 }
 
@@ -1259,7 +1259,7 @@ onMounted(() => {
   }
 
   .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
 
   .filters-sidebar {
@@ -1316,9 +1316,9 @@ onMounted(() => {
     display: flex;
   }
 
-  .products-grid {
+  /* .products-grid {
     grid-template-columns: 1fr;
-  }
+  } */
 
   .catalog-header,
   .breadcrumbs {

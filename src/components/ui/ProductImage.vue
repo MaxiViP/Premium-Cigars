@@ -43,13 +43,13 @@ const imageSrc = computed(() => {
   return `/images/products/${props.src}`
 })
 
-const imageStyle = computed(() => ({
-  maxWidth: `${props.maxWidth}px`,
-  maxHeight: `${props.maxHeight}px`,
-  width: imageLoaded.value ? 'auto' : `${props.maxWidth}px`,
-  height: imageLoaded.value ? 'auto' : `${props.maxHeight}px`,
-  objectFit: 'contain' as const
-}))
+// const imageStyle = computed(() => ({
+//   maxWidth: `${props.maxWidth}px`,
+//   maxHeight: `${props.maxHeight}px`,
+//   width: imageLoaded.value ? 'auto' : `${props.maxWidth}px`,
+//   height: imageLoaded.value ? 'auto' : `${props.maxHeight}px`,
+//   objectFit: 'contain' as const
+// }))
 
 const handleError = () => {
   console.error(`Failed to load image: ${props.src}`)

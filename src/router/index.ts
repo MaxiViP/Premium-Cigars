@@ -30,6 +30,16 @@ const router = createRouter({
       component: () => import('@/views/ContactsView.vue'),
     },
   ],
+
+  // 🔹 Добавляем scrollBehavior, чтобы всегда прокручивать наверх
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      // Если пользователь нажал назад/вперед — возвращаем сохранённую позицию
+      return savedPosition
+    }
+    // Всегда прокручиваем страницу наверх при переходе
+    return { top: 0 }
+  },
 })
 
 export default router
