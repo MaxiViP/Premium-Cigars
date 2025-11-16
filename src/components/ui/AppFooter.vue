@@ -1,17 +1,15 @@
 <template>
   <footer class="app-footer">
     <div class="container">
-
       <!-- Верхние разделы -->
       <div class="footer-content">
-
         <!-- О компании -->
         <div class="footer-section">
           <h3>Premium Cigars</h3>
           <div class="line"></div>
           <p>
-            Элитные сигары и аксессуары, созданные для истинных ценителей роскоши,
-            стиля и высокого качества.
+            Элитные сигары и аксессуары, созданные для истинных ценителей роскоши, стиля и высокого
+            качества.
           </p>
         </div>
 
@@ -41,28 +39,35 @@
 
           <div class="social-icons">
             <!-- Telegram -->
-            <a href="https://t.me/your" target="_blank" aria-label="Telegram">
-              <svg viewBox="0 0 24 24">
-                <path d="M9.04 16.81L8.91 20.13...Z" />
+            <a href="https://t.me/PremiumCigarsBot" target="_blank" aria-label="Telegram">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                fill="currentColor"
+              >
+                <path
+                  d="M12 0C5.372 0 0 5.373 0 12c0 6.627 5.372 12 12 12s12-5.373 12-12C24 5.373 18.628 0 12 0zm5.056 8.304l-1.87 8.807c-.142.66-.51.82-1.03.51l-2.845-2.097-1.372 1.321c-.152.152-.28.28-.574.28l.206-2.918 5.313-4.802c.232-.206-.05-.32-.36-.114l-6.565 4.13-2.823-.883c-.61-.19-.622-.61.128-.902l10.99-4.234c.51-.19.954.122.792.883z"
+                />
               </svg>
             </a>
 
             <!-- VK -->
-            <a href="https://vk.com/your" target="_blank" aria-label="VK">
+            <a href="#" target="_blank" aria-label="VK">
               <svg viewBox="0 0 24 24">
                 <path d="M12.77 17.93C7.3 17.93...Z" />
               </svg>
             </a>
 
             <!-- Max -->
-            <a href="https://x.com/your" target="_blank" aria-label="Max">
+            <a href="#" target="_blank" aria-label="Max">
               <svg viewBox="0 0 24 24">
                 <path d="M18.36 3H21L14.44...Z" />
               </svg>
             </a>
           </div>
         </div>
-
       </div>
 
       <!-- Нижняя полоса -->
@@ -72,22 +77,18 @@
       </div>
 
       <!-- Кнопка "наверх" -->
-      <button class="scroll-top" @click="scrollToTop">
-        ↑
-      </button>
-
+      <button class="scroll-top" @click="scrollToTop">↑</button>
     </div>
   </footer>
 </template>
 
 <script setup lang="ts">
 const scrollToTop = () => {
-  window.scrollTo({ top: 0, behavior: "smooth" });
-};
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
 </script>
 
 <style scoped>
-
 /* Футер */
 .app-footer {
   background: var(--footer-bg);
@@ -137,7 +138,9 @@ const scrollToTop = () => {
   color: var(--gold-color);
   opacity: 0.9;
   text-decoration: none;
-  transition: 0.3s ease, color 0.3s ease;
+  transition:
+    0.3s ease,
+    color 0.3s ease;
 }
 
 .footer-section a:hover {
@@ -169,8 +172,8 @@ const scrollToTop = () => {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: rgba(212,175,55,0.1);
-  border: 1px solid rgba(212,175,55,0.3);
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
   transition: 0.3s ease;
 }
 
@@ -194,7 +197,7 @@ const scrollToTop = () => {
 .footer-bottom {
   text-align: center;
   padding-top: 1.5rem;
-  border-top: 1px solid rgba(212,175,55,0.3);
+  border-top: 1px solid rgba(212, 175, 55, 0.3);
   color: var(--footer-text-light);
 }
 

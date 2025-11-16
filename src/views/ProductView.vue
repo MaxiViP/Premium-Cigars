@@ -47,22 +47,24 @@
             </div>
 
             <div class="product-price-section">
-              <div class="product-price">{{ formatPrice(product.price) }}</div>
+              <div class="price-item">
+                <span class="price-label">Цена за 1 шт:</span>
+                <span class="product-price">{{ formatPrice(product.pricePerUnit) }}</span>
+              </div>
+              <div v-if="product.pricePerBox" class="price-item">
+                <span class="price-label">Цена за коробку:</span>
+                <span class="product-price">{{ formatPrice(product.pricePerBox) }}</span>
+              </div>
+
               <div v-if="product.inStock" class="in-stock-badge">В наличии</div>
               <div v-else class="out-of-stock-badge">Нет в наличии</div>
             </div>
 
             <div class="product-actions">
-              <button
-                class="add-to-cart-btn"
-                :disabled="!product.inStock"
-                @click="addToCart"
-              >
+              <button class="add-to-cart-btn" :disabled="!product.inStock" @click="addToCart">
                 {{ product.inStock ? 'Добавить в корзину' : 'Нет в наличии' }}
               </button>
-              <button class="wishlist-btn">
-                ♡ В избранное
-              </button>
+              <button class="wishlist-btn">♡ В избранное</button>
             </div>
 
             <div class="product-description">
@@ -122,11 +124,7 @@
               <div class="flavor-notes">
                 <strong>Ноты вкуса:</strong>
                 <div class="flavor-tags">
-                  <span
-                    v-for="note in product.flavorNotes"
-                    :key="note"
-                    class="flavor-tag"
-                  >
+                  <span v-for="note in product.flavorNotes" :key="note" class="flavor-tag">
                     {{ note }}
                   </span>
                 </div>
@@ -154,9 +152,7 @@
         <div class="not-found-icon">🚬</div>
         <h2>Товар не найден</h2>
         <p>Извините, запрашиваемый товар не существует или был удален</p>
-        <router-link to="/catalog" class="back-to-catalog-btn">
-          Вернуться в каталог
-        </router-link>
+        <router-link to="/catalog" class="back-to-catalog-btn"> Вернуться в каталог </router-link>
       </div>
     </div>
   </div>
@@ -164,7 +160,7 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useProductsStore } from '@/stores/products'
 import ProductCard from '@/components/ui/ProductCard.vue'
 import { formatPrice } from '@/utils/formatters'
@@ -188,10 +184,11 @@ const relatedProducts = computed(() => {
   if (!product.value) return []
 
   return productsStore.products
-    .filter(p =>
-      p.id !== product.value!.id &&
-      p.category === 'cigars' &&
-      (p.brand === product.value!.brand || p.country === product.value!.country)
+    .filter(
+      (p) =>
+        p.id !== product.value!.id &&
+        p.category === 'cigars' &&
+        (p.brand === product.value!.brand || p.country === product.value!.country),
     )
     .slice(0, 4)
 })
@@ -222,7 +219,6 @@ const addToCart = () => {
 onMounted(() => {
   if (product.value && product.value.images.length > 0) {
     mainImage.value = product.value?.images[0] ?? ''
-
   }
 })
 </script>
@@ -378,6 +374,19 @@ onMounted(() => {
   font-weight: 700;
   color: var(--primary-color);
 }
+
+.price-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.price-label {
+  font-size: 1rem;
+  color: #666;
+  font-weight: 500;
+}
+
 
 .in-stock-badge {
   background: #10b981;

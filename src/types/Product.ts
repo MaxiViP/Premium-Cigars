@@ -20,7 +20,8 @@ export interface Product {
     | 'Землистые'
     | 'Сладкие'
   description: string
-  price: number
+  pricePerUnit: number // цена за 1 шт
+  pricePerBox?: number // цена за коробку (опционально)
   images: string[]
   category: 'cigars' | 'accessories'
   inStock: boolean
