@@ -1,0 +1,20 @@
+/* ===========================
+   ПРЕМИАЛЬНАЯ ПАЛИТРА
+   =========================== */
+:root {
+  --primary-color: #8b4513;            /* Кожаный коричневый */
+  --secondary-color: #d4af37;          /* Классическое золото */
+  --gold-color: #e5c76b;               /* Мягкое золото */
+  --accent-color: #2c5530;             /* Тёмный зелёный */
+  --text-dark: #1a1a1a;
+  --text-light: #777;
+  --background: #f6f3ef;
+  --dark-bg: #0d0d0d;
+  --white: #ffffff;
+
+
+  --footer-bg: #0d0d0d;
+  --border: #dfd6c8;
+  --shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  --gold-shadow: 0 0 15px rgba(212, 175, 55, 0.35);
+}

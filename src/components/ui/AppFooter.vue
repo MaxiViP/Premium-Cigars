@@ -87,13 +87,6 @@ const scrollToTop = () => {
 </script>
 
 <style scoped>
-:root {
-  --gold-color: #d4af37;
-  --gold-light: #f4d67c;
-  --footer-bg: #191818;
-  --footer-text: #d4af37;
-  --footer-text-light: rgba(212,175,55,0.8);
-}
 
 /* Футер */
 .app-footer {
@@ -102,6 +95,7 @@ const scrollToTop = () => {
   padding: 4rem 0 2rem;
   position: relative;
   font-family: 'Georgia', serif;
+  border-radius: 25px 25px 0 0;
 }
 
 /* Верхняя сетка футера */
@@ -133,14 +127,14 @@ const scrollToTop = () => {
 /* Основной текст */
 .footer-section p {
   line-height: 1.6;
-  color: var(--gold-light);
+  color: var(--gold-color);
   opacity: 0.85;
   margin-bottom: 0.5rem;
 }
 
 /* Ссылки */
 .footer-section a {
-  color: var(--gold-light);
+  color: var(--gold-color);
   opacity: 0.9;
   text-decoration: none;
   transition: 0.3s ease, color 0.3s ease;
@@ -181,7 +175,7 @@ const scrollToTop = () => {
 }
 
 .social-icons svg {
-  fill: var(--gold-light);
+  fill: var(--gold-color);
   width: 20px;
   height: 20px;
   transition: fill 0.3s ease;
@@ -209,7 +203,7 @@ const scrollToTop = () => {
   margin-top: 0.5rem;
   font-size: 0.9rem;
   opacity: 0.6;
-  color: var(--gold-light);
+  color: var(--gold-color);
 }
 
 /* Кнопка "наверх" */
@@ -228,6 +222,6 @@ const scrollToTop = () => {
 }
 
 .scroll-top:hover {
-  background: var(--gold-light);
+  background: var(--gold-color);
 }
 </style>

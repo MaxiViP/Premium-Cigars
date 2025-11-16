@@ -84,10 +84,12 @@ const smoke = [
 
 <style scoped>
 .hero-section {
-  height: 100vh;
+  height: 60vh;
   min-height: 720px;
   position: relative;
   overflow: hidden;
+  border-bottom: 25px;
+  border-radius: 0 25px 25px;
 }
 
 /* Новый премиальный фон */

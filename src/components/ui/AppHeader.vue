@@ -3,7 +3,10 @@
     <nav class="navbar">
       <div class="container">
         <router-link to="/" class="logo">
-          <div class="logo-icon">LOGO</div>
+          <div class="logo-icon">
+            <img src="/logo.png" alt="Premium Logo" class="logo-image" />
+          </div>
+
           <div class="logo-text">
             <h1>Premium Cigars</h1>
             <p class="logo-subtitle">Элитные табачные изделия</p>
@@ -81,9 +84,18 @@ const closeMobileMenu = () => {
 </script>
 
 <style scoped>
-:root {
-  --gold-color: #d4af37;
-  --gold-light: #ffd966;
+ 
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon img.logo-image {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
 }
 
 .app-header {
@@ -95,19 +107,22 @@ const closeMobileMenu = () => {
   left: 0;
   right: 0;
   z-index: 1000;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 0 1px rgba(212,175,55,0.2);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(212, 175, 55, 0.2);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(212,175,55,0.1);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
   animation: slideInDown 0.6s ease-out;
 }
 
 .navbar {
-  padding: 0.8rem 0;
+  padding: 2px 0;
 }
 
 .navbar .container {
   display: flex;
   justify-content: space-between;
+  padding: 0 10px;
   align-items: center;
   position: relative;
 }
@@ -128,7 +143,7 @@ const closeMobileMenu = () => {
 .logo-icon {
   /* font-size: 2rem; */
   background: linear-gradient(45deg, var(--gold-color), var(--gold-light));
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 
 .logo-text h1 {
@@ -136,7 +151,7 @@ const closeMobileMenu = () => {
   font-size: 1.6rem;
   font-weight: 700;
   color: var(--gold-color);
-  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   line-height: 1.2;
   letter-spacing: 0.5px;
 }
@@ -144,7 +159,7 @@ const closeMobileMenu = () => {
 .logo-subtitle {
   margin: 0;
   font-size: 0.7rem;
-  color: rgba(255,255,255,0.8);
+  color: rgba(255, 255, 255, 0.8);
   font-weight: 300;
   letter-spacing: 0.5px;
 }
@@ -170,9 +185,13 @@ const closeMobileMenu = () => {
   transition: all 0.3s ease;
 }
 
+.nav-text {
+  white-space: nowrap;
+}
+
 .nav-link .nav-text {
   position: relative;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .nav-link .nav-text::after {
@@ -194,17 +213,19 @@ const closeMobileMenu = () => {
 
 .nav-link:hover,
 .nav-link.router-link-active {
-  background: rgba(212,175,55,0.15);
+  background: rgba(212, 175, 55, 0.15);
   color: var(--gold-color);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(212,175,55,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
-  border: 1px solid rgba(212,175,55,0.3);
+  box-shadow:
+    0 4px 12px rgba(212, 175, 55, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
 }
 
 .nav-icon {
   font-size: 1.1rem;
   transition: transform 0.3s ease;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
 .nav-link:hover .nav-icon {
@@ -222,11 +243,11 @@ const closeMobileMenu = () => {
   padding: 0.5rem;
   border-radius: 6px;
   transition: all 0.3s ease;
-  border: 1px solid rgba(212,175,55,0.3);
+  border: 1px solid rgba(212, 175, 55, 0.3);
 }
 
 .mobile-menu-btn:hover {
-  background: rgba(212,175,55,0.1);
+  background: rgba(212, 175, 55, 0.1);
   border-color: var(--gold-color);
 }
 
@@ -235,7 +256,7 @@ const closeMobileMenu = () => {
   height: 2px;
   background: var(--gold-color);
   border-radius: 2px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
 }
 
@@ -251,12 +272,12 @@ const closeMobileMenu = () => {
   right: 0;
   background: linear-gradient(135deg, #6b6868 0%, #2c1f0e 100%);
   backdrop-filter: blur(20px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
   transition: all 0.4s ease;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-20px);
-  border-top: 1px solid rgba(212,175,55,0.2);
+  border-top: 1px solid rgba(212, 175, 55, 0.2);
 }
 
 .mobile-menu--open {
@@ -270,22 +291,23 @@ const closeMobileMenu = () => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  border-radius: 0 25px 25px;
 }
 
 .mobile-nav-link {
   display: flex;
   align-items: center;
   gap: 1rem;
-  color: rgba(255,255,255,0.9);
+  color: rgba(255, 255, 255, 0.9);
   text-decoration: none;
   font-size: 1.1rem;
   font-weight: 500;
   padding: 1rem 1.5rem;
   border-radius: 12px;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .mobile-nav-link::after {
@@ -307,30 +329,52 @@ const closeMobileMenu = () => {
 
 .mobile-nav-link:hover,
 .mobile-nav-link.router-link-active {
-  background: rgba(212,175,55,0.2);
+  background: rgba(212, 175, 55, 0.2);
   color: var(--gold-color);
-  border-color: rgba(212,175,55,0.4);
+  border-color: rgba(212, 175, 55, 0.4);
   transform: translateX(10px);
 }
 
 /* Адаптивность */
 @media (max-width: 768px) {
-  .nav-links { display: none; }
-  .mobile-menu-btn { display: flex; }
-  .logo-text h1 { font-size: 1.4rem; }
-  .logo-subtitle { font-size: 0.65rem; }
+  .nav-links {
+    display: none;
+  }
+  .mobile-menu-btn {
+    display: flex;
+  }
+  .logo-text h1 {
+    font-size: 1.4rem;
+  }
+  .logo-subtitle {
+    font-size: 0.65rem;
+  }
 }
 
 @media (max-width: 480px) {
-  .navbar .container { padding: 0 1rem; }
-  .logo-text h1 { font-size: 1.2rem; }
-  .logo-subtitle { display: none; }
-  .mobile-menu-content { padding: 1.5rem; }
+  .navbar .container {
+    padding: 0 2px;
+  }
+  .logo-text h1 {
+    font-size: 1.2rem;
+  }
+  .logo-subtitle {
+    display: none;
+  }
+  .mobile-menu-content {
+    padding: 1.5rem;
+  }
 }
 
 /* Анимация появления */
 @keyframes slideInDown {
-  from { transform: translateY(-100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 </style>

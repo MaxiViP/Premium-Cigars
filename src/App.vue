@@ -22,6 +22,6 @@ import AppFooter from '@/components/ui/AppFooter.vue'
 
 .main-content {
   flex: 1;
-  padding-top: 80px; /* Для фиксированного хедера */
+  padding-top: 5px
 }
 </style>

@@ -208,7 +208,7 @@ onMounted(() => {
 .catalog-btn {
   display: inline-block;
   padding: 0.9rem 2.3rem;
-  background: var(--primary-color);
+  background-color: var(--primary-color);
   color: #bdbdba;
   border-radius: 10px;
   font-weight: 600;
