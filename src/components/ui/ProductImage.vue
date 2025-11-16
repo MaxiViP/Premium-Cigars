@@ -3,7 +3,6 @@
     :src="imageSrc"
     :alt="alt"
     :class="className"
-    :style="imageStyle"
     @error="handleError"
     @load="handleLoad"
     loading="lazy"
@@ -23,7 +22,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   maxWidth: 350,
-  maxHeight: 350
+  maxHeight: 350,
 })
 
 const imageError = ref(false)
