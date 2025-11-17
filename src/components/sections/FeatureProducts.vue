@@ -44,10 +44,10 @@
       <!-- Кнопка с параллаксом -->
       <div
         class="catalog-btn-wrapper"
-
+        ref="buttonRef"
+        :style="parallaxButtonStyle"
       >
-        <router-link to="/catalog" class="catalog-btn"        ref="buttonRef"
-        :style="parallaxButtonStyle">
+        <router-link to="/catalog" class="catalog-btn">
           Весь каталог
         </router-link>
       </div>
