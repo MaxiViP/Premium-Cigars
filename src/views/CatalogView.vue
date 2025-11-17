@@ -400,10 +400,10 @@ type FilterMap = {
 }
 
 const sortOptions = [
-  { label: 'По названию', value: 'name' },
-  { label: 'По цене', value: 'price' },
-  { label: 'По бренду', value: 'brand' },
-  { label: 'По рейтингу', value: 'rating' },
+  { label: 'По названию', value: 'name' as const },
+  { label: 'По цене', value: 'price' as const },
+  { label: 'По бренду', value: 'brand' as const },
+  { label: 'По рейтингу', value: 'rating' as const },
 ]
 
 // const sortBy = ref('price') // текущее значение
