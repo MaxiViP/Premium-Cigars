@@ -1,13 +1,12 @@
 <template>
   <section class="hero-section">
     <div class="hero-background">
-
       <!-- Сигары (генерация через массив) -->
       <div
         v-for="(cigar, i) in cigars"
         :key="i"
         class="floating-cigar"
-        :class="`cigar-${i+1}`"
+        :class="`cigar-${i + 1}`"
         :style="{ top: cigar.top, left: cigar.left, '--rotation': cigar.rotation }"
       >
         <SvgCigar :type="cigar.type" :width="cigar.w" :height="cigar.h" />
@@ -18,7 +17,7 @@
         v-for="(item, i) in smoke"
         :key="i"
         class="smoke"
-        :class="`smoke-${i+1}`"
+        :class="`smoke-${i + 1}`"
         :style="{ top: item.top, left: item.left, width: item.size, height: item.size }"
       ></div>
 
@@ -27,12 +26,35 @@
           <h1 class="hero-title">Элитные сигары премиум-класса</h1>
 
           <p class="hero-subtitle">
-            Откройте для себя мир изысканных вкусов и непревзойдённого качества от лучших производителей Кубы и Доминиканы
+            Откройте для себя мир изысканных вкусов и непревзойдённого качества от лучших
+            производителей Кубы, Доминиканы и Никарагуа
           </p>
 
           <div class="hero-actions">
             <router-link to="/catalog" class="btn btn-primary">Смотреть каталог</router-link>
             <router-link to="/about" class="btn btn-secondary">О нас</router-link>
+
+            <!-- Кнопка Telegram с выезжающей подписью -->
+            <a
+              href="https://t.me/PremiumCigarsBot"
+              target="_blank"
+              rel="noopener"
+              class="btn-link btn-primary telegram-button"
+              aria-label="Заказать в Telegram"
+            >
+              <svg
+                class="telegram-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M12 0C5.372 0 0 5.373 0 12c0 6.627 5.372 12 12 12s12-5.373 12-12C24 5.373 18.628 0 12 0zm5.056 8.304l-1.87 8.807c-.142.66-.51.82-1.03.51l-2.845-2.097-1.372 1.321c-.152.152-.28.28-.574.28l.206-2.918 5.313-4.802c.232-.206-.05-.32-.36-.114l-6.565 4.13-2.823-.883c-.61-.19-.622-.61.128-.902l10.99-4.234c.51-.19.954.122.792.883z"
+                />
+              </svg>
+
+              <span class="telegram-text">Заказать доставку</span>
+            </a>
           </div>
 
           <div class="hero-features">
@@ -59,9 +81,9 @@
 import SvgCigar from '@/components/ui/SvgCigar.vue'
 
 const cigars = [
-  { type: 1, top: '15%', left: '6%',  rotation: '8deg',  w: 140, h: 50 },
+  { type: 1, top: '15%', left: '6%', rotation: '8deg', w: 140, h: 50 },
   { type: 2, top: '65%', left: '82%', rotation: '-10deg', w: 120, h: 45 },
-  { type: 3, top: '75%', left: '14%', rotation: '5deg',  w: 130, h: 48 },
+  { type: 3, top: '75%', left: '14%', rotation: '5deg', w: 130, h: 48 },
   { type: 4, top: '28%', left: '87%', rotation: '-18deg', w: 110, h: 42 },
   { type: 5, top: '42%', left: '20%', rotation: '20deg', w: 140, h: 50 },
   { type: 6, top: '58%', left: '70%', rotation: '-12deg', w: 120, h: 45 },
@@ -80,7 +102,6 @@ const smoke = [
   { top: '28%', left: '57%', size: '130px' },
 ]
 </script>
-
 
 <style scoped>
 .hero-section {
@@ -102,10 +123,10 @@ const smoke = [
 }
 
 .hero-background::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 40%, rgba(212,175,55,0.25), transparent 70%);
+  background: radial-gradient(circle at 50% 40%, rgba(212, 175, 55, 0.25), transparent 70%);
   opacity: 0.6;
 }
 
@@ -119,14 +140,20 @@ const smoke = [
 }
 
 @keyframes float {
-  0% { transform: translateY(0px) rotate(var(--rotation)); }
-  50% { transform: translateY(-25px) rotate(calc(var(--rotation) + 4deg)); }
-  100% { transform: translateY(0px) rotate(var(--rotation)); }
+  0% {
+    transform: translateY(0px) rotate(var(--rotation));
+  }
+  50% {
+    transform: translateY(-25px) rotate(calc(var(--rotation) + 4deg));
+  }
+  100% {
+    transform: translateY(0px) rotate(var(--rotation));
+  }
 }
 
 .floating-cigar:hover {
   transform: scale(1.15);
-  filter: drop-shadow(0 6px 18px rgba(212,175,55,0.55));
+  filter: drop-shadow(0 6px 18px rgba(212, 175, 55, 0.55));
 }
 
 /* =======================================
@@ -135,17 +162,28 @@ const smoke = [
 .smoke {
   position: absolute;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.32), rgba(255,255,255,0) 70%);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0) 70%);
   animation: smoke 14s linear infinite;
   filter: blur(14px);
   z-index: 1;
 }
 
 @keyframes smoke {
-  0%   { transform: translateY(0) scale(0.5); opacity: 0; }
-  20%  { opacity: 0.6; }
-  60%  { transform: translateY(-90px) scale(1.2); opacity: 0.35; }
-  100% { transform: translateY(-180px) scale(1.8); opacity: 0; }
+  0% {
+    transform: translateY(0) scale(0.5);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.6;
+  }
+  60% {
+    transform: translateY(-90px) scale(1.2);
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateY(-180px) scale(1.8);
+    opacity: 0;
+  }
 }
 
 /* =======================================
@@ -172,9 +210,15 @@ const smoke = [
 }
 
 @keyframes shine {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .hero-subtitle {
@@ -193,6 +237,68 @@ const smoke = [
   margin-bottom: 3.5rem;
 }
 
+.telegram-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  width: 70px;
+  height: 70px;
+  border-radius: 40px;
+  overflow: hidden;
+  transition: all 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.telegram-icon {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  transition: all 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+}
+
+.telegram-text {
+  position: absolute;
+  left: 50px;
+  font-weight: 600;
+  font-size: 15px;
+  color: white;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* При наведении — расширяемся и показываем текст */
+.telegram-button:hover {
+  width: 240px; /* или сколько нужно под текст */
+  padding-right: 24px;
+  gap: 12px;
+}
+
+.telegram-button:hover .telegram-icon {
+  width: 30px;
+  height: 30px;
+  display: none;
+}
+
+.telegram-button:hover .telegram-text {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Поддержка тача (клик = hover) */
+@media (hover: none) {
+  .telegram-button:active {
+    width: 240px;
+    padding-right: 24px;
+  }
+  .telegram-button:active .telegram-text {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
 .btn {
   padding: 1rem 2.6rem;
   border-radius: 40px;
@@ -205,7 +311,7 @@ const smoke = [
 .btn-primary {
   background: #d4af37;
   color: #1a1a1a;
-  box-shadow: 0 4px 20px rgba(212,175,55,0.35);
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.35);
 }
 
 .btn-primary:hover {
@@ -240,7 +346,7 @@ const smoke = [
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  background: rgba(255,255,255,0.12);
+  background: rgba(255, 255, 255, 0.12);
   padding: 0.7rem 1.3rem;
   border-radius: 24px;
   backdrop-filter: blur(10px);
@@ -248,15 +354,21 @@ const smoke = [
 }
 
 .feature:hover {
-  background: rgba(255,255,255,0.22);
+  background: rgba(255, 255, 255, 0.22);
   transform: translateY(-2px);
 }
 
 /* MOBILE */
 @media (max-width: 768px) {
-  .hero-title { font-size: 2.7rem; }
-  .hero-features { flex-direction: column; gap: 1rem; }
-  .floating-cigar { display: none; }
+  .hero-title {
+    font-size: 2.7rem;
+  }
+  .hero-features {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .floating-cigar {
+    display: none;
+  }
 }
 </style>
-

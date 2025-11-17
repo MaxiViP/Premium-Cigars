@@ -99,9 +99,8 @@ onMounted(() => {
 <style scoped>
 
 .container-feature {
-
   margin: 0 auto;
-  padding: 0 2rem;
+  /* padding: 0 2rem; */
 }
 
 /* SECTION */

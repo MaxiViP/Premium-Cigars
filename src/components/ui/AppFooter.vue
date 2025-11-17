@@ -68,6 +68,8 @@
             </a>
           </div>
         </div>
+        <div class="footer-section_img"></div>
+        <div class="footer-section_img2"></div>
       </div>
 
       <!-- Нижняя полоса -->
@@ -160,6 +162,17 @@ const scrollToTop = () => {
   margin-bottom: 0.7rem;
 }
 
+.footer-section_img {
+  background: url('/images/background/1.jpg');
+  background-size: 50%;
+  margin: -15px;
+}
+.footer-section_img2 {
+  background: url('/images/background/tabak_list.jpg');
+  background-size: 55%;
+  margin: -15px;
+}
+
 /* Соцсети */
 .social-icons {
   display: flex;
@@ -228,5 +241,14 @@ const scrollToTop = () => {
 
 .scroll-top:hover {
   background: var(--gold-color);
+}
+
+@media (max-width: 930px) {
+  .footer-section_img {
+    display: none;
+  }
+  .footer-section_img2 {
+    display: none;
+  }
 }
 </style>
