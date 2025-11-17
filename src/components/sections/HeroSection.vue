@@ -360,6 +360,15 @@ const smoke = [
 
 /* MOBILE */
 @media (max-width: 768px) {
+  .hero-actions {
+    flex-wrap: wrap;
+    margin-bottom: 0;
+  }
+
+  .hero-section {
+    height: 40vh;
+  }
+
   .hero-title {
     font-size: 2.7rem;
   }
@@ -368,6 +377,10 @@ const smoke = [
     gap: 1rem;
   }
   .floating-cigar {
+    display: none;
+  }
+
+  .hero-features {
     display: none;
   }
 }

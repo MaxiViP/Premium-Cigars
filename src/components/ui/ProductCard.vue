@@ -239,7 +239,7 @@ function addToCart() {
 .product-specs {
   border-top: 1px dashed #eee;
   border-bottom: 1px dashed #eee;
-  padding: 1rem 0;
+  /* padding: 1rem 0; */
   margin-bottom: 1.2rem;
 }
 
@@ -315,12 +315,12 @@ function addToCart() {
   .product-image-container {
     height: 180px;
   }
-
+/* 
   .product-info {
     padding: 70px 0 0;
     display: flex;
     flex-direction: column;
     flex: 1;
-  }
+  } */
 }
 </style>

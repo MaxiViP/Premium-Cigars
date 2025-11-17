@@ -241,7 +241,7 @@ const closeMobileMenu = () => {
 
 /* Мобильное меню */
 .mobile-menu-btn {
-  display: none;
+  display: flex;
   flex-direction: column;
   gap: 4px;
   background: none;
@@ -344,18 +344,24 @@ const closeMobileMenu = () => {
 
 /* Адаптивность */
 @media (max-width: 768px) {
-  .nav-links {
+  .nav-text {
     display: none;
   }
   .mobile-menu-btn {
     display: flex;
   }
+
+   .logo-text {
+    display: none;
+   }
+
   .logo-text h1 {
     font-size: 1.4rem;
   }
   .logo-subtitle {
     font-size: 0.65rem;
   }
+
 }
 
 @media (max-width: 480px) {

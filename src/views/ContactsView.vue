@@ -1,7 +1,6 @@
 <template>
   <div class="contacts">
     <div class="container">
-
       <!-- Заголовок -->
       <div class="contacts-header">
         <h1>Контакты</h1>
@@ -10,7 +9,6 @@
 
       <!-- Контент -->
       <div class="contacts-content">
-
         <!-- Информация -->
         <div class="contact-info">
           <div class="contact-item">
@@ -41,12 +39,12 @@
           <form @submit.prevent="submitForm">
             <div class="form-group">
               <label for="name">Имя</label>
-              <input type="text" id="name" v-model="form.name" required>
+              <input type="text" id="name" v-model="form.name" required />
             </div>
 
             <div class="form-group">
               <label for="email">Email</label>
-              <input type="email" id="email" v-model="form.email" required>
+              <input type="email" id="email" v-model="form.email" required />
             </div>
 
             <div class="form-group">
@@ -57,7 +55,6 @@
             <button type="submit" class="btn btn-gold">Отправить</button>
           </form>
         </div>
-
       </div>
     </div>
   </div>
@@ -69,7 +66,7 @@ import { ref } from 'vue'
 const form = ref({
   name: '',
   email: '',
-  message: ''
+  message: '',
 })
 
 const submitForm = () => {
@@ -160,7 +157,9 @@ const submitForm = () => {
   padding: 2rem;
   border-radius: 12px;
   box-shadow: var(--shadow);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .contact-form:hover {
@@ -219,6 +218,11 @@ const submitForm = () => {
   .contacts-content {
     grid-template-columns: 1fr;
     gap: 2rem;
+  }
+
+  .contact-info {
+    gap: 1rem;
+    padding: 1rem;
   }
 }
 </style>

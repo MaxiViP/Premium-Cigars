@@ -250,5 +250,9 @@ const scrollToTop = () => {
   .footer-section_img2 {
     display: none;
   }
+
+.footer-content {
+  margin-left: 1rem;
+}
 }
 </style>
