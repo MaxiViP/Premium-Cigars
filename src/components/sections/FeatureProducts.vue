@@ -41,12 +41,8 @@
         <div class="swiper-button-next"></div>
       </Swiper>
 
-      <!-- Кнопка с параллаксом -->
-      <div
-        class="catalog-btn-wrapper"
-        ref="buttonRef"
-        :style="parallaxButtonStyle"
-      >
+      <!-- Кнопка -->
+      <div class="catalog-btn-wrapper">
         <router-link to="/catalog" class="catalog-btn">
           Весь каталог
         </router-link>
@@ -61,25 +57,28 @@ import { ref, onMounted, computed } from 'vue'
 import { useProductsStore } from '@/stores/products'
 import ProductCard from '@/components/ui/ProductCard.vue'
 
-// Swiper
+// Swiper imports
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Autoplay, Navigation } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/navigation'
+import 'swiper/css/pagination'
 
 const productsStore = useProductsStore()
 
 // Swiper modules
 const modules = [Autoplay, Navigation]
 
-// Загрузка (скелетон)
+// Имитация задержки (загрузка)
 const loading = ref(true)
-setTimeout(() => (loading.value = false), 1200)
+setTimeout(() => {
+  loading.value = false
+}, 1200)
 
 // Товары
 const featuredProducts = computed(() => productsStore.featuredProducts)
 
-// Параллакс заголовка
+// Parallax
 const sectionRef = ref<HTMLElement | null>(null)
 const parallaxY = ref(0)
 
@@ -87,36 +86,21 @@ const parallaxStyle = computed(() => ({
   transform: `translateY(${parallaxY.value}px)`
 }))
 
-// Параллакс кнопки
-const buttonRef = ref<HTMLElement | null>(null)
-const parallaxButton = ref(0)
-
-const parallaxButtonStyle = computed(() => ({
-  transform: `translateY(${parallaxButton.value}px)`
-}))
-
 onMounted(() => {
   window.addEventListener('scroll', () => {
     if (!sectionRef.value) return
-
-    // Заголовок
     const rect = sectionRef.value.getBoundingClientRect()
     const progress = Math.min(Math.max(rect.top / 5, -40), 40)
     parallaxY.value = progress
-
-    // Кнопка
-    if (buttonRef.value) {
-      const btnRect = buttonRef.value.getBoundingClientRect()
-      const btnProgress = Math.min(Math.max(btnRect.top / 8, -30), -30)
-      parallaxButton.value = btnProgress
-    }
   })
 })
 </script>
 
 <style scoped>
+
 .container-feature {
   margin: 0 auto;
+  /* padding: 0 2rem; */
 }
 
 /* SECTION */
@@ -127,7 +111,7 @@ onMounted(() => {
   overflow: hidden;
 }
 
-/* Декоративное пятно */
+/* Декор */
 .featured-products::before {
   content: "";
   position: absolute;
@@ -191,11 +175,13 @@ onMounted(() => {
 /* SLIDER */
 .products-slider {
   width: 100%;
+  /* max-width: 1300px; */
   margin: 0 auto 3rem;
   padding: 1rem 0 3rem;
+  position: relative;
 }
 
-/* Навигация */
+/* Кнопки слайдера */
 .swiper-button-prev,
 .swiper-button-next {
   color: var(--primary-color);
@@ -220,18 +206,16 @@ onMounted(() => {
   transform: translateY(-2px);
 }
 
-/* Кнопка */
+/* Catalog button */
 .catalog-btn-wrapper {
   text-align: center;
-  margin-top: 2rem;
-  transition: transform .3s ease-out;
 }
 
 .catalog-btn {
   display: inline-block;
   padding: 0.9rem 2.3rem;
   background-color: var(--primary-color);
-  color: #e4e4e4;
+  color: #bdbdba;
   border-radius: 10px;
   font-weight: 600;
   font-size: 1.05rem;
@@ -242,7 +226,7 @@ onMounted(() => {
 
 .catalog-btn:hover {
   transform: translateY(-3px);
-  background: var(--gold-color);
+  background: var( --gold-color);
   color: black;
 }
 

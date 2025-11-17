@@ -1,4 +1,5 @@
 <template>
+  
   <div class="home">
     <HeroSection />
     <FeaturedProducts />
