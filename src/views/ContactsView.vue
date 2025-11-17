@@ -220,7 +220,7 @@ const submitForm = () => {
     gap: 2rem;
   }
 
-  .contact-info {
+  .contact-info { 
     gap: 1rem;
     padding: 1rem;
   }

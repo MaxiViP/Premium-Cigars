@@ -71,7 +71,15 @@
         <div class="footer-section_img"></div>
         <div class="footer-section_img2"></div>
       </div>
-
+      <div class="footer-section_info">
+        <p>
+          Сайт носит информационный характер. Он не содержит рекламы алкогольной продукции и
+          табачных изделий. 18+. Сайт предназначен для просмотра исключительно лицами, достигшими
+          совершеннолетнего возраста. Компания Pairstore не осуществляет дистанционную продажи
+          алкогольной, табачной продукции, зажигалок и устройств для курения табака. Мы не продаем
+          алкоголь, табачные изделия, устройства для курения и зажигалки лицам моложе 18 лет.
+        </p>
+      </div>
       <!-- Нижняя полоса -->
       <div class="footer-bottom">
         <p>&copy; 2025 Premium Cigars. Все права защищены.</p>
@@ -173,6 +181,14 @@ const scrollToTop = () => {
   margin: -15px;
 }
 
+.footer-section_info p {
+  text-align: center;
+  line-height: 1.6;
+  color: var(--gold-color);
+  opacity: 0.85;
+  margin-bottom: 0.5rem;
+}
+
 /* Соцсети */
 .social-icons {
   display: flex;
@@ -251,8 +267,8 @@ const scrollToTop = () => {
     display: none;
   }
 
-.footer-content {
-  margin-left: 1rem;
-}
+  .footer-content {
+    margin-left: 1rem;
+  }
 }
 </style>

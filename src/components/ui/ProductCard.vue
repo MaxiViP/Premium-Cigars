@@ -73,7 +73,6 @@ import type { Product, Accessory } from '@/types/Product'
 import { formatPrice } from '@/utils/formatters'
 import ProductImage from './ProductImage.vue'
 
-
 interface Props {
   product: Product | Accessory
   catalogView?: boolean
@@ -140,7 +139,7 @@ function addToCart() {
 /* Изображение */
 .product-image-container {
   position: relative;
-  height: 260px;
+  /* height: 260px; */
   border-bottom: 1px solid #f0f0f0;
 }
 
@@ -295,13 +294,15 @@ function addToCart() {
 
 .add-cart-btn:hover {
   opacity: 0.85;
+  background: var(--gold-color);
+  color: black;
 }
 
 /* Медиазапросы: сохраняем адаптивность */
 @media (max-width: 768px) {
-  .product-image-container {
+  /* .product-image-container {
     height: 220px;
-  }
+  } */
 
   .product-info {
     padding: 20px 5px;
@@ -312,10 +313,10 @@ function addToCart() {
 }
 
 @media (max-width: 480px) {
-  .product-image-container {
+  /* .product-image-container {
     height: 180px;
-  }
-/* 
+  } */
+  /*
   .product-info {
     padding: 70px 0 0;
     display: flex;

@@ -364,26 +364,27 @@ onMounted(() => {
 
 .product-price-section {
   display: flex;
-   flex-wrap: wrap;
+  flex-wrap: wrap;
   align-items: center;
   gap: 1rem;
   margin-bottom: 2rem;
 }
 
 .product-price {
+  /* font-family: 'Courier New', Courier, monospace; */
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--primary-color);
-  flex-shrink: 1;        /* позволяет элементам уменьшаться */
-  min-width: 0;          /* обязательно, чтобы flex-shrink работал */
+  flex-shrink: 1; /* позволяет элементам уменьшаться */
+  min-width: 0; /* обязательно, чтобы flex-shrink работал */
 }
 
 .price-item {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  flex-shrink: 1;        /* позволяет элементам уменьшаться */
-  min-width: 0;          /* обязательно, чтобы flex-shrink работал */
+  flex-shrink: 1; /* позволяет элементам уменьшаться */
+  min-width: 0; /* обязательно, чтобы flex-shrink работал */
 }
 
 .price-label {
@@ -391,7 +392,6 @@ onMounted(() => {
   color: #666;
   font-weight: 500;
 }
-
 
 .in-stock-badge {
   background: #10b981;
@@ -431,7 +431,8 @@ onMounted(() => {
 }
 
 .add-to-cart-btn:hover:not(:disabled) {
-  background: #6b3710;
+  background: var(--gold-color);
+  color: black;
 }
 
 .add-to-cart-btn:disabled {
