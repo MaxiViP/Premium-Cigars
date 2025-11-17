@@ -107,7 +107,7 @@ onMounted(() => {
     // Кнопка
     if (buttonRef.value) {
       const btnRect = buttonRef.value.getBoundingClientRect()
-      const btnProgress = Math.min(Math.max(btnRect.top / 8, 30), -30)
+      const btnProgress = Math.min(Math.max(btnRect.top / 8, -30), -30)
       parallaxButton.value = btnProgress
     }
   })

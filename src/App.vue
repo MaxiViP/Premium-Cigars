@@ -14,7 +14,7 @@ import AppFooter from '@/components/ui/AppFooter.vue'
 </script>
 
 <style lang="scss">
-@import "@/assets/styles/main.scss";
+
 
 #app {
   min-height: 100vh;
