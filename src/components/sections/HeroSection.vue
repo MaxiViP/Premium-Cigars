@@ -192,7 +192,7 @@ const smoke = [
 .hero-content {
   text-align: center;
   color: white;
-  max-width: 850px;
+  /* max-width: 850px; */
   margin: 0 auto;
   z-index: 3;
   position: relative;

@@ -1,7 +1,6 @@
 <template>
   <section class="featured-products" ref="sectionRef">
     <div class="container-feature">
-
       <!-- Заголовок с параллаксом -->
       <div class="section-heading" :style="parallaxStyle">
         <h2>Рекомендуемые товары</h2>
@@ -25,11 +24,11 @@
         :autoplay="{ delay: 3500 }"
         :navigation="{
           prevEl: '.swiper-button-prev',
-          nextEl: '.swiper-button-next'
+          nextEl: '.swiper-button-next',
         }"
         :breakpoints="{
           640: { slidesPerView: 2.2, spaceBetween: 25 },
-          1024: { slidesPerView: 3.2, spaceBetween: 30 }
+          1024: { slidesPerView: 3.2, spaceBetween: 30 },
         }"
       >
         <SwiperSlide v-for="product in featuredProducts" :key="product.id">
@@ -43,11 +42,8 @@
 
       <!-- Кнопка -->
       <div class="catalog-btn-wrapper">
-        <router-link to="/catalog" class="catalog-btn">
-          Весь каталог
-        </router-link>
+        <router-link to="/catalog" class="catalog-btn"> Весь каталог </router-link>
       </div>
-
     </div>
   </section>
 </template>
@@ -83,7 +79,7 @@ const sectionRef = ref<HTMLElement | null>(null)
 const parallaxY = ref(0)
 
 const parallaxStyle = computed(() => ({
-  transform: `translateY(${parallaxY.value}px)`
+  transform: `translateY(${parallaxY.value}px)`,
 }))
 
 onMounted(() => {
@@ -97,7 +93,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-
 .container-feature {
   margin: 0 auto;
   /* padding: 0 2rem; */
@@ -113,7 +108,7 @@ onMounted(() => {
 
 /* Декор */
 .featured-products::before {
-  content: "";
+  content: '';
   position: absolute;
   top: -120px;
   right: -120px;
@@ -128,7 +123,7 @@ onMounted(() => {
 .section-heading {
   text-align: center;
   margin-bottom: 3rem;
-  transition: transform .3s ease-out;
+  transition: transform 0.3s ease-out;
 }
 
 .section-heading h2 {
@@ -139,7 +134,7 @@ onMounted(() => {
 
 .section-heading p {
   color: #666;
-  margin: .5rem 0 1rem;
+  margin: 0.5rem 0 1rem;
 }
 
 .decor-line {
@@ -168,8 +163,12 @@ onMounted(() => {
 }
 
 @keyframes skeleton {
-  from { background-position: 200% 0; }
-  to { background-position: -200% 0; }
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
 }
 
 /* SLIDER */
@@ -189,7 +188,7 @@ onMounted(() => {
   height: 38px;
   border-radius: 50%;
   background: white;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
 }
 
@@ -226,13 +225,21 @@ onMounted(() => {
 
 .catalog-btn:hover {
   transform: translateY(-3px);
-  background: var( --gold-color);
+  background: var(--gold-color);
   color: black;
 }
 
 @media (max-width: 768px) {
   .featured-products {
     padding: 1.5rem 0;
+  }
+
+  .products-slider {
+    width: 100%;
+    /* max-width: 1300px; */
+    margin: 0;
+    padding: 1rem 0 3rem;
+    position: relative;
   }
 
   .section-heading h2 {
