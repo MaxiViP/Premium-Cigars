@@ -364,6 +364,7 @@ onMounted(() => {
 
 .product-price-section {
   display: flex;
+   flex-wrap: wrap;
   align-items: center;
   gap: 1rem;
   margin-bottom: 2rem;
@@ -373,12 +374,16 @@ onMounted(() => {
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--primary-color);
+  flex-shrink: 1;        /* позволяет элементам уменьшаться */
+  min-width: 0;          /* обязательно, чтобы flex-shrink работал */
 }
 
 .price-item {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-shrink: 1;        /* позволяет элементам уменьшаться */
+  min-width: 0;          /* обязательно, чтобы flex-shrink работал */
 }
 
 .price-label {
