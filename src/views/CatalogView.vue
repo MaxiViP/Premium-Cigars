@@ -767,8 +767,9 @@ onMounted(() => {
 <style scoped>
 /* ====================== ЕДИНЫЙ СТИЛЬ ДЛЯ ПЕРЕКЛЮЧАТЕЛЕЙ ====================== */
 .category-tabs,
-.sort-control .sort-buttons {
+.sort-control .sort-buttons  {
   display: flex;
+    flex-wrap: wrap; 
   background: rgba(245, 245, 247, 0.8);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -1218,7 +1219,7 @@ onMounted(() => {
 /* ====================== АДАПТИВ ====================== */
 @media (max-width: 1024px) {
   .catalog-layout {
-    grid-template-columns: 300px 1fr;
+    grid-template-columns: minmax(280px, 340px) 1fr;
     gap: 1.5rem;
   }
 }
@@ -1261,6 +1262,7 @@ onMounted(() => {
     background: white;
     z-index: 998;
   }
+
 }
 
 @media (max-width: 480px) {
@@ -1277,6 +1279,7 @@ onMounted(() => {
   .category-tabs,
   .sort-control .sort-buttons {
     padding: 4px;
+
   }
   .category-tab,
   .sort-btn {
