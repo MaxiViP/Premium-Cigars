@@ -91,6 +91,8 @@ const scrollToTop = () => {
 <style scoped>
 /* Футер */
 .app-footer {
+  /* background:  url('/images/background/1.jpg') ;
+  background-size: auto 100%; */
   background: var(--footer-bg);
   color: var(--footer-text);
   padding: 4rem 0 2rem;
@@ -198,7 +200,7 @@ const scrollToTop = () => {
   text-align: center;
   padding-top: 1.5rem;
   border-top: 1px solid rgba(212, 175, 55, 0.3);
-  color: var(--footer-text-light);
+  color: var(--text-light);
 }
 
 .footer-bottom span {

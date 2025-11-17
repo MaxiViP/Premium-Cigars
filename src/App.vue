@@ -8,12 +8,14 @@
   </div>
 </template>
 
-<script setup lang="ts" >
+<script setup lang="ts">
 import AppHeader from '@/components/ui/AppHeader.vue'
 import AppFooter from '@/components/ui/AppFooter.vue'
 </script>
 
-<style>
+<style lang="scss">
+@import "@/assets/styles/main.scss";
+
 #app {
   min-height: 100vh;
   display: flex;
@@ -22,6 +24,6 @@ import AppFooter from '@/components/ui/AppFooter.vue'
 
 .main-content {
   flex: 1;
-  padding-top: 5px
+  padding-top: 5px;
 }
 </style>

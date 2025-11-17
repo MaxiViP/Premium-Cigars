@@ -1,16 +1,22 @@
- 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+
 }
 
 /* ===========================
    ОСНОВА
    =========================== */
+// html {
+//   background-color: #6b3710;
+// }
+
 body {
   font-family: 'Georgia', 'Times New Roman', serif;
-  background-color: var(--background);
+  // background-color: #6b3710;
+  background: var(--background);
+  // background-color: url('/images/background/1.jpg');
   color: var(--text-dark);
   -webkit-font-smoothing: antialiased;
   line-height: 1.7;

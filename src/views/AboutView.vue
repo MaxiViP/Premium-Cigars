@@ -33,7 +33,7 @@
         <!-- Изображение -->
         <div class="about-image">
           <div class="image-placeholder">
-            <span>Изображение магазина</span>
+            <span></span>
           </div>
         </div>
 
@@ -148,7 +148,7 @@
   width: 100%;
   max-width: 500px;
   height: 400px;
-  background: var(--border);
+  background: url('/images/background/123.webp') left / cover no-repeat;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -159,6 +159,7 @@
   box-shadow: var(--shadow);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
 
 .image-placeholder:hover {
   transform: scale(1.03);

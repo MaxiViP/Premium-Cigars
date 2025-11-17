@@ -84,8 +84,6 @@ const closeMobileMenu = () => {
 </script>
 
 <style scoped>
- 
-
 .logo {
   display: flex;
   align-items: center;
@@ -97,9 +95,7 @@ const closeMobileMenu = () => {
   height: 48px;
   object-fit: contain;
 }
-
 .app-header {
-  background: linear-gradient(135deg, #7dd6e6 0%, #f09a44 50%, #e15050 100%);
   color: var(--white);
   padding: 0;
   position: fixed;
@@ -132,6 +128,7 @@ const closeMobileMenu = () => {
   display: flex;
   align-items: center;
   gap: 0.8rem;
+  padding: 3px;
   text-decoration: none;
   transition: transform 0.3s ease;
 }
@@ -154,6 +151,9 @@ const closeMobileMenu = () => {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   line-height: 1.2;
   letter-spacing: 0.5px;
+  text-shadow:
+    0 0 3px rgba(0, 0, 0, 0.8),
+    0 0 5px rgba(0, 0, 0, 0.6);
 }
 
 .logo-subtitle {
@@ -162,6 +162,9 @@ const closeMobileMenu = () => {
   color: rgba(255, 255, 255, 0.8);
   font-weight: 300;
   letter-spacing: 0.5px;
+  text-shadow:
+    0 0 3px rgba(0, 0, 0, 0.8),
+    0 0 5px rgba(0, 0, 0, 0.6);
 }
 
 /* Навигация */
@@ -192,6 +195,10 @@ const closeMobileMenu = () => {
 .nav-link .nav-text {
   position: relative;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  color: var(--white);
+  text-shadow:
+    0 0 3px rgba(0, 0, 0, 0.8),
+    0 0 5px rgba(0, 0, 0, 0.6);
 }
 
 .nav-link .nav-text::after {

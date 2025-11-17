@@ -1,6 +1,6 @@
 <template>
   <section class="featured-products" ref="sectionRef">
-    <div class="container">
+    <div class="container-feature">
 
       <!-- Заголовок с параллаксом -->
       <div class="section-heading" :style="parallaxStyle">
@@ -97,9 +97,16 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
+.container-feature {
+
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
 /* SECTION */
 .featured-products {
-  padding: 1rem 0 2rem;
+  padding: 1rem 0 4rem;
   background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
   position: relative;
   overflow: hidden;
@@ -169,7 +176,7 @@ onMounted(() => {
 /* SLIDER */
 .products-slider {
   width: 100%;
-  max-width: 1300px;
+  /* max-width: 1300px; */
   margin: 0 auto 3rem;
   padding: 1rem 0 3rem;
   position: relative;
@@ -220,7 +227,8 @@ onMounted(() => {
 
 .catalog-btn:hover {
   transform: translateY(-3px);
-  background: #1a4d2c;
+  background: var( --gold-color);
+  color: black;
 }
 
 @media (max-width: 768px) {
