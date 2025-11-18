@@ -281,14 +281,15 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  background-color: #fbfaf9;
 }
 
 .main-image {
   width: 100%;
-  height: 500px;
+  height: 100%;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); */
 }
 
 .product-image {

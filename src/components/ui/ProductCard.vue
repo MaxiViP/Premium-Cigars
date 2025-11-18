@@ -1,6 +1,4 @@
 <template>
-  <!-- ROOT: делаем div кликабельным — у него role=link, tabindex для клавиатуры,
-       и @click будет вызывать переход -->
   <div
     :class="['product-card', { 'catalog-view': catalogView }]"
     role="link"
@@ -9,26 +7,26 @@
     @keydown.enter.prevent="goToProduct"
     @keydown.space.prevent="goToProduct"
   >
-    <div class="product-image-container">
-      <!-- Быстрые действия: важно — они должны прерывать всплытие, поэтому @click.stop -->
+    <!-- Изображение -->
+    <div class="product-image-wrapper">
       <div class="quick-actions">
         <button class="qa-btn" @click.stop.prevent="toggleLike">❤</button>
         <button class="qa-btn" @click.stop.prevent="shareProduct">⇄</button>
       </div>
 
+      <div class="in-stock-badge" v-if="product.inStock">В наличии</div>
+      <div class="out-of-stock-badge" v-else>Нет в наличии</div>
+
       <ProductImage :src="product.images[0]" :alt="product.name" class="product-image" />
 
-      <!-- Метка наличия -->
-      <div :class="product.inStock ? 'in-stock-badge' : 'out-of-stock-badge'">
-        {{ product.inStock ? 'В наличии' : 'Нет в наличии' }}
-      </div>
+      <!-- Overlay с цветом #FBFAF9 -->
+      <div class="image-overlay"></div>
     </div>
 
     <div class="product-info">
       <div class="product-brand">{{ product.brand }}</div>
       <h3 class="product-name">{{ product.name }}</h3>
 
-      <!-- Характеристики (опционально) -->
       <div v-if="product.category === 'cigars'" class="product-specs">
         <div class="spec-item">
           <span>Крепость:</span><span>{{ product.strength }}</span>
@@ -51,8 +49,6 @@
         </div>
 
         <div class="right">
-          <!-- Убрали кнопку "Подробнее" как видимый элемент — переход по клику на карточку -->
-          <!-- Кнопка "В корзину" остаётся интерактивной и НЕ вызывает переход (stop) -->
           <button
             v-if="product.inStock"
             class="add-cart-btn"
@@ -82,29 +78,20 @@ const props = withDefaults(defineProps<Props>(), {
   catalogView: false,
 })
 
-// router для навигации
 const router = useRouter()
 
-// Навигация при клике на карточку
 function goToProduct() {
-  // Защита: если product нет — ничего
   if (!props.product || !('id' in props.product)) return
   router.push(`/product/${(props.product as Product).id}`)
 }
 
-// Примитивные handlers — пока заглушки, заменить реальной логикой
 function toggleLike() {
-  // TODO: интегрировать логику лайка
   console.log('toggle like', props.product?.id)
 }
-
 function shareProduct() {
-  // TODO: интегрировать логику шаринга
   console.log('share product', props.product?.id)
 }
-
 function addToCart() {
-  // TODO: интегрировать добавление в корзину
   console.log('add to cart', props.product?.id)
 }
 </script>
@@ -115,88 +102,105 @@ function addToCart() {
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
-  transition: all 0.25s ease;
-  height: 100%;
+  transition: all 0.28s ease;
   display: flex;
   flex-direction: column;
-  position: relative;
-
-  /* Теперь карточка выглядит кликабельной */
   cursor: pointer;
   outline: none;
-}
-
-.product-card.catalog-view:focus {
-  box-shadow: 0 0 0 4px rgba(139, 69, 19, 0.12); /* акцент при фокусе */
-  transform: translateY(-3px);
+  height: 100%;
 }
 
 .product-card.catalog-view:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  transform: translateY(-6px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.14);
+  z-index: 10;
 }
 
-/* Изображение */
-.product-image-container {
+.product-card.catalog-view:focus {
+  box-shadow: 0 0 0 4px rgba(139, 69, 19, 0.18);
+  transform: translateY(-3px);
+}
+
+.product-image-wrapper {
   position: relative;
-  /* height: 260px; */
-  border-bottom: 1px solid #f0f0f0;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 14px 14px 0 0;
+  background-color: #fbfaf9;
 }
 
 .product-image {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-  pointer-events: none; /* чтобы клики шли на карточку, а не на картинку */
+  background-color: #fbfaf9;
+  object-fit: contain;
+  object-position: center;
+  transition: transform 0.35s ease;
 }
 
 .product-card.catalog-view:hover .product-image {
-  transform: scale(1.06);
+  transform: scale(1.05);
 }
 
-/* Быстрые действия */
+/* Overlay с цветом #FBFAF9 */
+.image-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    #FBFAF9 0%,
+    rgba(251, 250, 249, 0) 10%,
+    rgba(251, 250, 249, 0) 90%,
+    #FBFAF9 100%
+  );
+}
+
 .quick-actions {
   position: absolute;
-  right: 12px;
   top: 12px;
+  right: 12px;
+  z-index: 10;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  z-index: 4;
+  gap: 8px;
 }
 
-/* Кнопки быстрых действий — они перехватывают клик (stop) */
 .qa-btn {
-  background: white;
+  background: #fff;
   border-radius: 50%;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   border: none;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.16);
+  font-size: 1.1rem;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .qa-btn:hover {
-  background: #fafafa;
+  background: #f5f5f5;
+  transform: scale(1.08);
 }
 
-/* Наличие */
 .in-stock-badge,
 .out-of-stock-badge {
   position: absolute;
   top: 12px;
   left: 12px;
-  padding: 0.25rem 0.75rem;
+  z-index: 10;
+  padding: 6px 12px;
   border-radius: 20px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #fff;
-  z-index: 3;
 }
 
 .in-stock-badge {
@@ -206,27 +210,27 @@ function addToCart() {
   background: #ef4444;
 }
 
-/* Info */
 .product-info {
-  padding: 25px 15px;
+  padding: 24px 16px;
   display: flex;
   flex-direction: column;
   flex: 1;
+  border-top: 1px solid #eee;
 }
 
 .product-brand {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  font-weight: 600;
   color: #777;
   text-transform: uppercase;
-  font-weight: 500;
-  margin-bottom: 0.4rem;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
 }
-
 .product-name {
-  font-size: 1.15rem;
+  font-size: 1.18rem;
   font-weight: 700;
-  color: #222;
-  margin-bottom: 1rem;
+  color: #1a1a1a;
+  margin: 0 0 14px;
   line-height: 1.35;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -234,94 +238,80 @@ function addToCart() {
   overflow: hidden;
 }
 
-/* Specs */
 .product-specs {
-  border-top: 1px dashed #eee;
-  border-bottom: 1px dashed #eee;
-  /* padding: 1rem 0; */
-  margin-bottom: 1.2rem;
+  border-top: 1px dashed #e2e2e2;
+  border-bottom: 1px dashed #e2e2e2;
+  padding: 10px 0;
+  margin-bottom: 16px;
+  font-size: 0.86rem;
 }
 
 .spec-item {
   display: flex;
   justify-content: space-between;
-  padding: 0.25rem 0;
-  font-size: 0.85rem;
+  padding: 3px 0;
 }
-
 .spec-item span:first-child {
   color: #666;
+  font-weight: 500;
 }
 
-/* Footer */
 .product-footer {
   margin-top: auto;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 2px;
+  gap: 12px;
 }
-
 .product-price {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: var(--primary-color);
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--primary-color, #b8860b);
 }
-
 .product-rating {
   margin-top: 4px;
-}
-
-.rating-stars {
-  color: var(--secondary-color);
   font-size: 0.9rem;
 }
+.rating-stars {
+  color: var(--secondary-color, #d4af37);
+}
 
-/* details-btn удалён как отдельная кнопка — стиль не нужен */
-
-/* Кнопка в корзину — НЕ вызывает переход (мы добавили @click.stop) */
 .add-cart-btn {
-  background: var(--primary-color);
-  color: white;
-  padding: 0.6rem 1.1rem;
+  background: var(--primary-color, #b8860b);
+  color: #fff;
+  padding: 11px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
   border: none;
-  border-radius: 6px;
   cursor: pointer;
-  font-weight: 600;
-  transition: opacity 0.2s ease;
-  white-space: nowrap;
+  transition: all 0.2s ease;
 }
-
 .add-cart-btn:hover {
-  opacity: 0.85;
-  background: var(--gold-color);
-  color: black;
+  background: #fff;
+  color: #000;
+  transform: translateY(-1px);
 }
 
-/* Медиазапросы: сохраняем адаптивность */
 @media (max-width: 768px) {
-  /* .product-image-container {
-    height: 220px;
-  } */
-
   .product-info {
-    padding: 20px 5px;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+    padding: 20px 12px;
+  }
+  .product-name {
+    font-size: 1.1rem;
+  }
+  .product-price {
+    font-size: 1.3rem;
   }
 }
 
 @media (max-width: 480px) {
-  /* .product-image-container {
-    height: 180px;
-  } */
-  /*
   .product-info {
-    padding: 70px 0 0;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-  } */
+    padding: 18px 10px;
+  }
+  .add-cart-btn {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+  }
 }
 </style>
