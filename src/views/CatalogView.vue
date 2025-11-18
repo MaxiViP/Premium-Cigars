@@ -1247,7 +1247,7 @@ onMounted(() => {
     position: fixed;
     top: 0;
     left: -100%; /* Скрываем за левым краем */
-    width: 100%;
+    width: 65%;
     /* max-width: 400px; */
     height: 100vh;
     height: 100dvh;
