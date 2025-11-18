@@ -295,7 +295,7 @@ onMounted(() => {
 .product-image {
   width: 100%;
   height: 100%;
-  /* object-fit: cover; */
+  object-fit: cover;
 }
 
 .image-thumbnails {
@@ -636,10 +636,10 @@ onMounted(() => {
   .product-actions {
     flex-direction: column;
   }
-
+/*
   .main-image {
     height: 400px;
-  }
+  } */
 
   .related-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -655,9 +655,9 @@ onMounted(() => {
     font-size: 1.75rem;
   }
 
-  .main-image {
+  /* .main-image {
     height: 300px;
-  }
+  } */
 
   .image-thumbnails {
     justify-content: center;

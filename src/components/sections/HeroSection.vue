@@ -303,7 +303,7 @@ const smoke = [
 }
 .btn {
   display: flex;
-  
+  align-items: anchor-center;
   padding: 1rem 2.6rem;
   border-radius: 40px;
   font-weight: 600;

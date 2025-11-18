@@ -54,7 +54,7 @@ const handleLoad = (event: Event) => {
   aspect-ratio: 3 / 4;
   overflow: hidden;
   border-radius: 14px 14px 0 0;
-  background-color: #FBFAF9; /* базовый цвет для краёв */
+  background-color: #FBFAF9;
 }
 
 .product-image {
@@ -63,22 +63,22 @@ const handleLoad = (event: Event) => {
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain; /* сохраняет пропорции картинки */
+  object-fit: contain;
   object-position: center;
   display: block;
 }
 
-/* Overlay сверху и снизу (10% сверху и снизу) */
+/* Overlay сверху и снизу */
 .image-overlay {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background: linear-gradient(
     to bottom,
-    #FBFAF9 0%,
-    rgba(251, 250, 249, 0) 20%,
-    rgba(251, 250, 249, 0) 90%,
-    #FBFAF9 100%
+    #FBFAF9 0%,           /* сверху цвет */
+    rgba(251, 250, 249, 0) 20%,  /* прозрачность */
+    rgba(251, 250, 249, 0) 80%,  /* прозрачность */
+    #FBFAF9 100%          /* низ плавно закрашен */
   );
 }
 </style>

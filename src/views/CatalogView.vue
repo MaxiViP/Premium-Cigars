@@ -68,6 +68,12 @@
             <button class="close-filters" @click="closeFilters">×</button>
           </div>
 
+          <!-- Кнопки управления группами -->
+          <div v-if="activeFiltersCount > 0" class="filter-actions">
+            <button @click="openAllGroups" class="filter-action-btn">Развернуть все</button>
+            <button @click="closeAllGroups" class="filter-action-btn">Свернуть все</button>
+          </div>
+
           <!-- Активные фильтры -->
           <div v-if="activeFiltersCount > 0" class="active-filters">
             <div class="active-filters-header">
@@ -82,267 +88,473 @@
             </div>
           </div>
 
-          <!-- Фильтр по цене (всегда) -->
+          <!-- Фильтр по цене (всегда открыт) -->
           <div class="filter-group">
-            <h4 class="filter-title">Цена, ₽</h4>
-            <div class="price-filter">
-              <div class="price-inputs">
-                <div class="price-input-group">
-                  <label>от</label>
-                  <input
-                    type="number"
-                    v-model.number="minPrice"
-                    @change="applyFilters"
-                    @wheel="preventScroll"
-                    class="price-input"
-                  />
-                </div>
-                <div class="price-input-group">
-                  <label>до</label>
-                  <input
-                    type="number"
-                    v-model.number="maxPrice"
-                    @change="applyFilters"
-                    @wheel="preventScroll"
-                    class="price-input"
-                  />
-                </div>
-              </div>
-              <div class="price-slider">
-                <input
-                  type="range"
-                  :min="availableMinPrice"
-                  :max="availableMaxPrice"
-                  v-model.number="minPrice"
-                  @input="applyFilters"
-                  class="range-slider"
-                />
-                <input
-                  type="range"
-                  :min="availableMinPrice"
-                  :max="availableMaxPrice"
-                  v-model.number="maxPrice"
-                  @input="applyFilters"
-                  class="range-slider"
-                />
-              </div>
-              <div class="price-range">
-                <span>{{ formatPrice(minPrice) }}</span>
-                <span>—</span>
-                <span>{{ formatPrice(maxPrice) }}</span>
-              </div>
+            <div class="filter-header" @click="toggleFilterGroup('price')">
+              <h4 class="filter-title">Цена, ₽</h4>
+              <svg
+                class="filter-arrow"
+                :class="{ 'filter-arrow--open': isGroupOpen('price') }"
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+              >
+                <path d="M4 6l4 4 4-4" fill="currentColor" />
+              </svg>
             </div>
+
+            <transition name="filter-collapse">
+              <div v-show="isGroupOpen('price')" class="filter-content">
+                <div class="price-filter">
+                  <div class="price-inputs">
+                    <div class="price-input-group">
+                      <label>от</label>
+                      <input
+                        type="number"
+                        v-model.number="minPrice"
+                        @change="applyFilters"
+                        @wheel="preventScroll"
+                        class="price-input"
+                      />
+                    </div>
+                    <div class="price-input-group">
+                      <label>до</label>
+                      <input
+                        type="number"
+                        v-model.number="maxPrice"
+                        @change="applyFilters"
+                        @wheel="preventScroll"
+                        class="price-input"
+                      />
+                    </div>
+                  </div>
+                  <div class="price-slider">
+                    <input
+                      type="range"
+                      :min="availableMinPrice"
+                      :max="availableMaxPrice"
+                      v-model.number="minPrice"
+                      @input="applyFilters"
+                      class="range-slider"
+                    />
+                    <input
+                      type="range"
+                      :min="availableMinPrice"
+                      :max="availableMaxPrice"
+                      v-model.number="maxPrice"
+                      @input="applyFilters"
+                      class="range-slider"
+                    />
+                  </div>
+                  <div class="price-range">
+                    <span>{{ formatPrice(minPrice) }}</span>
+                    <span>—</span>
+                    <span>{{ formatPrice(maxPrice) }}</span>
+                  </div>
+                </div>
+              </div>
+            </transition>
           </div>
 
           <!-- Фильтры только для сигар -->
           <template v-if="category === 'cigars'">
-            <!-- Бренд, Страна, Формат и т.д. — как было -->
+            <!-- Бренд -->
             <div class="filter-group">
-              <h4 class="filter-title">Бренд</h4>
-              <div class="filter-options">
-                <label v-for="brand in brands" :key="brand" class="filter-option">
-                  <input
-                    type="checkbox"
-                    :value="brand"
-                    v-model="selectedBrands"
-                    @change="applyFilters"
-                  />
-                  <span class="checkmark"></span>
-                  <span class="option-text">{{ brand }}</span>
-                  <span class="option-count">({{ getBrandCount(brand) }})</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="filter-group">
-              <h4 class="filter-title">Страна</h4>
-              <div class="filter-options">
-                <label v-for="country in countries" :key="country" class="filter-option">
-                  <input
-                    type="checkbox"
-                    :value="country"
-                    v-model="selectedCountries"
-                    @change="applyFilters"
-                  />
-                  <span class="checkmark"></span>
-                  <span class="option-text">{{ country }}</span>
-                  <span class="option-count">({{ getCountryCount(country) }})</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="filter-group">
-              <h4 class="filter-title">Формат</h4>
-              <div class="filter-options">
-                <label v-for="format in formats" :key="format" class="filter-option">
-                  <input
-                    type="checkbox"
-                    :value="format"
-                    v-model="selectedFormats"
-                    @change="applyFilters"
-                  />
-                  <span class="checkmark"></span>
-                  <span class="option-text">{{ format }}</span>
-                  <span class="option-count">({{ getFormatCount(format) }})</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="filter-group">
-              <h4 class="filter-title">Крепость</h4>
-              <div class="filter-options">
-                <label v-for="strength in strengths" :key="strength" class="filter-option">
-                  <input
-                    type="checkbox"
-                    :value="strength"
-                    v-model="selectedStrengths"
-                    @change="applyFilters"
-                  />
-                  <span class="checkmark"></span>
-                  <span class="option-text">{{ strength }}</span>
-                  <span class="option-count">({{ getStrengthCount(strength) }})</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="filter-group">
-              <h4 class="filter-title">Время курения</h4>
-              <div class="filter-options">
-                <label v-for="time in smokingTimes" :key="time" class="filter-option">
-                  <input
-                    type="checkbox"
-                    :value="time"
-                    v-model="selectedSmokingTimes"
-                    @change="applyFilters"
-                  />
-                  <span class="checkmark"></span>
-                  <span class="option-text">{{ time }}</span>
-                  <span class="option-count">({{ getSmokingTimeCount(time) }})</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="filter-group">
-              <h4 class="filter-title">Семейство вкусов</h4>
-              <div class="filter-options">
-                <label v-for="family in flavorFamilies" :key="family" class="filter-option">
-                  <input
-                    type="checkbox"
-                    :value="family"
-                    v-model="selectedFlavorFamilies"
-                    @change="applyFilters"
-                  />
-                  <span class="checkmark"></span>
-                  <span class="option-text">{{ family }}</span>
-                  <span class="option-count">({{ getFlavorFamilyCount(family) }})</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="filter-group">
-              <h4 class="filter-title">Ноты вкуса</h4>
-              <div class="flavor-tags">
-                <button
-                  v-for="note in flavorNotes"
-                  :key="note"
-                  :class="[
-                    'flavor-tag',
-                    { 'flavor-tag--active': selectedFlavorNotes.includes(note) },
-                  ]"
-                  @click="toggleFlavorNote(note)"
+              <div class="filter-header" @click="toggleFilterGroup('brand')">
+                <h4 class="filter-title">Бренд</h4>
+                <svg
+                  class="filter-arrow"
+                  :class="{ 'filter-arrow--open': isGroupOpen('brand') }"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
                 >
-                  {{ note }}
-                </button>
+                  <path d="M4 6l4 4 4-4" fill="currentColor" />
+                </svg>
               </div>
+
+              <transition name="filter-collapse">
+                <div v-show="isGroupOpen('brand')" class="filter-content">
+                  <div class="filter-options">
+                    <label v-for="brand in brands" :key="brand" class="filter-option">
+                      <input
+                        type="checkbox"
+                        :value="brand"
+                        v-model="selectedBrands"
+                        @change="applyFilters"
+                      />
+                      <span class="checkmark"></span>
+                      <span class="option-text">{{ brand }}</span>
+                      <span class="option-count">({{ getBrandCount(brand) }})</span>
+                    </label>
+                  </div>
+                </div>
+              </transition>
             </div>
 
+            <!-- Страна -->
             <div class="filter-group">
-              <h4 class="filter-title">Длина (мм)</h4>
-              <div class="range-filter">
-                <div class="range-values">
-                  <span>{{ minLength }}</span>
-                  <span>{{ maxLength }}</span>
-                </div>
-                <input
-                  type="range"
-                  :min="availableMinLength"
-                  :max="availableMaxLength"
-                  v-model.number="minLength"
-                  @input="applyFilters"
-                  class="range-slider"
-                />
-                <input
-                  type="range"
-                  :min="availableMinLength"
-                  :max="availableMaxLength"
-                  v-model.number="maxLength"
-                  @input="applyFilters"
-                  class="range-slider"
-                />
+              <div class="filter-header" @click="toggleFilterGroup('country')">
+                <h4 class="filter-title">Страна</h4>
+                <svg
+                  class="filter-arrow"
+                  :class="{ 'filter-arrow--open': isGroupOpen('country') }"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M4 6l4 4 4-4" fill="currentColor" />
+                </svg>
               </div>
+
+              <transition name="filter-collapse">
+                <div v-show="isGroupOpen('country')" class="filter-content">
+                  <div class="filter-options">
+                    <label v-for="country in countries" :key="country" class="filter-option">
+                      <input
+                        type="checkbox"
+                        :value="country"
+                        v-model="selectedCountries"
+                        @change="applyFilters"
+                      />
+                      <span class="checkmark"></span>
+                      <span class="option-text">{{ country }}</span>
+                      <span class="option-count">({{ getCountryCount(country) }})</span>
+                    </label>
+                  </div>
+                </div>
+              </transition>
             </div>
 
+            <!-- Формат -->
             <div class="filter-group">
-              <h4 class="filter-title">Калибр (RG)</h4>
-              <div class="range-filter">
-                <div class="range-values">
-                  <span>{{ minRingGauge }}</span>
-                  <span>{{ maxRingGauge }}</span>
-                </div>
-                <input
-                  type="range"
-                  :min="availableMinRingGauge"
-                  :max="availableMaxRingGauge"
-                  v-model.number="minRingGauge"
-                  @input="applyFilters"
-                  class="range-slider"
-                />
-                <input
-                  type="range"
-                  :min="availableMinRingGauge"
-                  :max="availableMaxRingGauge"
-                  v-model.number="maxRingGauge"
-                  @input="applyFilters"
-                  class="range-slider"
-                />
+              <div class="filter-header" @click="toggleFilterGroup('format')">
+                <h4 class="filter-title">Формат</h4>
+                <svg
+                  class="filter-arrow"
+                  :class="{ 'filter-arrow--open': isGroupOpen('format') }"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M4 6l4 4 4-4" fill="currentColor" />
+                </svg>
               </div>
+
+              <transition name="filter-collapse">
+                <div v-show="isGroupOpen('format')" class="filter-content">
+                  <div class="filter-options">
+                    <label v-for="format in formats" :key="format" class="filter-option">
+                      <input
+                        type="checkbox"
+                        :value="format"
+                        v-model="selectedFormats"
+                        @change="applyFilters"
+                      />
+                      <span class="checkmark"></span>
+                      <span class="option-text">{{ format }}</span>
+                      <span class="option-count">({{ getFormatCount(format) }})</span>
+                    </label>
+                  </div>
+                </div>
+              </transition>
+            </div>
+
+            <!-- Крепость -->
+            <div class="filter-group">
+              <div class="filter-header" @click="toggleFilterGroup('strength')">
+                <h4 class="filter-title">Крепость</h4>
+                <svg
+                  class="filter-arrow"
+                  :class="{ 'filter-arrow--open': isGroupOpen('strength') }"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M4 6l4 4 4-4" fill="currentColor" />
+                </svg>
+              </div>
+
+              <transition name="filter-collapse">
+                <div v-show="isGroupOpen('strength')" class="filter-content">
+                  <div class="filter-options">
+                    <label v-for="strength in strengths" :key="strength" class="filter-option">
+                      <input
+                        type="checkbox"
+                        :value="strength"
+                        v-model="selectedStrengths"
+                        @change="applyFilters"
+                      />
+                      <span class="checkmark"></span>
+                      <span class="option-text">{{ strength }}</span>
+                      <span class="option-count">({{ getStrengthCount(strength) }})</span>
+                    </label>
+                  </div>
+                </div>
+              </transition>
+            </div>
+
+            <!-- Время курения -->
+            <div class="filter-group">
+              <div class="filter-header" @click="toggleFilterGroup('smokingTime')">
+                <h4 class="filter-title">Время курения</h4>
+                <svg
+                  class="filter-arrow"
+                  :class="{ 'filter-arrow--open': isGroupOpen('smokingTime') }"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M4 6l4 4 4-4" fill="currentColor" />
+                </svg>
+              </div>
+
+              <transition name="filter-collapse">
+                <div v-show="isGroupOpen('smokingTime')" class="filter-content">
+                  <div class="filter-options">
+                    <label v-for="time in smokingTimes" :key="time" class="filter-option">
+                      <input
+                        type="checkbox"
+                        :value="time"
+                        v-model="selectedSmokingTimes"
+                        @change="applyFilters"
+                      />
+                      <span class="checkmark"></span>
+                      <span class="option-text">{{ time }}</span>
+                      <span class="option-count">({{ getSmokingTimeCount(time) }})</span>
+                    </label>
+                  </div>
+                </div>
+              </transition>
+            </div>
+
+            <!-- Семейство вкусов -->
+            <div class="filter-group">
+              <div class="filter-header" @click="toggleFilterGroup('flavorFamily')">
+                <h4 class="filter-title">Семейство вкусов</h4>
+                <svg
+                  class="filter-arrow"
+                  :class="{ 'filter-arrow--open': isGroupOpen('flavorFamily') }"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M4 6l4 4 4-4" fill="currentColor" />
+                </svg>
+              </div>
+
+              <transition name="filter-collapse">
+                <div v-show="isGroupOpen('flavorFamily')" class="filter-content">
+                  <div class="filter-options">
+                    <label v-for="family in flavorFamilies" :key="family" class="filter-option">
+                      <input
+                        type="checkbox"
+                        :value="family"
+                        v-model="selectedFlavorFamilies"
+                        @change="applyFilters"
+                      />
+                      <span class="checkmark"></span>
+                      <span class="option-text">{{ family }}</span>
+                      <span class="option-count">({{ getFlavorFamilyCount(family) }})</span>
+                    </label>
+                  </div>
+                </div>
+              </transition>
+            </div>
+
+            <!-- Ноты вкуса -->
+            <div class="filter-group">
+              <div class="filter-header" @click="toggleFilterGroup('flavorNotes')">
+                <h4 class="filter-title">Ноты вкуса</h4>
+                <svg
+                  class="filter-arrow"
+                  :class="{ 'filter-arrow--open': isGroupOpen('flavorNotes') }"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M4 6l4 4 4-4" fill="currentColor" />
+                </svg>
+              </div>
+
+              <transition name="filter-collapse">
+                <div v-show="isGroupOpen('flavorNotes')" class="filter-content">
+                  <div class="flavor-tags">
+                    <button
+                      v-for="note in flavorNotes"
+                      :key="note"
+                      :class="[
+                        'flavor-tag',
+                        { 'flavor-tag--active': selectedFlavorNotes.includes(note) },
+                      ]"
+                      @click="toggleFlavorNote(note)"
+                    >
+                      {{ note }}
+                    </button>
+                  </div>
+                </div>
+              </transition>
+            </div>
+
+            <!-- Длина -->
+            <div class="filter-group">
+              <div class="filter-header" @click="toggleFilterGroup('length')">
+                <h4 class="filter-title">Длина (мм)</h4>
+                <svg
+                  class="filter-arrow"
+                  :class="{ 'filter-arrow--open': isGroupOpen('length') }"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M4 6l4 4 4-4" fill="currentColor" />
+                </svg>
+              </div>
+
+              <transition name="filter-collapse">
+                <div v-show="isGroupOpen('length')" class="filter-content">
+                  <div class="range-filter">
+                    <div class="range-values">
+                      <span>{{ minLength }}</span>
+                      <span>{{ maxLength }}</span>
+                    </div>
+                    <input
+                      type="range"
+                      :min="availableMinLength"
+                      :max="availableMaxLength"
+                      v-model.number="minLength"
+                      @input="applyFilters"
+                      class="range-slider"
+                    />
+                    <input
+                      type="range"
+                      :min="availableMinLength"
+                      :max="availableMaxLength"
+                      v-model.number="maxLength"
+                      @input="applyFilters"
+                      class="range-slider"
+                    />
+                  </div>
+                </div>
+              </transition>
+            </div>
+
+            <!-- Калибр -->
+            <div class="filter-group">
+              <div class="filter-header" @click="toggleFilterGroup('ringGauge')">
+                <h4 class="filter-title">Калибр (RG)</h4>
+                <svg
+                  class="filter-arrow"
+                  :class="{ 'filter-arrow--open': isGroupOpen('ringGauge') }"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M4 6l4 4 4-4" fill="currentColor" />
+                </svg>
+              </div>
+
+              <transition name="filter-collapse">
+                <div v-show="isGroupOpen('ringGauge')" class="filter-content">
+                  <div class="range-filter">
+                    <div class="range-values">
+                      <span>{{ minRingGauge }}</span>
+                      <span>{{ maxRingGauge }}</span>
+                    </div>
+                    <input
+                      type="range"
+                      :min="availableMinRingGauge"
+                      :max="availableMaxRingGauge"
+                      v-model.number="minRingGauge"
+                      @input="applyFilters"
+                      class="range-slider"
+                    />
+                    <input
+                      type="range"
+                      :min="availableMinRingGauge"
+                      :max="availableMaxRingGauge"
+                      v-model.number="maxRingGauge"
+                      @input="applyFilters"
+                      class="range-slider"
+                    />
+                  </div>
+                </div>
+              </transition>
             </div>
           </template>
 
           <!-- Фильтры только для аксессуаров -->
           <template v-if="category === 'accessories'">
+            <!-- Тип аксессуара -->
             <div class="filter-group">
-              <h4 class="filter-title">Тип аксессуара</h4>
-              <div class="filter-options">
-                <label v-for="type in accessoryTypes" :key="type" class="filter-option">
-                  <input
-                    type="checkbox"
-                    :value="type"
-                    v-model="selectedAccessoryTypes"
-                    @change="applyFilters"
-                  />
-                  <span class="checkmark"></span>
-                  <span class="option-text">{{ accessoryTypeLabel(type) }}</span>
-                  <span class="option-count">({{ getAccessoryTypeCount(type) }})</span>
-                </label>
+              <div class="filter-header" @click="toggleFilterGroup('accessoryType')">
+                <h4 class="filter-title">Тип аксессуара</h4>
+                <svg
+                  class="filter-arrow"
+                  :class="{ 'filter-arrow--open': isGroupOpen('accessoryType') }"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M4 6l4 4 4-4" fill="currentColor" />
+                </svg>
               </div>
+
+              <transition name="filter-collapse">
+                <div v-show="isGroupOpen('accessoryType')" class="filter-content">
+                  <div class="filter-options">
+                    <label v-for="type in accessoryTypes" :key="type" class="filter-option">
+                      <input
+                        type="checkbox"
+                        :value="type"
+                        v-model="selectedAccessoryTypes"
+                        @change="applyFilters"
+                      />
+                      <span class="checkmark"></span>
+                      <span class="option-text">{{ accessoryTypeLabel(type) }}</span>
+                      <span class="option-count">({{ getAccessoryTypeCount(type) }})</span>
+                    </label>
+                  </div>
+                </div>
+              </transition>
             </div>
 
+            <!-- Материал -->
             <div class="filter-group">
-              <h4 class="filter-title">Материал</h4>
-              <div class="filter-options">
-                <label v-for="material in accessoryMaterials" :key="material" class="filter-option">
-                  <input
-                    type="checkbox"
-                    :value="material"
-                    v-model="selectedAccessoryMaterials"
-                    @change="applyFilters"
-                  />
-                  <span class="checkmark"></span>
-                  <span class="option-text">{{ material }}</span>
-                  <span class="option-count">({{ getAccessoryMaterialCount(material) }})</span>
-                </label>
+              <div class="filter-header" @click="toggleFilterGroup('accessoryMaterial')">
+                <h4 class="filter-title">Материал</h4>
+                <svg
+                  class="filter-arrow"
+                  :class="{ 'filter-arrow--open': isGroupOpen('accessoryMaterial') }"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M4 6l4 4 4-4" fill="currentColor" />
+                </svg>
               </div>
+
+              <transition name="filter-collapse">
+                <div v-show="isGroupOpen('accessoryMaterial')" class="filter-content">
+                  <div class="filter-options">
+                    <label
+                      v-for="material in accessoryMaterials"
+                      :key="material"
+                      class="filter-option"
+                    >
+                      <input
+                        type="checkbox"
+                        :value="material"
+                        v-model="selectedAccessoryMaterials"
+                        @change="applyFilters"
+                      />
+                      <span class="checkmark"></span>
+                      <span class="option-text">{{ material }}</span>
+                      <span class="option-count">({{ getAccessoryMaterialCount(material) }})</span>
+                    </label>
+                  </div>
+                </div>
+              </transition>
             </div>
           </template>
 
@@ -406,8 +618,6 @@ const sortOptions = [
   { label: 'По рейтингу', value: 'rating' as const },
 ]
 
-// const sortBy = ref('price') // текущее значение
-
 // Текущая категория
 const category = ref<'cigars' | 'accessories'>('cigars')
 
@@ -433,6 +643,46 @@ const minPrice = ref(0)
 const maxPrice = ref(100000)
 const sortBy = ref<'name' | 'price' | 'brand' | 'rating'>('name')
 const showFilters = ref(false)
+
+// Состояние открытых/закрытых групп аккордеона
+const openGroups = ref<Record<string, boolean>>({
+  price: true, // Цена всегда открыта
+  brand: false,
+  country: false,
+  format: false,
+  strength: false,
+  smokingTime: false,
+  flavorFamily: false,
+  flavorNotes: false,
+  length: false,
+  ringGauge: false,
+  accessoryType: false,
+  accessoryMaterial: false,
+})
+
+// Методы для управления аккордеоном
+const toggleFilterGroup = (groupName: string) => {
+  openGroups.value[groupName] = !openGroups.value[groupName]
+}
+
+const isGroupOpen = (groupName: string) => {
+  return openGroups.value[groupName]
+}
+
+const openAllGroups = () => {
+  Object.keys(openGroups.value).forEach((key) => {
+    openGroups.value[key] = true
+  })
+}
+
+const closeAllGroups = () => {
+  Object.keys(openGroups.value).forEach((key) => {
+    if (key !== 'price') {
+      // Цену не закрываем
+      openGroups.value[key] = false
+    }
+  })
+}
 
 // Текущие товары
 const currentProducts = computed<Product[]>(() => {
@@ -744,262 +994,376 @@ const accessoryTypeLabel = (type: string) => {
   return labels[type] || type
 }
 
-const toggleFilters = () => {
+const toggleFilters = (e: MouseEvent) => {
+  e.stopPropagation() // останавливаем всплытие клика
   showFilters.value = !showFilters.value
+
+  // Блокируем/разблокируем скролл страницы на мобильных
+  if (window.innerWidth <= 768) {
+    document.body.style.overflow = showFilters.value ? 'hidden' : ''
+  }
 }
+
 const closeFilters = () => {
   showFilters.value = false
+  // Восстанавливаем прокрутку body
+  if (window.innerWidth <= 768) {
+    document.body.style.overflow = ''
+  }
 }
+
+// Закрытие по нажатию Escape
+const handleEscape = (event: KeyboardEvent) => {
+  if (event.key === 'Escape' && showFilters.value) {
+    closeFilters()
+  }
+}
+
+// Добавляем обработчик Escape
+onMounted(() => {
+  document.addEventListener('keydown', handleEscape)
+  resetFilters()
+})
 
 // Инициализация при смене категории
 watch(
   category,
   () => {
     resetFilters()
+    closeAllGroups() // Закрываем все группы при смене категории
   },
   { immediate: true },
 )
 
+// Убираем обработчик при уничтожении компонента
 onMounted(() => {
-  resetFilters()
+  document.removeEventListener('keydown', handleEscape)
 })
+
+// onMounted(() => {
+//   resetFilters()
+// })
 </script>
+
 <style scoped>
-/* ====================== ЕДИНЫЙ СТИЛЬ ДЛЯ ПЕРЕКЛЮЧАТЕЛЕЙ ====================== */
-.category-tabs,
-.sort-control .sort-buttons  {
-  display: flex;
-    flex-wrap: wrap; 
-  background: rgba(245, 245, 247, 0.8);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 16px;
-  padding: 6px;
-  box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-}
-
-/* Общие стили кнопок внутри */
-.category-tab,
-.sort-btn {
-  position: relative;
-  z-index: 2;
-  padding: 11px 22px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #555;
-  background: transparent;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.32s cubic-bezier(0.4, 0, 0.2, 1);
-  white-space: nowrap;
-}
-
-/* Активное состояние */
-.category-tab--active,
-.sort-btn.active {
-  color: #111;
-  font-weight: 700;
-}
-
-/* Плавающая белая капсула */
-.category-tabs::before,
-.sort-control .sort-buttons::before {
-  content: '';
-  position: absolute;
-  top: 6px;
-  left: 6px;
-  right: 6px;
-  bottom: 6px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow:
-    0 3px 12px rgba(0, 0, 0, 0.1),
-    0 1px 4px rgba(0, 0, 0, 0.06);
-  transition: all 0.38s cubic-bezier(0.4, 0, 0.2, 1);
-  pointer-events: none;
-}
-
-/* Движение капсулы — категории (2 кнопки) */
-.category-tabs .category-tab:nth-child(1).category-tab--active ~ .category-tabs::before {
-  transform: translateX(0%);
-}
-.category-tabs .category-tab:nth-child(2).category-tab--active ~ .category-tabs::before {
-  transform: translateX(100%);
-}
-
-/* Движение капсулы — сортировка (4 кнопки) */
-.sort-btn:nth-child(1).active ~ .sort-buttons::before {
-  transform: translateX(0%);
-}
-.sort-btn:nth-child(2).active ~ .sort-buttons::before {
-  transform: translateX(100%);
-}
-.sort-btn:nth-child(3).active ~ .sort-buttons::before {
-  transform: translateX(200%);
-}
-.sort-btn:nth-child(4).active ~ .sort-buttons::before {
-  transform: translateX(300%);
-}
-
-/* Ховер и нажатие */
-.category-tab:hover:not(.category-tab--active),
-.sort-btn:hover:not(.active) {
-  color: #000;
-}
-
-.category-tab:active,
-.sort-btn:active {
-  transform: scale(0.96);
-}
-
-/* ====================== ОБЩИЕ СТИЛИ ====================== */
 .catalog-page {
   min-height: 100vh;
-  background: #fff;
-  padding-top: 80px;
+  background: #f8f8f8;
 }
 
 .catalog-container {
-  /* max-width: 1400px; */
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 10px;
+  padding: 0 1rem;
 }
 
-/* Хлебные крошки */
 .breadcrumbs {
-  padding: 2rem 0 1rem;
-  border-bottom: 1px solid #f0f0f0;
-  margin-bottom: 2rem;
-  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  padding: 1.5rem 0;
+  font-size: 0.875rem;
+  color: #666;
 }
 
 .breadcrumb-link {
-  color: #666;
+  color: #8b4513;
   text-decoration: none;
-  transition: color 0.3s;
-}
-.breadcrumb-link:hover {
-  color: var(--primary-color);
-}
-.breadcrumb-separator {
-  margin: 0 0.5rem;
-  color: #999;
-}
-.breadcrumb-current {
-  color: #111;
-  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
-/* Заголовок + контролы */
+.breadcrumb-separator {
+  margin: 0 0.5rem;
+}
+
+.breadcrumb-current {
+  color: #333;
+}
+
 .catalog-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 2rem;
-  flex-wrap: wrap;
-  gap: 1rem;
 }
 
 .catalog-title {
-  font-size: 2.5rem;
-  font-weight: 300;
-  color: #111;
-  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.category-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.category-tab {
+  padding: 0.75rem 1.5rem;
+  background: #fff;
+  border: 2px solid #e5e5e5;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #8b4513;
+  }
+
+  &--active {
+    background: #8b4513;
+    color: #fff;
+    border-color: #8b4513;
+  }
 }
 
 .catalog-controls {
   display: flex;
-  gap: 1rem;
+  justify-content: space-between;
   align-items: center;
+  gap: 1rem;
 }
 
-/* Кнопка фильтров на мобильных */
 .filter-toggle {
-  display: none;
+  display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  background: rgba(245, 245, 247, 0.9);
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  font-size: 0.9rem;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #8b4513;
+    color: #8b4513;
+  }
 }
 
-.filter-toggle:hover {
-  background: #eee;
+.sort-control {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
-/* Overlay */
-.filters-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
+.sort-buttons {
+  display: flex;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.filters-overlay--active {
-  opacity: 1;
-  visibility: visible;
+.sort-btn {
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f5f5f5;
+  }
+
+  &.active {
+    background: #8b4513;
+    color: #fff;
+  }
 }
 
-/* Layout */
 .catalog-layout {
   display: grid;
-  grid-template-columns: 340px 1fr;
+  grid-template-columns: 300px 1fr;
   gap: 2rem;
-  align-items: start;
+  position: relative;
 }
 
-/* Сайдбар фильтров */
-.filters-sidebar {
-  position: sticky;
-  top: 20px;
-  background: #fafafa;
-  border-radius: 16px;
-  /* padding: 1.75rem; */
-  height: fit-content;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-}
-
-.filters-sidebar--open {
+.filters-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
   left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+
+  &--active {
+    display: block;
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    z-index: 9998;
+  }
+}
+
+.filters-sidebar {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  height: fit-content;
+  position: sticky;
+  top: 2rem;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+
+  /* Современный красивый скроллбар */
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 8px 0;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+    transition: background 0.3s;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+  }
+
+  /* Плавная прокрутка */
+  scroll-behavior: smooth;
+
+  /* На мобильных — занимает всю высоту экрана */
+  @media (max-width: 768px) {
+    position: fixed;
+    top: 0;
+    left: -100%; /* Скрываем за левым краем */
+    width: 100%;
+    /* max-width: 400px; */
+    height: 100vh;
+    height: 100dvh;
+    z-index: 9999;
+    border-radius: 0;
+    padding: 1rem;
+    transition: left 0.35s cubic-bezier(0.32, 0, 0.07, 1);
+    overflow-y: auto;
+    max-height: none;
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+
+    &.filters-sidebar--open {
+      left: 0;
+    }
+
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Для планшетов можно сделать панель поуже */
+  @media (max-width: 768px) and (min-width: 481px) {
+    width: 400px;
+  }
 }
 
 .filters-header {
-  display: none;
+  display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e5e5e5;
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 1;
+    padding: 1rem 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #e5e5e5;
+  }
 }
 
-.filters-header h3 {
-  margin: 0;
-  font-size: 1.25rem;
-}
 .close-filters {
-  font-size: 1.75rem;
-  color: #888;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
   cursor: pointer;
+  color: #666;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #333;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
-/* Активные фильтры */
+.filter-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid #e5e5e5;
+
+  @media (max-width: 768px) {
+    position: sticky;
+    top: 80px;
+    background: #fff;
+    z-index: 1;
+    margin-bottom: 1rem;
+    padding: 1rem 0;
+  }
+}
+
+.filter-action-btn {
+  padding: 0.5rem 1rem;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #e5e5e5;
+    border-color: #ccc;
+  }
+}
+
 .active-filters {
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 10px 0 0 0;
   margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f9f5f2;
+  border-radius: 8px;
+
+  @media (max-width: 768px) {
+    position: sticky;
+    top: 140px;
+    background: #fff;
+    z-index: 1;
+    margin-bottom: 1rem;
+  }
 }
 
 .active-filters-header {
@@ -1007,284 +1371,443 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.75rem;
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .clear-all {
-  color: #666;
-  text-decoration: underline;
-  font-size: 0.85rem;
+  background: none;
+  border: none;
+  color: #8b4513;
   cursor: pointer;
+  font-size: 0.875rem;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
-.clear-all:hover {
-  color: var(--primary-color);
+
+.active-filters-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .filter-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 20px;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.85rem;
-}
-
-.filter-tag button {
-  color: #aaa;
-  font-size: 1.1rem;
-}
-.filter-tag button:hover {
-  color: var(--primary-color);
-}
-
-/* Группы фильтров */
-.filter-group {
-  margin-bottom: 2rem;
-}
-.filter-title {
-  font-size: 0.95rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: #111;
-  margin-bottom: 1rem;
-}
-
-/* Цена */
-.price-inputs {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-.price-input-group {
-  flex: 1;
-}
-.price-input-group label {
-  font-size: 0.8rem;
-  color: #666;
-  margin-bottom: 0.25rem;
-  display: block;
-}
-.price-input {
-  width: 100%;
-  padding: 0.65rem;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  font-size: 0.95rem;
-}
-.price-input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(100, 100, 255, 0.15);
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.375rem 0.75rem;
+  background: #8b4513;
+  color: #fff;
+  border-radius: 16px;
+  font-size: 0.75rem;
+
+  button {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+
+    &:hover {
+      color: #ffd700;
+    }
+  }
 }
 
-.range-slider {
-  -webkit-appearance: none;
-  width: 100%;
-  height: 6px;
-  border-radius: 3px;
-  background: #ddd;
-  outline: none;
-  margin: 12px 0;
+/* Стили для аккордеона фильтров */
+.filter-group {
+  border-bottom: 1px solid #e5e5e5;
+  padding: 0.5rem 0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  @media (max-width: 768px) {
+    padding: 1rem 0;
+  }
 }
-.range-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--primary-color);
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
   cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #f8f8f8;
+    border-radius: 4px;
+
+    .filter-title {
+      color: #8b4513;
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 1rem 0;
+  }
 }
 
-/* Чекбоксы */
+.filter-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+  transition: color 0.2s ease;
+
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+}
+
+.filter-arrow {
+  transition: transform 0.3s ease;
+  color: #666;
+
+  &--open {
+    transform: rotate(180deg);
+  }
+}
+
+.filter-content {
+  overflow: hidden;
+}
+
+/* Анимация раскрытия/закрытия */
+.filter-collapse-enter-active,
+.filter-collapse-leave-active {
+  transition: all 0.3s ease;
+  max-height: 300px;
+}
+
+.filter-collapse-enter-from,
+.filter-collapse-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+
+.filter-options {
+  max-height: 250px;
+  overflow-y: auto;
+  overflow-y: overlay;
+  padding: 0.5rem 0;
+  margin-right: -0.5rem;
+  padding-right: 0.5rem;
+
+  /* Скрываем скроллбар по умолчанию */
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 3px;
+    transition: background 0.3s ease;
+  }
+
+  /* Показываем скроллбар при наведении на контейнер */
+  &:hover {
+    scrollbar-color: #c1c1c1 #f1f1f1;
+
+    &::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+
+      &:hover {
+        background: #a8a8a8;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    max-height: 200px;
+    padding: 1rem 0;
+  }
+
+  @media (max-width: 480px) {
+    max-height: 150px;
+  }
+}
+
 .filter-option {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
   padding: 0.5rem 0;
   cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #f8f8f8;
+    border-radius: 4px;
+  }
+
+  input[type='checkbox'] {
+    margin-right: 0.5rem;
+  }
 }
-.filter-option input {
-  display: none;
-}
-.checkmark {
-  width: 20px;
-  height: 20px;
-  border: 2px solid #ccc;
-  border-radius: 6px;
-  transition: all 0.25s;
-}
-.filter-option input:checked + .checkmark {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
-}
-.filter-option input:checked + .checkmark::after {
-  content: '';
-  position: absolute;
-  left: 6px;
-  top: 2px;
-  width: 6px;
-  height: 10px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
+
 .option-text {
   flex: 1;
-  font-size: 0.95rem;
+  font-size: 0.875rem;
 }
+
 .option-count {
-  color: #888;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
+  color: #666;
 }
 
-/* Теги вкусов */
-.flavor-tag {
-  padding: 0.5rem 0.9rem;
-  background: #f1f1f1;
-  border: 1px solid #e0e0e0;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  transition: all 0.25s;
+/* Стили для остальных элементов фильтров */
+.price-filter {
+  padding: 0.5rem 0;
 }
-.flavor-tag:hover {
+
+.price-inputs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.price-input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 1;
+
+  label {
+    font-size: 0.875rem;
+    color: #666;
+  }
+}
+
+.price-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  font-size: 0.875rem;
+
+  &:focus {
+    outline: none;
+    border-color: #8b4513;
+  }
+}
+
+.price-slider {
+  position: relative;
+  height: 20px;
+  margin-bottom: 0.5rem;
+}
+
+.range-slider {
+  position: absolute;
+  width: 85%;
+  height: 4px;
   background: #e5e5e5;
-}
-.flavor-tag--active {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
-  color: white;
+  border-radius: 2px;
+  outline: none;
+
+  &::-webkit-slider-thumb {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #8b4513;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #8b4513;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+  }
 }
 
-/* Кнопка сброса */
+.price-range {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.flavor-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+.flavor-tag {
+  padding: 0.5rem 0.75rem;
+  background: #f5f5f5;
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #8b4513;
+  }
+
+  &--active {
+    background: #8b4513;
+    color: #fff;
+    border-color: #8b4513;
+  }
+}
+
+.range-filter {
+  padding: 0.5rem 0;
+}
+
+.range-values {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
 .reset-filters-btn {
   width: 100%;
-  padding: 0.9rem;
-  background: transparent;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  font-size: 0.95rem;
-  color: #555;
+  padding: 0.75rem;
+  background: none;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  color: #8b4513;
   cursor: pointer;
-  transition: all 0.3s;
+  font-weight: 500;
   margin-top: 1rem;
-}
-.reset-filters-btn:hover {
-  background: #f0f0f0;
-  color: #111;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f9f5f2;
+    border-color: #8b4513;
+  }
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    font-size: 1rem;
+    margin: 2rem 0 1rem 0;
+  }
 }
 
-/* Основной контент */
+.catalog-main {
+  min-height: 500px;
+}
+
 .products-stats {
+  font-size: 0.875rem;
   color: #666;
-  font-size: 0.95rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #f0f0f0;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
 }
 
 .catalog-product-card {
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-}
-.catalog-product-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+  }
 }
 
-/* Нет товаров */
 .no-products {
   text-align: center;
-  padding: 5rem 2rem;
-  color: #777;
-}
-.no-products-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-  opacity: 0.6;
+  padding: 3rem 1rem;
+  color: #666;
 }
 
-/* ====================== АДАПТИВ ====================== */
+.no-products-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.no-products h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.no-products p {
+  margin-bottom: 1.5rem;
+}
+
+/* Адаптивность */
 @media (max-width: 1024px) {
   .catalog-layout {
-    grid-template-columns: minmax(280px, 340px) 1fr;
+    grid-template-columns: 280px 1fr;
     gap: 1.5rem;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
   }
 }
 
 @media (max-width: 768px) {
-  .catalog-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .catalog-title {
-    font-size: 2rem;
-  }
-  .filter-toggle {
-    display: flex;
-  }
   .catalog-layout {
     grid-template-columns: 1fr;
   }
-  .filters-sidebar {
-    position: fixed;
-    top: 0;
-    left: -100%;
-    width: 85%;
-    height: 100vh;
-    padding: 1.5rem;
-    z-index: 1001;
-    border-radius: 0;
-    transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .filters-sidebar--open {
-    left: 0;
-  }
-  .filters-header {
-    display: flex;
-  }
-  .breadcrumbs,
-  .catalog-header {
-    position: sticky;
-    top: 0;
-    background: white;
-    z-index: 998;
+
+  .catalog-controls {
+    flex-direction: column;
+    align-items: stretch;
   }
 
+  .sort-buttons {
+    justify-content: center;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
 }
 
 @media (max-width: 480px) {
+  .catalog-container {
+    padding: 0 0.5rem;
+  }
+
   .catalog-title {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
   }
-  .products-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  .price-inputs {
+
+  .category-tabs {
     flex-direction: column;
   }
-  .category-tabs,
-  .sort-control .sort-buttons {
-    padding: 4px;
 
+  .products-grid {
+    grid-template-columns: 1fr;
   }
-  .category-tab,
-  .sort-btn {
-    padding: 10px 16px;
-    font-size: 14px;
+
+  .filters-sidebar {
+    padding: 0.75rem;
+  }
+
+  .filter-header {
+    padding: 0.75rem 0;
   }
 }
 </style>
