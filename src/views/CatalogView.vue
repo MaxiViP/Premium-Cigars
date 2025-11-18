@@ -1213,7 +1213,7 @@ onMounted(() => {
   height: fit-content;
   position: sticky;
   top: 2rem;
-  max-height: calc(100vh - 200px);
+  /* max-height: calc(100vh - 200px); */
   overflow-y: auto;
 
   /* Современный красивый скроллбар */
