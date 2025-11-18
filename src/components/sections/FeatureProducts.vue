@@ -231,14 +231,14 @@ onMounted(() => {
 
 @media (max-width: 768px) {
   .featured-products {
-    padding: 1.5rem 0;
+    padding:0 0 1.5rem;
   }
 
   .products-slider {
     width: 100%;
     /* max-width: 1300px; */
     margin: 0;
-    padding: 1rem 0 3rem;
+    padding: 1rem 0 1.5rem;
     position: relative;
   }
 

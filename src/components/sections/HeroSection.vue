@@ -81,16 +81,16 @@
 import SvgCigar from '@/components/ui/SvgCigar.vue'
 
 const cigars = [
-  { type: 1, top: '15%', left: '6%', rotation: '8deg', w: 140, h: 50 },
-  { type: 2, top: '65%', left: '82%', rotation: '-10deg', w: 120, h: 45 },
-  { type: 3, top: '75%', left: '14%', rotation: '5deg', w: 130, h: 48 },
+  { type: 1, top: '15%', left: '10%', rotation: '8deg', w: 140, h: 50 },
+  { type: 2, top: '80%', left: '80%', rotation: '-10deg', w: 120, h: 45 },
+  { type: 3, top: '85%', left: '7%', rotation: '5deg', w: 130, h: 48 },
   { type: 4, top: '28%', left: '87%', rotation: '-18deg', w: 110, h: 42 },
-  { type: 5, top: '42%', left: '20%', rotation: '20deg', w: 140, h: 50 },
-  { type: 6, top: '58%', left: '70%', rotation: '-12deg', w: 120, h: 45 },
+  { type: 5, top: '45%', left: '5%', rotation: '20deg', w: 140, h: 50 },
+  { type: 6, top: '60%', left: '76%', rotation: '-12deg', w: 120, h: 45 },
   { type: 7, top: '33%', left: '75%', rotation: '12deg', w: 130, h: 48 },
   { type: 8, top: '50%', left: '26%', rotation: '-16deg', w: 110, h: 42 },
-  { type: 9, top: '22%', left: '50%', rotation: '14deg', w: 130, h: 48 },
-  { type: 10, top: '70%', left: '36%', rotation: '-10deg', w: 110, h: 42 },
+  { type: 9, top: '9%', left: '50%', rotation: '14deg', w: 130, h: 48 },
+  { type: 10, top: '76%', left: '36%', rotation: '-10deg', w: 110, h: 42 },
 ]
 
 const smoke = [
@@ -105,8 +105,8 @@ const smoke = [
 
 <style scoped>
 .hero-section {
-  height: 60vh;
-  min-height: 720px;
+  height: 65vh;
+  min-height: 600px;
   position: relative;
   overflow: hidden;
   border-bottom: 25px;
@@ -194,12 +194,14 @@ const smoke = [
   color: white;
   /* max-width: 850px; */
   margin: 0 auto;
+  /* padding: 25px 0 0; */
   z-index: 3;
   position: relative;
 }
 
 .hero-title {
   font-size: 3.8rem;
+  margin-top: 2.4rem;
   margin-bottom: 1.4rem;
   font-weight: 800;
   line-height: 1.1;
@@ -300,6 +302,8 @@ const smoke = [
   }
 }
 .btn {
+  display: flex;
+  
   padding: 1rem 2.6rem;
   border-radius: 40px;
   font-weight: 600;
@@ -376,12 +380,34 @@ const smoke = [
     flex-direction: column;
     gap: 1rem;
   }
-  .floating-cigar {
-    display: none;
-  }
+  /* .floating-cigar {
+      display: none;
+    } */
 
   .hero-features {
     display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 1.7rem;
+    margin-bottom: 1rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .hero-section {
+    min-height: 500px;
+    border-radius: 0 50px 50px;
+  }
+
+  .btn {
+    padding: 8px;
+    font-weight: 200;
   }
 }
 </style>

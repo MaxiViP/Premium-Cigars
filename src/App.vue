@@ -12,12 +12,14 @@
 import AppHeader from '@/components/ui/AppHeader.vue'
 import AppFooter from '@/components/ui/AppFooter.vue'
 
+import { onMounted } from 'vue'
 
+onMounted(() => {
+  window.scrollTo(0, 0)
+})
 </script>
 
 <style lang="scss">
-
-
 #app {
   min-height: 100vh;
   display: flex;

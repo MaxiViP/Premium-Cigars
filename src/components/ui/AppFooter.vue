@@ -271,4 +271,17 @@ const scrollToTop = () => {
     margin-left: 1rem;
   }
 }
+
+@media (max-width: 480px) {
+  .app-footer {
+    border-radius: 50px 50px 0 0;
+    padding: 2rem 0;
+  }
+
+  .footer-content {
+    gap: 1rem;
+  }
+}
+
+
 </style>

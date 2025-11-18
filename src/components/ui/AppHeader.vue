@@ -180,7 +180,7 @@ const closeMobileMenu = () => {
   gap: 0.5rem;
   text-decoration: none;
   font-weight: 500;
-  padding: 0.8rem 1.2rem;
+  padding: 12.8px 19.2px;
   border-radius: 12px;
   position: relative;
   overflow: hidden;
@@ -342,6 +342,12 @@ const closeMobileMenu = () => {
   transform: translateX(10px);
 }
 
+  @media (max-width: 930px) {
+    .logo-subtitle {
+      display: none;
+    }
+  }
+
 /* Адаптивность */
 @media (max-width: 768px) {
   .nav-text {
@@ -376,6 +382,13 @@ const closeMobileMenu = () => {
   }
   .mobile-menu-content {
     padding: 1.5rem;
+  }
+
+  .nav-links {
+    gap: 0;
+  }
+  .nav-link {
+    padding: 12px;
   }
 }
 
