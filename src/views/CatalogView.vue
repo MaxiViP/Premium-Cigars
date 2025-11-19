@@ -1226,7 +1226,7 @@ onMounted(() => {
   top: 0;
   left: -100%;
   width: 400px;
-  max-height: 100vh; /* ограничиваем по высоте экрана */
+  max-height: 90vh; /* ограничиваем по высоте экрана */
   background: #fff;
   z-index: 9999;
   padding: 1.5rem;
@@ -1810,13 +1810,12 @@ onMounted(() => {
     display: flex;
   }
 
- .sort-buttons {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 колонки одинаковой ширины */
-  gap: 2px; /* расстояние между кнопками */
-  justify-items: stretch; /* кнопки растягиваются по ширине ячейки */
-}
-
+  .sort-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 колонки одинаковой ширины */
+    gap: 2px; /* расстояние между кнопками */
+    justify-items: stretch; /* кнопки растягиваются по ширине ячейки */
+  }
 
   .products-grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -1846,10 +1845,6 @@ onMounted(() => {
 
   .filter-header {
     padding: 0.75rem 0;
-  }
-
-    .sort-buttons {
-    grid-template-columns: 1fr; /* 1 колонка на очень маленьких экранах */
   }
 
   .catalog-controls {
