@@ -21,8 +21,13 @@
                 <div v-else class="out-of-stock-badge">Нет в наличии</div>
               </div>
               <div class="quick-actions">
-                <button class="qa-btn" @click.stop.prevent="toggleLike">❤</button>
-                <button class="qa-btn" @click.stop.prevent="shareProduct">⇄</button>
+                <button class="qa-btn" @click.stop.prevent="handleToggleLike(product.id)">
+                  ❤
+                </button>
+                <button class="qa-btn" @click.stop.prevent="handleShareProduct(product.id)">
+                  ⇄
+                </button>
+ 
               </div>
             </div>
 
@@ -150,9 +155,9 @@
               :key="relatedProduct.id"
               :product="relatedProduct"
               class="related-product-card"
-              @toggle-like="toggleLike"
-              @share-product="shareProduct"
-              @add-to-cart="addRelatedToCart"
+              @toggle-like="handleToggleLike"
+              @share-product="handleShareProduct"
+              @add-to-cart="handleAddRelatedToCart"
             />
           </div>
         </div>
@@ -187,6 +192,19 @@ function shareProduct(productId: number) {
 
 function addRelatedToCart(productId: number) {
   console.log('add to cart', productId)
+}
+
+// В секции script
+const handleToggleLike = (productId: number) => {
+  toggleLike(productId)
+}
+
+const handleShareProduct = (productId: number) => {
+  shareProduct(productId)
+}
+
+const handleAddRelatedToCart = (productId: number) => {
+  addRelatedToCart(productId)
 }
 
 const route = useRoute()
