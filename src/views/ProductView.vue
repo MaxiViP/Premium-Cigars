@@ -15,6 +15,17 @@
         <div class="product-main">
           <!-- Изображения -->
           <div class="product-images">
+            <div class="product-main_action">
+              <div class="product-action">
+                <div v-if="product.inStock" class="in-stock-badge">В наличии</div>
+                <div v-else class="out-of-stock-badge">Нет в наличии</div>
+              </div>
+              <div class="quick-actions">
+                <button class="qa-btn" @click.stop.prevent="toggleLike">❤</button>
+                <button class="qa-btn" @click.stop.prevent="shareProduct">⇄</button>
+              </div>
+            </div>
+
             <div class="main-image">
               <img
                 :src="getImageUrl(product.images[0])"
@@ -22,6 +33,7 @@
                 class="product-image"
               />
             </div>
+
             <div v-if="product.images.length > 1" class="image-thumbnails">
               <img
                 v-for="(image, index) in product.images"
@@ -48,23 +60,19 @@
 
             <div class="product-price-section">
               <div class="price-item">
-                <span class="price-label">Цена за 1 шт:</span>
+                <span class="price-label">За 1 шт:</span>
                 <span class="product-price">{{ formatPrice(product.pricePerUnit) }}</span>
               </div>
               <div v-if="product.pricePerBox" class="price-item">
-                <span class="price-label">Цена за коробку:</span>
+                <span class="price-label">За коробку:</span>
                 <span class="product-price">{{ formatPrice(product.pricePerBox) }}</span>
               </div>
-
-              <div v-if="product.inStock" class="in-stock-badge">В наличии</div>
-              <div v-else class="out-of-stock-badge">Нет в наличии</div>
             </div>
 
             <div class="product-actions">
               <button class="add-to-cart-btn" :disabled="!product.inStock" @click="addToCart">
                 {{ product.inStock ? 'Добавить в корзину' : 'Нет в наличии' }}
               </button>
-              <button class="wishlist-btn">♡ В избранное</button>
             </div>
 
             <div class="product-description">
@@ -276,6 +284,12 @@ onMounted(() => {
   margin-bottom: 3rem;
 }
 
+.product-main_action {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
 /* Изображения */
 .product-images {
   display: flex;
@@ -397,10 +411,11 @@ onMounted(() => {
 .in-stock-badge {
   background: #10b981;
   color: white;
-  padding: 0.5rem 1rem;
+  padding: 6px 12px;
+  width: max-content;
   border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .out-of-stock-badge {
@@ -411,6 +426,36 @@ onMounted(() => {
   font-size: 0.9rem;
   font-weight: 500;
 }
+
+.quick-actions {
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.qa-btn {
+  background: #f7f5f5;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.16);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.qa-btn:hover {
+  background: #f5f5f5;
+  transform: scale(1.08);
+}
+
 
 .product-actions {
   display: flex;
@@ -616,8 +661,9 @@ onMounted(() => {
 /* Адаптивность */
 @media (max-width: 768px) {
   .product-main {
-    grid-template-columns: 1fr;
-    gap: 2rem;
+    grid-template-columns: 0.4fr 0.8fr;
+    gap: 3rem;
+    margin-bottom: 0;
   }
 
   .product-details {
@@ -636,10 +682,12 @@ onMounted(() => {
   .product-actions {
     flex-direction: column;
   }
-/*
-  .main-image {
-    height: 400px;
-  } */
+
+  .breadcrumbs {
+    padding: 1rem 0 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 0;
+  }
 
   .related-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -653,6 +701,19 @@ onMounted(() => {
 
   .product-title {
     font-size: 1.75rem;
+  }
+
+  .product-main {
+    grid-template-columns: 1fr  ;
+    gap: 2px;
+    margin-bottom: 0;
+  }
+
+  .product-info {
+  }
+
+  .price-item {
+    flex-wrap: wrap;
   }
 
   /* .main-image {

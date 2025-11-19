@@ -85,7 +85,7 @@
       "pricePerBox": 170000,
       "images": ["sigary-Partagas-Linea-Maestra_1.webp"],
       "category": "cigars",
-      "inStock": true,
+      "inStock": false,
       "rating": 4.7
     },
     {
