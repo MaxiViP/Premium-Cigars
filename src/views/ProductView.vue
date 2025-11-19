@@ -174,6 +174,18 @@ import ProductCard from '@/components/ui/ProductCard.vue'
 import { formatPrice } from '@/utils/formatters'
 import type { Product } from '@/types/Product'
 
+
+// Обработчики действий
+function toggleLike(productId: number) {
+  console.log('toggle like', productId)
+}
+
+function shareProduct(productId: number) {
+  console.log('share product', productId)
+}
+
+ 
+
 const route = useRoute()
 
 const productsStore = useProductsStore()
