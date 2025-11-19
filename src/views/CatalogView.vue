@@ -63,11 +63,10 @@
 
         <!-- Боковая панель фильтров -->
         <aside class="filters-sidebar" :class="{ 'filters-sidebar--open': showFilters }">
-          <div class="filters-header">
-            <h3>Фильтры</h3>
-            <button class="close-filters" @click="closeFilters">×</button>
-          </div>
-
+          <!-- Крестик закрытия -->
+          <button class="filters-sidebar__close" @click="closeFilters" aria-label="Закрыть фильтры">
+            ×
+          </button>
           <!-- Кнопки управления группами -->
           <div v-if="activeFiltersCount > 0" class="filter-actions">
             <button @click="openAllGroups" class="filter-action-btn">Развернуть все</button>
@@ -1054,10 +1053,6 @@ watch(
 onMounted(() => {
   document.removeEventListener('keydown', handleEscape)
 })
-
-// onMounted(() => {
-//   resetFilters()
-// })
 </script>
 
 <style scoped>
@@ -1098,7 +1093,7 @@ onMounted(() => {
 }
 
 .catalog-header {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .catalog-title {
@@ -1110,8 +1105,9 @@ onMounted(() => {
 
 .category-tabs {
   display: flex;
+  justify-content: right;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 5px;
 }
 
 .category-tab {
@@ -1137,7 +1133,7 @@ onMounted(() => {
 
 .catalog-controls {
   display: flex;
-  justify-content: space-between;
+  justify-content: right;
   align-items: center;
   gap: 1rem;
 }
@@ -1147,12 +1143,15 @@ onMounted(() => {
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  background: #fff;
+  background: var(--text-super-light);
   border: 1px solid #e5e5e5;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
   transition: all 0.2s ease;
+  height: 40px; /* Фиксированная высота */
+  min-height: 40px; /* Минимальная высота */
+  box-sizing: border-box; /* Чтобы padding не увеличивал высоту */
 
   &:hover {
     border-color: #8b4513;
@@ -1168,8 +1167,8 @@ onMounted(() => {
 
 .sort-buttons {
   display: flex;
-  background: #fff;
-  border: 1px solid #e5e5e5;
+  background: var(--text-super-light);
+  border: 1px solid #1a1818;
   border-radius: 8px;
   overflow: hidden;
 }
@@ -1177,7 +1176,7 @@ onMounted(() => {
 .sort-btn {
   padding: 0.75rem 1rem;
   background: none;
-  border: none;
+  border: 1px solid var(--text-light);
   cursor: pointer;
   font-size: 0.875rem;
   transition: all 0.2s ease;
@@ -1193,7 +1192,8 @@ onMounted(() => {
 }
 
 .catalog-layout {
-  display: grid;
+  /* display: grid; */
+  justify-content: right;
   grid-template-columns: 300px 1fr;
   gap: 2rem;
   position: relative;
@@ -1222,16 +1222,20 @@ onMounted(() => {
 }
 
 .filters-sidebar {
+  position: fixed;
+  top: 0;
+  left: -100%;
+  width: 400px;
+  max-height: 100vh; /* ограничиваем по высоте экрана */
   background: #fff;
-  border-radius: 12px;
+  z-index: 9999;
   padding: 1.5rem;
-  height: fit-content;
-  position: sticky;
-  top: 2rem;
-  /* max-height: calc(100vh - 200px); */
-  overflow-y: auto;
+  border: 1px solid var(--dark-bg);
+  border-radius: 0 0 20px;
+  overflow-y: auto; /* скролл если контент выше max-height */
 
-  /* Современный красивый скроллбар */
+  transition: left 0.35s cubic-bezier(0.32, 0, 0.07, 1);
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
   scrollbar-width: thin;
   scrollbar-color: #c1c1c1 transparent;
 
@@ -1254,36 +1258,44 @@ onMounted(() => {
     background: #a1a1a1;
   }
 
-  /* Плавная прокрутка */
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 
-  /* На мобильных — занимает всю высоту экрана */
-  @media (max-width: 768px) {
-    position: fixed;
-    top: 0;
-    left: -100%; /* Скрываем за левым краем */
-    width: 65%;
-    /* max-width: 400px; */
-    height: 100vh;
-    height: 100dvh;
-    z-index: 9999;
-    border-radius: 0;
-    padding: 1rem;
-    transition: left 0.35s cubic-bezier(0.32, 0, 0.07, 1);
-    overflow-y: auto;
-    max-height: none;
-    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
-
-    &.filters-sidebar--open {
-      left: 0;
-    }
-
-    -webkit-overflow-scrolling: touch;
+  &.filters-sidebar--open {
+    left: 0;
   }
 
-  /* Для планшетов можно сделать панель поуже */
-  @media (max-width: 768px) and (min-width: 481px) {
-    width: 400px;
+  /* Крестик закрытия */
+  .filters-sidebar__close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: #666;
+    transition:
+      color 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .filters-sidebar__close:hover {
+    color: #000;
+    transform: rotate(90deg);
+  }
+
+  /* Адаптивность для мобильных */
+  @media (max-width: 768px) {
+    width: 65%;
+  }
+
+  @media (max-width: 480px) {
+    width: 100%;
+    padding: 1rem;
   }
 }
 
@@ -1704,7 +1716,7 @@ onMounted(() => {
   width: 100%;
   padding: 0.75rem;
   background: none;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--border);
   border-radius: 8px;
   color: #8b4513;
   cursor: pointer;
@@ -1729,6 +1741,8 @@ onMounted(() => {
 }
 
 .products-stats {
+  display: flex;
+  justify-content: right;
   font-size: 0.875rem;
   color: #666;
   margin-bottom: 1rem;
@@ -1792,9 +1806,17 @@ onMounted(() => {
     align-items: stretch;
   }
 
-  .sort-buttons {
-    justify-content: center;
+  .filter-toggle {
+    display: flex;
   }
+
+ .sort-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 колонки одинаковой ширины */
+  gap: 2px; /* расстояние между кнопками */
+  justify-items: stretch; /* кнопки растягиваются по ширине ячейки */
+}
+
 
   .products-grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -1824,6 +1846,14 @@ onMounted(() => {
 
   .filter-header {
     padding: 0.75rem 0;
+  }
+
+    .sort-buttons {
+    grid-template-columns: 1fr; /* 1 колонка на очень маленьких экранах */
+  }
+
+  .catalog-controls {
+    justify-content: center;
   }
 }
 </style>

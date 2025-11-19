@@ -121,6 +121,7 @@ const closeMobileMenu = () => {
   padding: 0 10px;
   align-items: center;
   position: relative;
+  gap: 2px;
 }
 
 /* Логотип */
@@ -220,7 +221,7 @@ const closeMobileMenu = () => {
 
 .nav-link:hover,
 .nav-link.router-link-active {
-  background: rgba(212, 175, 55, 0.15);
+  /* background: rgba(218, 172, 22, 0.15); */
   color: var(--gold-color);
   transform: translateY(-2px);
   box-shadow:

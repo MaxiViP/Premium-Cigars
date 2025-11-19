@@ -303,7 +303,7 @@ function goToProduct() {
   transition: all 0.2s ease;
 }
 .add-cart-btn:hover {
-  background: #fff;
+  background: var(--secondary-color);
   color: #000;
   transform: translateY(-1px);
 }
