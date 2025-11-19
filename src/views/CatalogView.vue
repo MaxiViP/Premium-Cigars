@@ -587,7 +587,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useProductsStore } from '@/stores/products'
 import ProductCard from '@/components/ui/ProductCard.vue'
 import { formatPrice } from '@/utils/formatters'
@@ -995,10 +995,9 @@ const accessoryTypeLabel = (type: string) => {
 }
 
 const toggleFilters = (e: MouseEvent) => {
-  e.stopPropagation() // останавливаем всплытие клика
+  e.stopPropagation()
   showFilters.value = !showFilters.value
 
-  // Блокируем/разблокируем скролл страницы на мобильных
   if (window.innerWidth <= 768) {
     document.body.style.overflow = showFilters.value ? 'hidden' : ''
   }
@@ -1006,23 +1005,39 @@ const toggleFilters = (e: MouseEvent) => {
 
 const closeFilters = () => {
   showFilters.value = false
-  // Восстанавливаем прокрутку body
   if (window.innerWidth <= 768) {
     document.body.style.overflow = ''
   }
 }
-
-// Закрытие по нажатию Escape
 const handleEscape = (event: KeyboardEvent) => {
-  if (event.key === 'Escape' && showFilters.value) {
+  if (event.key === 'Escape' && showFilters.value) closeFilters()
+}
+
+const handleClickOutside = (event: Event) => {
+  if (!showFilters.value) return
+
+  const sidebarEl = document.querySelector('.filters-sidebar')
+  if (!sidebarEl) return
+
+  const target = event.target as Node | null
+  // если клик/тап не внутри сайдбара — закрыть
+  if (target && !sidebarEl.contains(target)) {
     closeFilters()
   }
 }
 
-// Добавляем обработчик Escape
+// добавляем слушатели при монтировании и удаляем при размонтировании
 onMounted(() => {
   document.addEventListener('keydown', handleEscape)
+  document.addEventListener('click', handleClickOutside)
+  document.addEventListener('touchstart', handleClickOutside)
   resetFilters()
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleEscape)
+  document.removeEventListener('click', handleClickOutside)
+  document.removeEventListener('touchstart', handleClickOutside)
 })
 
 // Инициализация при смене категории
@@ -1298,6 +1313,7 @@ onMounted(() => {
 }
 
 .close-filters {
+  display: none;
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -1310,6 +1326,7 @@ onMounted(() => {
   }
 
   @media (max-width: 768px) {
+    display: flex;
     font-size: 2rem;
     width: 44px;
     height: 44px;
@@ -1533,8 +1550,7 @@ onMounted(() => {
   }
 
   @media (max-width: 768px) {
-    max-height: 200px;
-    padding: 1rem 0;
+    /* max-height: 200px; */
   }
 
   @media (max-width: 480px) {
@@ -1772,7 +1788,7 @@ onMounted(() => {
   }
 
   .catalog-controls {
-    flex-direction: column;
+    flex-direction: row;
     align-items: stretch;
   }
 

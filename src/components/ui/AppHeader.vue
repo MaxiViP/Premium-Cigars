@@ -198,7 +198,7 @@ const closeMobileMenu = () => {
   color: var(--white);
   text-shadow:
     0 0 3px rgba(0, 0, 0, 0.8),
-    0 0 5px rgba(0, 0, 0, 0.6);
+    0 2px 5px rgba(0, 0, 0, 0.6);
 }
 
 .nav-link .nav-text::after {
@@ -342,11 +342,11 @@ const closeMobileMenu = () => {
   transform: translateX(10px);
 }
 
-  @media (max-width: 930px) {
-    .logo-subtitle {
-      display: none;
-    }
+@media (max-width: 930px) {
+  .logo-subtitle {
+    display: none;
   }
+}
 
 /* Адаптивность */
 @media (max-width: 768px) {
@@ -357,9 +357,9 @@ const closeMobileMenu = () => {
     display: flex;
   }
 
-   .logo-text {
+  .logo-text {
     display: none;
-   }
+  }
 
   .logo-text h1 {
     font-size: 1.4rem;
@@ -367,7 +367,6 @@ const closeMobileMenu = () => {
   .logo-subtitle {
     font-size: 0.65rem;
   }
-
 }
 
 @media (max-width: 480px) {

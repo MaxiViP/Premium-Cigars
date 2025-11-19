@@ -1,26 +1,6 @@
 <template>
   <section class="hero-section">
     <div class="hero-background">
-      <!-- Сигары (генерация через массив) -->
-      <div
-        v-for="(cigar, i) in cigars"
-        :key="i"
-        class="floating-cigar"
-        :class="`cigar-${i + 1}`"
-        :style="{ top: cigar.top, left: cigar.left, '--rotation': cigar.rotation }"
-      >
-        <SvgCigar :type="cigar.type" :width="cigar.w" :height="cigar.h" />
-      </div>
-
-      <!-- Мягкий дым (генерация через массив) -->
-      <div
-        v-for="(item, i) in smoke"
-        :key="i"
-        class="smoke"
-        :class="`smoke-${i + 1}`"
-        :style="{ top: item.top, left: item.left, width: item.size, height: item.size }"
-      ></div>
-
       <div class="container">
         <div class="hero-content">
           <h1 class="hero-title">Элитные сигары премиум-класса</h1>
@@ -77,113 +57,63 @@
   </section>
 </template>
 
-<script setup lang="ts">
-import SvgCigar from '@/components/ui/SvgCigar.vue'
-
-const cigars = [
-  { type: 1, top: '15%', left: '10%', rotation: '8deg', w: 140, h: 50 },
-  { type: 2, top: '80%', left: '80%', rotation: '-10deg', w: 120, h: 45 },
-  { type: 3, top: '85%', left: '7%', rotation: '5deg', w: 130, h: 48 },
-  { type: 4, top: '28%', left: '87%', rotation: '-18deg', w: 110, h: 42 },
-  { type: 5, top: '45%', left: '5%', rotation: '20deg', w: 140, h: 50 },
-  { type: 6, top: '60%', left: '76%', rotation: '-12deg', w: 120, h: 45 },
-  { type: 7, top: '33%', left: '75%', rotation: '12deg', w: 130, h: 48 },
-  { type: 8, top: '50%', left: '26%', rotation: '-16deg', w: 110, h: 42 },
-  { type: 9, top: '9%', left: '50%', rotation: '14deg', w: 130, h: 48 },
-  { type: 10, top: '76%', left: '36%', rotation: '-10deg', w: 110, h: 42 },
-]
-
-const smoke = [
-  { top: '7%', left: '10%', size: '180px' },
-  { top: '60%', left: '75%', size: '220px' },
-  { top: '80%', left: '32%', size: '140px' },
-  { top: '36%', left: '20%', size: '160px' },
-  { top: '55%', left: '62%', size: '190px' },
-  { top: '28%', left: '57%', size: '130px' },
-]
-</script>
+<script setup lang="ts"></script>
 
 <style scoped>
 .hero-section {
-  height: 65vh;
+  height: 60vh;
   min-height: 600px;
   position: relative;
   overflow: hidden;
   border-bottom: 25px;
-  border-radius: 0 25px 25px;
 }
 
-/* Новый премиальный фон */
 .hero-background {
-  background: linear-gradient(145deg, #1a1a1a 0%, #3c3c3c 40%, #1a1a1a 85%);
   position: relative;
-  height: 100%;
+  height: 60vh;
   display: flex;
   align-items: center;
+  justify-content: center;
+  border-radius: 0 25px 25px;
+  background-image: url('/hero.jpg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+
+  overflow: hidden;
 }
 
 .hero-background::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 40%, rgba(212, 175, 55, 0.25), transparent 70%);
-  opacity: 0.6;
-}
+  pointer-events: none;
 
-/* =======================================
-   SIGARS
-======================================= */
-.floating-cigar {
-  position: absolute;
-  animation: float 9s ease-in-out infinite;
-  z-index: 2;
-}
+  background:
+    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.55) 100%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0) 25%, rgba(0, 0, 0, 0));
 
-@keyframes float {
-  0% {
-    transform: translateY(0px) rotate(var(--rotation));
-  }
-  50% {
-    transform: translateY(-25px) rotate(calc(var(--rotation) + 4deg));
-  }
-  100% {
-    transform: translateY(0px) rotate(var(--rotation));
-  }
-}
+  backdrop-filter: blur(-4px);
 
-.floating-cigar:hover {
-  transform: scale(1.15);
-  filter: drop-shadow(0 6px 18px rgba(212, 175, 55, 0.55));
-}
-
-/* =======================================
-   SMOKE
-======================================= */
-.smoke {
-  position: absolute;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0) 70%);
-  animation: smoke 14s linear infinite;
-  filter: blur(14px);
   z-index: 1;
 }
 
-@keyframes smoke {
-  0% {
-    transform: translateY(0) scale(0.5);
-    opacity: 0;
-  }
-  20% {
-    opacity: 0.6;
-  }
-  60% {
-    transform: translateY(-90px) scale(1.2);
-    opacity: 0.35;
-  }
-  100% {
-    transform: translateY(-180px) scale(1.8);
-    opacity: 0;
-  }
+.hero-background::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  background: radial-gradient(circle at 50% 40%, rgba(212, 175, 55, 0.18), transparent 60%);
+
+  z-index: 2;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  color: #fff;
 }
 
 /* =======================================
@@ -201,7 +131,7 @@ const smoke = [
 
 .hero-title {
   font-size: 3.8rem;
-  margin-top: 2.4rem;
+  margin-top: 1.5rem;
   margin-bottom: 1.4rem;
   font-weight: 800;
   line-height: 1.1;
@@ -227,6 +157,10 @@ const smoke = [
   font-size: 1.4rem;
   opacity: 0.85;
   margin-bottom: 2.8rem;
+  color: var(--dark-bg);
+  text-shadow:
+    0 0 1px rgba(0, 0, 0, 0.8),
+    0 0 5px rgba(0, 0, 0, 0.6);
 }
 
 /* =======================================
@@ -262,10 +196,10 @@ const smoke = [
 
 .telegram-text {
   position: absolute;
-  left: 50px;
+  left: 25px;
   font-weight: 600;
-  font-size: 15px;
-  color: white;
+  font-size: 1.15rem;
+  color: rgb(17, 17, 17);
   white-space: nowrap;
   opacity: 0;
   transform: translateX(-10px);
@@ -319,20 +253,21 @@ const smoke = [
 }
 
 .btn-primary:hover {
-  background: transparent;
-  color: #d4af37;
+  background: var(--gold-color);
+  color: var(--dark-bg);
   border: 2px solid #d4af37;
   transform: translateY(-3px);
 }
 
 .btn-secondary {
   background: transparent;
-  border: 2px solid white;
-  color: white;
+  backdrop-filter: blur(2px);
+  border: 2px solid rgb(231, 229, 224);
+  color: rgb(12, 12, 12);
 }
 
 .btn-secondary:hover {
-  background: white;
+  background: var( --gold-color);
   color: #111;
   transform: translateY(-3px);
 }
@@ -350,6 +285,7 @@ const smoke = [
   display: flex;
   align-items: center;
   gap: 0.7rem;
+  color: var(--text-dark);
   background: rgba(255, 255, 255, 0.12);
   padding: 0.7rem 1.3rem;
   border-radius: 24px;
@@ -369,9 +305,9 @@ const smoke = [
     margin-bottom: 0;
   }
 
-  .hero-section {
-    height: 40vh;
-  }
+  /* .hero-section {
+    height: 60vh;
+  } */
 
   .hero-title {
     font-size: 2.7rem;
@@ -391,8 +327,13 @@ const smoke = [
 
 @media (max-width: 480px) {
   .hero-title {
-    font-size: 1.7rem;
+    font-size: 2.7rem;
     margin-bottom: 1rem;
+    margin-top: 0;
+  }
+  .hero-background {
+    height: 50vh;
+    border-radius: 50px;
   }
 
   .hero-subtitle {
@@ -400,10 +341,10 @@ const smoke = [
     margin-bottom: 1rem;
   }
 
-  .hero-section {
+  /* .hero-section {
     min-height: 500px;
-    border-radius: 0 50px 50px;
-  }
+
+  } */
 
   .btn {
     padding: 8px;

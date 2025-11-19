@@ -535,7 +535,7 @@ onMounted(() => {
 .specs-grid {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  /* gap: 0.75rem; */
 }
 
 .spec-item {
