@@ -83,31 +83,31 @@ const props = withDefaults(defineProps<Props>(), {
 const router = useRouter()
 
 const emit = defineEmits<{
-  (e: 'toggle-like', id: number | undefined): void
-  (e: 'share-product', id: number | undefined): void
-  (e: 'add-to-cart', id: number | undefined): void
+  (e: 'toggle-like', id: number): void
+  (e: 'share-product', id: number): void
+  (e: 'add-to-cart', id: number): void
 }>()
 
+function toggleLike() {
+  if (!props.product?.id) return
+  emit('toggle-like', props.product.id)
+}
+
+function shareProduct() {
+  if (!props.product?.id) return
+  emit('share-product', props.product.id)
+}
+
+function addToCart() {
+  if (!props.product?.id) return
+  emit('add-to-cart', props.product.id)
+}
 
 function goToProduct() {
   if (!props.product || !('id' in props.product)) return
   router.push(`/product/${(props.product as Product).id}`)
 }
 
-function toggleLike() {
-  console.log('toggle like', props.product?.id)
-  emit('toggle-like', props.product?.id)
-}
-
-function shareProduct() {
-  console.log('share product', props.product?.id)
-  emit('share-product', props.product?.id)
-}
-
-function addToCart() {
-  console.log('add to cart', props.product?.id)
-  emit('add-to-cart', props.product?.id)
-}
 
 </script>
 
