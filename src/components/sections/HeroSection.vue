@@ -327,12 +327,12 @@
 
 @media (max-width: 480px) {
   .hero-title {
-    font-size: 2.7rem;
+    font-size: 2rem;
     margin-bottom: 1rem;
     margin-top: 0;
   }
   .hero-background {
-    height: 50vh;
+    /* height: 50vh; */
     border-radius: 50px;
   }
 
