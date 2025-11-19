@@ -150,6 +150,9 @@
               :key="relatedProduct.id"
               :product="relatedProduct"
               class="related-product-card"
+              @toggle-like="toggleLike"
+              @share-product="shareProduct"
+              @add-to-cart="addRelatedToCart"
             />
           </div>
         </div>
@@ -174,8 +177,6 @@ import ProductCard from '@/components/ui/ProductCard.vue'
 import { formatPrice } from '@/utils/formatters'
 import type { Product } from '@/types/Product'
 
-
-// Обработчики действий
 function toggleLike(productId: number) {
   console.log('toggle like', productId)
 }
@@ -184,7 +185,9 @@ function shareProduct(productId: number) {
   console.log('share product', productId)
 }
 
- 
+function addRelatedToCart(productId: number) {
+  console.log('add to cart', productId)
+}
 
 const route = useRoute()
 
@@ -468,7 +471,6 @@ onMounted(() => {
   transform: scale(1.08);
 }
 
-
 .product-actions {
   display: flex;
   gap: 1rem;
@@ -716,7 +718,7 @@ onMounted(() => {
   }
 
   .product-main {
-    grid-template-columns: 1fr  ;
+    grid-template-columns: 1fr;
     gap: 2px;
     margin-bottom: 0;
   }

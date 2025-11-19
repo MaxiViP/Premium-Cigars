@@ -69,6 +69,8 @@ import type { Product, Accessory } from '@/types/Product'
 import { formatPrice } from '@/utils/formatters'
 import ProductImage from './ProductImage.vue'
 
+
+
 interface Props {
   product: Product | Accessory
   catalogView?: boolean
@@ -80,6 +82,13 @@ const props = withDefaults(defineProps<Props>(), {
 
 const router = useRouter()
 
+const emit = defineEmits<{
+  (e: 'toggle-like', id: number | undefined): void
+  (e: 'share-product', id: number | undefined): void
+  (e: 'add-to-cart', id: number | undefined): void
+}>()
+
+
 function goToProduct() {
   if (!props.product || !('id' in props.product)) return
   router.push(`/product/${(props.product as Product).id}`)
@@ -87,13 +96,19 @@ function goToProduct() {
 
 function toggleLike() {
   console.log('toggle like', props.product?.id)
+  emit('toggle-like', props.product?.id)
 }
+
 function shareProduct() {
   console.log('share product', props.product?.id)
+  emit('share-product', props.product?.id)
 }
+
 function addToCart() {
   console.log('add to cart', props.product?.id)
+  emit('add-to-cart', props.product?.id)
 }
+
 </script>
 
 <style scoped>
