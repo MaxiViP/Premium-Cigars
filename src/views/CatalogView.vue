@@ -1853,7 +1853,7 @@ onMounted(() => {
   }
 
   .catalog-controls {
-    justify-content: center;
+    justify-content: justify-content;
   }
 }
 </style>
