@@ -574,7 +574,7 @@
           </div>
 
           <div v-if="filteredProducts.length === 0" class="no-products">
-            <div class="no-products-icon">🚬</div>
+            <div class="no-products-icon"></div>
             <h3>Товары не найдены</h3>
             <p>Попробуйте изменить параметры фильтрации</p>
             <button class="reset-filters-btn" @click="resetFilters">Сбросить фильтры</button>
@@ -950,7 +950,7 @@ const removeFilter = (key: string, value: string) => {
     maxPrice.value = availableMaxPrice.value
   } else if (key === 'length') {
     minLength.value = availableMinLength.value
-    maxLength.value = availableMaxLength.value
+    maxLength.value = availableMaxRingGauge.value
   } else if (key === 'ringGauge') {
     minRingGauge.value = availableMinRingGauge.value
     maxRingGauge.value = availableMaxRingGauge.value
@@ -969,7 +969,8 @@ const removeFilter = (key: string, value: string) => {
       flavorNote: selectedFlavorNotes,
     }
 
-    if ((map as any)[key]) {
+    // Type guard для проверки ключа
+    if (key in map) {
       const k = key as keyof FilterMap
       map[k].value = map[k].value.filter((v) => v !== value)
     }
@@ -1107,7 +1108,7 @@ onMounted(() => {
   display: flex;
   justify-content: right;
   gap: 1rem;
-  margin-bottom: 5px;
+  margin-bottom: 15px;
 }
 
 .category-tab {
@@ -1767,12 +1768,17 @@ onMounted(() => {
   padding: 3rem 1rem;
   color: #666;
 }
-
 .no-products-icon {
+  background-image: url('/images/cigars_svg/cigar3.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
   font-size: 3rem;
   margin-bottom: 1rem;
+  width: 100px; /* или нужный размер */
+  height: 100px; /* или нужный размер */
+  display: inline-block; /* или block/flex в зависимости от контекста */
 }
-
 .no-products h3 {
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
@@ -1849,6 +1855,7 @@ onMounted(() => {
 
   .catalog-controls {
     justify-content: justify-content;
+    flex-direction: column;
   }
 }
 </style>

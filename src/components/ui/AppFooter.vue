@@ -117,7 +117,7 @@ const scrollToTop = () => {
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 3rem;
   margin-bottom: 3rem;
-  margin-left: 3rem;
+  margin-left: 0;
 }
 
 /* Заголовки секций */
@@ -268,7 +268,7 @@ const scrollToTop = () => {
   }
 
   .footer-content {
-    margin-left: 1rem;
+    margin-left: 0;
   }
 }
 

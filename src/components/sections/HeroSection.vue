@@ -62,7 +62,7 @@
 <style scoped>
 .hero-section {
   height: 60vh;
-  min-height: 600px;
+  /* min-height: 600px; */
   position: relative;
   overflow: hidden;
   border-bottom: 25px;
@@ -170,7 +170,7 @@
   display: flex;
   justify-content: center;
   gap: 1.4rem;
-  margin-bottom: 3.5rem;
+  margin-bottom: 25px;
 }
 
 .telegram-button {
@@ -267,7 +267,7 @@
 }
 
 .btn-secondary:hover {
-  background: var( --gold-color);
+  background: var(--gold-color);
   color: #111;
   transform: translateY(-3px);
 }
@@ -284,7 +284,7 @@
 .feature {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
+  gap: 0;
   color: var(--text-dark);
   background: rgba(255, 255, 255, 0.12);
   padding: 0.7rem 1.3rem;
@@ -305,9 +305,14 @@
     margin-bottom: 0;
   }
 
-  /* .hero-section {
-    height: 60vh;
-  } */
+  .hero-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .feature {
+    padding: 10px;
+  }
 
   .hero-title {
     font-size: 2.7rem;
@@ -316,9 +321,6 @@
     flex-direction: column;
     gap: 1rem;
   }
-  /* .floating-cigar {
-      display: none;
-    } */
 
   .hero-features {
     display: none;
@@ -332,19 +334,12 @@
     margin-top: 0;
   }
   .hero-background {
-    /* height: 50vh; */
     border-radius: 50px;
   }
 
   .hero-subtitle {
-    font-size: 1rem;
     margin-bottom: 1rem;
   }
-
-  /* .hero-section {
-    min-height: 500px;
-
-  } */
 
   .btn {
     padding: 8px;
