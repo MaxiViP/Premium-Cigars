@@ -11,6 +11,32 @@ export interface BaseProduct {
   inStock: boolean
   rating: number
   description: string
+  country: string
+  format: string
+  strength: 'Легкая' | 'Средняя' | 'Полная' | 'Средняя-Полная' | 'Мягкая-Средняя'
+  smokingTime:
+    | 'до 15 минут'
+    | 'до 20 минут'
+    | 'до 30 минут'
+    | 'до 45 минут'
+    | 'до 60 минут'
+    | 'до 75 минут'
+    | '60-80 минут'
+    | '60-90 минут'
+    | '90+ минут'
+  flavorFamily:
+    | 'Древесные'
+    | 'Пряные'
+    | 'Цитрусовые'
+    | 'Цветочные'
+    | 'Ореховые'
+    | 'Фруктовые'
+    | 'Землистые'
+    | 'Сладкие'
+    | 'Сливочные'
+    | 'Кофейные'
+  flavorNotes: string[]
+  size: string
 }
 
 /** Сигары — все поля, которые у тебя были */
@@ -51,6 +77,8 @@ export interface Accessory extends BaseProduct {
   category: 'accessories'
   type: 'Cutter' | 'Lighter' | 'Humidor' | 'Ashtray' | 'Case'
   material: string
+  ringGauge: number
+  length: number
 }
 
 /** Главный тип — любой товар */

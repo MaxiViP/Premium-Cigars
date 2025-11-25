@@ -4,14 +4,16 @@ import axios from '@/plugins/axios'
 import router from '@/router'
 
 interface CartItem {
-  product: string | {
-    _id?: string
-    id?: number
-    name: string
-    price: number
-    image?: string
-    title?: string
-  }
+  product:
+    | string
+    | {
+        _id?: string
+        id?: number
+        name: string
+        price: number
+        image?: string
+        title?: string
+      }
   qty: number
 }
 
@@ -26,6 +28,17 @@ interface User {
   favorites: string[]
   cart: CartItem[]
   createdAt: string
+}
+
+// Тип для ошибок Axios
+interface AxiosError {
+  response?: {
+    data?: {
+      error?: string
+      message?: string
+    }
+  }
+  message: string
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -60,7 +73,8 @@ export const useAuthStore = defineStore('auth', {
         const res = await axios.get('/user/me')
         this.user = res.data.user || res.data
         return this.user
-      } catch (err: any) {
+      } catch (error) {
+        const err = error as AxiosError
         console.error('fetchMe error:', err.response?.data || err.message)
         this.logout()
         throw err
@@ -88,7 +102,7 @@ export const useAuthStore = defineStore('auth', {
       await axios.post(`/user/favorites/${idStr}`)
 
       if (this.user && !this.user.favorites.includes(idStr)) {
-        this.user.favorites.push(idStr)  // сохраняем как string
+        this.user.favorites.push(idStr) // сохраняем как string
       }
     },
 
@@ -97,14 +111,14 @@ export const useAuthStore = defineStore('auth', {
       await axios.delete(`/user/favorites/${idStr}`)
 
       if (this.user) {
-        this.user.favorites = this.user.favorites.filter(f => String(f) !== idStr)
+        this.user.favorites = this.user.favorites.filter((f) => String(f) !== idStr)
       }
     },
 
     async addToCart(productId: string | number, qty: number = 1) {
       const idStr = String(productId)
       await axios.post('/user/cart', { productId: idStr, qty })
-      await this.fetchMe()  // обновляем актуальные данные с сервера
+      await this.fetchMe() // обновляем актуальные данные с сервера
     },
 
     async removeFromCart(productId: string | number) {

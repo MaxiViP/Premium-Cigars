@@ -5,16 +5,10 @@
 
       <!-- Вкладки -->
       <div class="tabs">
-        <button
-          :class="{ active: activeTab === 'email' }"
-          @click="activeTab = 'email'"
-        >
+        <button :class="{ active: activeTab === 'email' }" @click="activeTab = 'email'">
           Email / Пароль
         </button>
-        <button
-          :class="{ active: activeTab === 'phone' }"
-          @click="activeTab = 'phone'"
-        >
+        <button :class="{ active: activeTab === 'phone' }" @click="activeTab = 'phone'">
           Телефон
         </button>
       </div>
@@ -67,17 +61,9 @@
         <div v-if="phoneStep === 1">
           <div class="form-group">
             <label>Номер телефона</label>
-            <input
-              v-model="phone"
-              placeholder="+7 (999) 123-45-67"
-              type="tel"
-            />
+            <input v-model="phone" placeholder="+7 (999) 123-45-67" type="tel" />
           </div>
-          <button
-            @click="sendCode"
-            :disabled="loading || !phone"
-            class="btn-submit"
-          >
+          <button @click="sendCode" :disabled="loading || !phone" class="btn-submit">
             {{ loading ? 'Отправляем...' : 'Отправить код' }}
           </button>
         </div>
@@ -96,12 +82,18 @@
             />
           </div>
 
-          <button @click="verifyCode" :disabled="loading" class="btn-submit">
-            Подтвердить
-          </button>
+          <button @click="verifyCode" :disabled="loading" class="btn-submit">Подтвердить</button>
 
           <!-- ИСПРАВЛЕНО: теперь без ошибки парсинга -->
-          <button @click="() => { phoneStep = 1; code = '' }" class="link">
+          <button
+            @click="
+              () => {
+                phoneStep = 1
+                code = ''
+              }
+            "
+            class="link"
+          >
             Изменить номер
           </button>
         </div>
@@ -147,6 +139,15 @@ const phoneStep = ref(1)
 const loading = ref(false)
 const successMessage = ref('')
 
+// Вспомогательная функция для обработки ошибок
+const getErrorMessage = (error: unknown): string => {
+  if (typeof error === 'object' && error !== null && 'response' in error) {
+    const axiosError = error as { response?: { data?: { error?: string } } }
+    return axiosError.response?.data?.error || 'Ошибка сервера'
+  }
+  return 'Неизвестная ошибка'
+}
+
 // Методы
 const toggleMode = () => {
   mode.value = mode.value === 'login' ? 'register' : 'login'
@@ -166,8 +167,8 @@ const submitEmail = async () => {
     auth.setTokens(res.data.tokens)
     await auth.fetchMe()
     success('Вход успешен!')
-  } catch (e: any) {
-    alert(e?.response?.data?.error || 'Ошибка авторизации')
+  } catch (error) {
+    alert(getErrorMessage(error))
   } finally {
     loading.value = false
   }
@@ -178,8 +179,8 @@ const sendCode = async () => {
   try {
     await axios.post('/auth/phone/send', { phone: phone.value })
     phoneStep.value = 2
-  } catch (e: any) {
-    alert(e?.response?.data?.error || 'Не удалось отправить код')
+  } catch (error) {
+    alert(getErrorMessage(error))
   } finally {
     loading.value = false
   }
@@ -192,8 +193,8 @@ const verifyCode = async () => {
     auth.setTokens(res.data.tokens)
     await auth.fetchMe()
     success('Вход через телефон успешен!')
-  } catch (e: any) {
-    alert(e?.response?.data?.error || 'Неверный код')
+  } catch (error) {
+    alert(getErrorMessage(error))
   } finally {
     loading.value = false
   }
@@ -233,7 +234,6 @@ onMounted(() => {
   }
 })
 </script>
-
 <style scoped>
 .modal-overlay {
   position: fixed;
@@ -392,7 +392,9 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .fade-enter-active,

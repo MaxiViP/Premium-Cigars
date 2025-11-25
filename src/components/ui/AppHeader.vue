@@ -147,17 +147,17 @@ const closeMobileMenu = () => {
 }
 
 // Открытие модального окна из мобильного меню
-const openAuthMobile = () => {
-  showAuthModal.value = true
-  closeMobileMenu()
-}
+// const openAuthMobile = () => {
+//   showAuthModal.value = true
+//   closeMobileMenu()
+// }
 
 const isAuthenticated = computed(() => !!auth.token)
 
-const logout = () => {
-  auth.logout()
-  closeMobileMenu()
-}
+// const logout = () => {
+//   auth.logout()
+//   closeMobileMenu()
+// }
 </script>
 
 <style scoped>

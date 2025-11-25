@@ -8,13 +8,14 @@
 import { computed } from 'vue';
 import { useFavoriteStore } from '@/stores/favorite';
 import { useAuthStore } from '@/stores/auth';
-const props = defineProps({ productId: String });
+
+const props = defineProps<{ productId: string }>();
 
 const fav = useFavoriteStore();
 const auth = useAuthStore();
 
 const isFav = computed(() => {
-  return auth.user?.favorites?.some(f => f._id === props.productId) || false;
+  return auth.user?.favorites?.includes(props.productId) || false;
 });
 
 async function toggle() {
