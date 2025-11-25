@@ -1,48 +1,77 @@
-import express from 'express';
-import passport from 'passport';
-import User from '../models/User.js';
- 
-import { signAccess, signRefresh } from '../services/jwt.js';
+import express from 'express'
+import passport from 'passport'
+import bcrypt from 'bcryptjs'
+import User from '../models/User.js'
+import { signAccess, signRefresh } from '../services/jwt.js'
+import { sendVerifyCode, checkVerifyCode } from '../services/phone.js'
 
-const router = express.Router();
+const router = express.Router()
 
-// Phone: send code
-router.post('/phone/send', async (req, res) => {
-  const { phone } = req.body;
-  if (!phone) return res.status(400).send({ error: 'phone required' });
+// Email/Пароль — регистрация с объединением
+router.post('/register', async (req, res) => {
+  const { email, password } = req.body
+  if (!email || !password) return res.status(400).json({ error: 'Email и пароль обязательны' })
+
   try {
-    await sendVerifyCode(phone);
-    res.send({ ok: true });
-  } catch (e) { res.status(500).send({ error: e.message }); }
-});
+    let user = await User.findOne({ email })
 
-// Phone verify
-router.post('/phone/verify', async (req, res) => {
-  const { phone, code } = req.body;
-  if (!phone || !code) return res.status(400).send({ error: 'phone/code required' });
-  const ok = await checkVerifyCode(phone, code);
-  if (!ok) return res.status(401).send({ error: 'Invalid code' });
-  let user = await User.findOne({ phone });
-  if (!user) user = await User.create({ phone });
-  const access = signAccess({ id: user._id });
-  const refresh = signRefresh({ id: user._id });
-  res.send({ user, tokens: { access, refresh } });
-});
+    if (user) {
+      if (user.password) {
+        return res.status(400).json({ error: 'Этот email уже используется для входа по паролю.' })
+      }
+      // Аккаунт есть, но без пароля → привязываем пароль
+      user.password = await bcrypt.hash(password, 10)
+      await user.save()
+    } else {
+      // Совсем новый пользователь
+      user = await User.create({
+        email,
+        password: await bcrypt.hash(password, 10),
+      })
+    }
 
-// OAuth Google
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-router.get('/google/callback', passport.authenticate('google', { session: false }), (req, res) => {
-  const access = signAccess({ id: req.user._id });
-  const refresh = signRefresh({ id: req.user._id });
-  res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/success?access=${access}&refresh=${refresh}`);
-});
+    const access = signAccess({ id: user._id })
+    const refresh = signRefresh({ id: user._id })
+    res.json({ user, tokens: { access, refresh } })
+  } catch (e) {
+    res.status(500).json({ error: e.message })
+  }
+})
 
-// OAuth Yandex
-router.get('/yandex', passport.authenticate('yandex'));
-router.get('/yandex/callback', passport.authenticate('yandex', { session: false }), (req, res) => {
-  const access = signAccess({ id: req.user._id });
-  const refresh = signRefresh({ id: req.user._id });
-  res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/success?access=${access}&refresh=${refresh}`);
-});
+// Логин по email/паролю
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body
+  const user = await User.findOne({ email })
 
-export default router;
+  if (!user || !user.password || !(await bcrypt.compare(password, user.password))) {
+    return res.status(401).json({ error: 'Неверный email или пароль' })
+  }
+
+  const access = signAccess({ id: user._id })
+  const refresh = signRefresh({ id: user._id })
+  res.json({ user, tokens: { access, refresh } })
+})
+
+// Телефон — без изменений (у тебя отлично)
+router.post('/phone/send', async (req, res) => { /* твой код */ })
+router.post('/phone/verify', async (req, res) => { /* твой код */ })
+
+// OAuth — ВСЁ ЧЕРЕЗ ОДИН success-редирект
+const oauthCallback = (req, res) => {
+  if (!req.user) return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/failure`)
+
+  const access = signAccess({ id: req.user._id })
+  const refresh = signRefresh({ id: req.user._id })
+
+  res.redirect(
+    `${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/success?access=${access}&refresh=${refresh}`,
+  )
+}
+
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }))
+router.get('/google/callback', passport.authenticate('google', { session: false }), oauthCallback)
+
+router.get('/yandex', passport.authenticate('yandex'))
+router.get('/yandex/callback', passport.authenticate('yandex', { session: false }), oauthCallback)
+
+export default router

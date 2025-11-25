@@ -1,8 +1,17 @@
-import axios from 'axios';
+// src/plugins/axios.js
+import axios from 'axios'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const instance = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  withCredentials: true,
+})
 
-axios.defaults.baseURL = API;
-axios.defaults.withCredentials = true;
-
-export default axios;
+// Добавляем токен в каждый запрос, если он есть
+instance.interceptors.request.use((config) => {
+  const token = localStorage.getItem('accessToken') // Теперь ключ совпадает
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+export default instance

@@ -41,13 +41,29 @@
               </router-link>
             </li>
           </ul>
-
-          <!-- Кнопки авторизации/выхода десктоп -->
+          <!-- АВТОРИЗАЦИЯ: ДЕСКТОП -->
           <div class="auth-buttons">
+            <!-- Не авторизован — показываем кнопку входа -->
             <button v-if="!isAuthenticated" @click="showAuthModal = true" class="btn-auth">
               Вход / Регистрация
             </button>
-            <button v-else @click="logout" class="btn-auth btn-logout">Выйти</button>
+
+            <!-- Авторизован — показываем кнопку с именем и переходом в профиль -->
+            <router-link v-else to="/profile" class="btn-profile">
+              <div class="profile-avatar">
+                <img
+                  :src="auth.user?.avatar || '/default-avatar.png'"
+                  alt="avatar"
+                  class="avatar-img"
+                />
+              </div>
+              <span class="profile-name">
+                {{ displayName }}
+              </span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M19 9l-7 7-7-7" stroke-width="2" />
+              </svg>
+            </router-link>
           </div>
 
           <!-- Кнопка открытия мобильного меню -->
@@ -75,11 +91,30 @@
             <span class="nav-icon">📞</span> Контакты
           </router-link>
 
-          <!-- Кнопки авторизации/выхода мобильное -->
-          <button v-if="!isAuthenticated" class="mobile-auth-btn" @click="openAuthMobile">
-            🔑 Вход / Регистрация
-          </button>
-          <button v-else class="mobile-auth-btn btn-logout" @click="logout">🚪 Выйти</button>
+          <!-- АВТОРИЗАЦИЯ: ДЕСКТОП -->
+          <div class="auth-buttons">
+            <!-- Не авторизован — показываем кнопку входа -->
+            <button v-if="!isAuthenticated" @click="showAuthModal = true" class="btn-auth">
+              Вход / Регистрация
+            </button>
+
+            <!-- Авторизован — показываем кнопку с именем и переходом в профиль -->
+            <router-link v-else to="/profile" class="btn-profile">
+              <div class="profile-avatar">
+                <img
+                  :src="auth.user?.avatar || '/default-avatar.png'"
+                  alt="avatar"
+                  class="avatar-img"
+                />
+              </div>
+              <span class="profile-name">
+                {{ displayName }}
+              </span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M19 9l-7 7-7-7" stroke-width="2" />
+              </svg>
+            </router-link>
+          </div>
         </div>
       </div>
     </header>
@@ -97,6 +132,12 @@ import AuthModal from '@/components/ui/AuthModal.vue'
 const isMobileMenuOpen = ref(false)
 const showAuthModal = ref(false)
 const auth = useAuthStore()
+
+// Красивое отображение имени: имя → email@ → первая часть email → Гость
+const displayName = computed(() => {
+  if (!auth.user) return 'Гость'
+  return auth.user.name || auth.user.email?.split('@')[0] || 'Пользователь'
+})
 
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
@@ -293,34 +334,98 @@ const logout = () => {
   background: var(--gold-light);
 }
 
-/* .auth-buttons {
-  display: flex;
-  align-items: center;
-  margin-left: 1rem;
-}
-
 .btn-auth {
   background: var(--gold-color);
-  color: var(--white);
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-weight: 500;
+  color: black;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
   border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s;
+  font-size: 0.95rem;
 }
 
 .btn-auth:hover {
   background: var(--gold-light);
+  transform: translateY(-2px);
 }
 
-.btn-logout {
-  background: #e74c3c;
+/* КНОПКА С ИМЕНЕМ ПОЛЬЗОВАТЕЛЯ */
+.btn-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  padding: 0.6rem 1rem;
+  border-radius: 16px;
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s;
+  backdrop-filter: blur(10px);
 }
 
-.btn-logout:hover {
-  background: #c0392b;
-} */
+.btn-profile:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: var(--gold-color);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.2);
+}
+
+.profile-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--gold-color);
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-name {
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+
+/* МОБИЛЬНЫЙ ПРОФИЛЬ */
+.mobile-profile-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  color: white;
+  text-decoration: none;
+}
+
+.mobile-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--gold-color);
+}
+
+.mobile-name {
+  font-weight: 600;
+  color: var(--gold-color);
+}
+
+.mobile-email {
+  font-size: 0.9rem;
+  color: #ccc;
+}
 
 /* Мобильное меню */
 .mobile-menu-btn {

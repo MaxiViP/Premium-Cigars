@@ -1,11 +1,10 @@
 import express from 'express'
 import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
-// import Product from '../models/Product.js'
 
 const router = express.Router()
 
-// 🔹 Middleware для авторизации по JWT
+// Middleware для авторизации
 function authMiddleware(req, res, next) {
   const header = req.headers.authorization
   if (!header) return res.status(401).json({ error: 'No token provided' })
@@ -17,23 +16,24 @@ function authMiddleware(req, res, next) {
     const payload = jwt.verify(token, process.env.JWT_SECRET)
     req.userId = payload.id
     next()
-  } catch  {
+  } catch {
     return res.status(401).json({ error: 'Invalid token' })
   }
 }
 
-// 🔹 Получение информации о пользователе
+// Получение данных пользователя
 router.get('/me', authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.userId).populate('favorites').populate('cart.product')
     if (!user) return res.status(404).json({ error: 'User not found' })
     res.json(user)
-  } catch  {
+  } catch (e) {
+    console.error(e)
     res.status(500).json({ error: 'Server error' })
   }
 })
 
-// 🔹 Добавление товара в избранное
+// Избранное
 router.post('/favorites/:productId', authMiddleware, async (req, res) => {
   try {
     const { productId } = req.params
@@ -43,23 +43,23 @@ router.post('/favorites/:productId', authMiddleware, async (req, res) => {
     if (!user.favorites.includes(productId)) user.favorites.push(productId)
     await user.save()
     res.json({ ok: true })
-  } catch  {
+  } catch (e) {
+    console.error(e)
     res.status(500).json({ error: 'Server error' })
   }
 })
 
-// 🔹 Удаление товара из избранного
 router.delete('/favorites/:productId', authMiddleware, async (req, res) => {
   try {
-    const { productId } = req.params
-    await User.findByIdAndUpdate(req.userId, { $pull: { favorites: productId } })
+    await User.findByIdAndUpdate(req.userId, { $pull: { favorites: req.params.productId } })
     res.json({ ok: true })
-  } catch  {
+  } catch (e) {
+    console.error(e)
     res.status(500).json({ error: 'Server error' })
   }
 })
 
-// 🔹 Добавление товара в корзину
+// Корзина
 router.post('/cart', authMiddleware, async (req, res) => {
   try {
     const { productId, qty = 1 } = req.body
@@ -72,19 +72,18 @@ router.post('/cart', authMiddleware, async (req, res) => {
 
     await user.save()
     res.json({ ok: true })
-  } catch  {
+  } catch (e) {
+    console.error(e)
     res.status(500).json({ error: 'Server error' })
   }
 })
 
-// 🔹 Удаление товара из корзины
 router.delete('/cart/:productId', authMiddleware, async (req, res) => {
   try {
-    await User.findByIdAndUpdate(req.userId, {
-      $pull: { cart: { product: req.params.productId } },
-    })
+    await User.findByIdAndUpdate(req.userId, { $pull: { cart: { product: req.params.productId } } })
     res.json({ ok: true })
-  } catch  {
+  } catch (e) {
+    console.error(e)
     res.status(500).json({ error: 'Server error' })
   }
 })

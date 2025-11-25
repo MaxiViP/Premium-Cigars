@@ -1,23 +1,40 @@
-<template><div>Авторизация успешна, перенаправление...</div></template>
+<!-- src/components/auth/AuthSuccess.vue -->
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
+const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 
-onMounted(async () => {
-  const params = new URLSearchParams(location.search)
-  const access = params.get('access')
-  if (access) {
-    auth.setToken(access)
-    try {
-      await auth.fetchMe()
-    } catch (e) {
-      console.warn(e)
-    }
+onMounted(() => {
+  const { access, refresh } = route.query
+
+  if (access && typeof access === 'string') {
+    // Сохраняем токены
+    auth.setTokens({
+      access,
+      refresh: typeof refresh === 'string' ? refresh : undefined
+    })
+
+    // Загружаем данные пользователя
+    auth.fetchMe().then(() => {
+      // Убираем query из URL и переходим в профиль
+      router.replace('/profile')
+    }).catch(() => {
+      alert('Ошибка входа')
+      router.replace('/')
+    })
+  } else {
+    router.replace('/')
   }
-  router.push('/profile')
 })
 </script>
+
+<template>
+  <div style="text-align: center; padding: 4rem;  color: white;">
+    <h2>Вход выполнен успешно!</h2>
+    <p>Перенаправляем в личный кабинет...</p>
+  </div>
+</template>
