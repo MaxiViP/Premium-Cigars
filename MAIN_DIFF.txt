@@ -1,0 +1,5 @@
+DIFF for main.ts (Pinia + axios)
++ import { createPinia } from 'pinia'
++ import '@/plugins/axios'
++ const pinia = createPinia()
++ app.use(pinia)

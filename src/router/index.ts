@@ -29,15 +29,41 @@ const router = createRouter({
       name: 'contacts',
       component: () => import('@/views/ContactsView.vue'),
     },
+
+    // Вход по телефону (компонент есть: src/components/auth/LoginPhone.vue)
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('@/components/auth/LoginPhone.vue'),
+    },
+
+    // OAuth success (компонент есть: src/components/auth/AuthSuccess.vue)
+    {
+      path: '/auth/success',
+      name: 'auth-success',
+      component: () => import('@/components/auth/AuthSuccess.vue'),
+    },
+
+    // Личный кабинет (компонент есть: src/components/Profile.vue)
+    {
+      path: '/profile',
+      name: 'profile',
+      component: () => import('@/components/auth/Profile.vue'),
+    },
+
+    // Корзина (компонент есть: src/components/auth/Cart.vue)
+    {
+      path: '/cart',
+      name: 'cart',
+      component: () => import('@/components/auth/Cart.vue'),
+    },
   ],
 
-  // 🔹 Добавляем scrollBehavior, чтобы всегда прокручивать наверх
+  // Всегда прокручивать наверх при навигации
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
-      // Если пользователь нажал назад/вперед — возвращаем сохранённую позицию
       return savedPosition
     }
-    // Всегда прокручиваем страницу наверх при переходе
     return { top: 0 }
   },
 })

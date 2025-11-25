@@ -4,6 +4,9 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 
+import '@/plugins/axios'
+
+
 import './assets/styles/vars.css'
 import "@/assets/styles/main.scss";
 

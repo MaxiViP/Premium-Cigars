@@ -1,0 +1,23 @@
+DIFF for router (add routes)
+--- router/index.ts (add)
++ import LoginView from '@/components/auth/LoginPhone.vue'
++ import AuthSuccessView from '@/components/auth/AuthSuccess.vue'
++ import ProfileView from '@/components/auth/Profile.vue'
++ 
++ {
++   path: '/login', name: 'login', component: LoginView
++ },
++ {
++   path: '/auth/success', name: 'auth-success', component: AuthSuccessView
++ },
++ {
++   path: '/profile', name: 'profile', component: ProfileView, meta: { requiresAuth: true }
++ }
++ 
++ router.beforeEach((to, from, next) => {
++   if (to.meta.requiresAuth) {
++     const token = localStorage.getItem('pc_access_token')
++     if (!token) return next('/login')
++   }
++   next()
++ })
