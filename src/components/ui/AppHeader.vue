@@ -1,85 +1,121 @@
 <template>
-  <header class="app-header">
-    <nav class="navbar">
-      <div class="container">
-        <router-link to="/" class="logo">
-          <div class="logo-icon">
-            <img src="/logo.png" alt="Premium Logo" class="logo-image" />
+  <div>
+    <header class="app-header">
+      <nav class="navbar">
+        <div class="container">
+          <!-- Логотип -->
+          <router-link to="/" class="logo">
+            <div class="logo-icon">
+              <img src="/logo.png" alt="Premium Logo" class="logo-image" />
+            </div>
+            <div class="logo-text">
+              <h1>Premium Cigars</h1>
+              <p class="logo-subtitle">Элитные табачные изделия</p>
+            </div>
+          </router-link>
+
+          <!-- Десктоп навигация -->
+          <ul class="nav-links">
+            <li>
+              <router-link to="/" class="nav-link">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-text">Главная</span>
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/catalog" class="nav-link">
+                <span class="nav-icon">📦</span>
+                <span class="nav-text">Каталог</span>
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/about" class="nav-link">
+                <span class="nav-icon">ℹ️</span>
+                <span class="nav-text">О нас</span>
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/contacts" class="nav-link">
+                <span class="nav-icon">📞</span>
+                <span class="nav-text">Контакты</span>
+              </router-link>
+            </li>
+          </ul>
+
+          <!-- Кнопки авторизации/выхода десктоп -->
+          <div class="auth-buttons">
+            <button v-if="!isAuthenticated" @click="showAuthModal = true" class="btn-auth">
+              Вход / Регистрация
+            </button>
+            <button v-else @click="logout" class="btn-auth btn-logout">Выйти</button>
           </div>
 
-          <div class="logo-text">
-            <h1>Premium Cigars</h1>
-            <p class="logo-subtitle">Элитные табачные изделия</p>
-          </div>
-        </router-link>
+          <!-- Кнопка открытия мобильного меню -->
+          <button class="mobile-menu-btn" @click="toggleMobileMenu">
+            <span class="menu-bar"></span>
+            <span class="menu-bar"></span>
+            <span class="menu-bar"></span>
+          </button>
+        </div>
+      </nav>
 
-        <ul class="nav-links">
-          <li>
-            <router-link to="/" class="nav-link">
-              <span class="nav-icon">🏠</span>
-              <span class="nav-text">Главная</span>
-            </router-link>
-          </li>
-          <li>
-            <router-link to="/catalog" class="nav-link">
-              <span class="nav-icon">📦</span>
-              <span class="nav-text">Каталог</span>
-            </router-link>
-          </li>
-          <li>
-            <router-link to="/about" class="nav-link">
-              <span class="nav-icon">ℹ️</span>
-              <span class="nav-text">О нас</span>
-            </router-link>
-          </li>
-          <li>
-            <router-link to="/contacts" class="nav-link">
-              <span class="nav-icon">📞</span>
-              <span class="nav-text">Контакты</span>
-            </router-link>
-          </li>
-        </ul>
+      <!-- Мобильное меню -->
+      <div class="mobile-menu" :class="{ 'mobile-menu--open': isMobileMenuOpen }">
+        <div class="mobile-menu-content">
+          <router-link to="/" class="mobile-nav-link" @click="closeMobileMenu">
+            <span class="nav-icon">🏠</span> Главная
+          </router-link>
+          <router-link to="/catalog" class="mobile-nav-link" @click="closeMobileMenu">
+            <span class="nav-icon">📦</span> Каталог
+          </router-link>
+          <router-link to="/about" class="mobile-nav-link" @click="closeMobileMenu">
+            <span class="nav-icon">ℹ️</span> О нас
+          </router-link>
+          <router-link to="/contacts" class="mobile-nav-link" @click="closeMobileMenu">
+            <span class="nav-icon">📞</span> Контакты
+          </router-link>
 
-        <!-- Мобильное меню -->
-        <button class="mobile-menu-btn" @click="toggleMobileMenu">
-          <span class="menu-bar"></span>
-          <span class="menu-bar"></span>
-          <span class="menu-bar"></span>
-        </button>
+          <!-- Кнопки авторизации/выхода мобильное -->
+          <button v-if="!isAuthenticated" class="mobile-auth-btn" @click="openAuthMobile">
+            🔑 Вход / Регистрация
+          </button>
+          <button v-else class="mobile-auth-btn btn-logout" @click="logout">🚪 Выйти</button>
+        </div>
       </div>
-    </nav>
+    </header>
 
-    <!-- Мобильное меню -->
-    <div class="mobile-menu" :class="{ 'mobile-menu--open': isMobileMenuOpen }">
-      <div class="mobile-menu-content">
-        <router-link to="/" class="mobile-nav-link" @click="closeMobileMenu">
-          <span class="nav-icon">🏠</span> Главная
-        </router-link>
-        <router-link to="/catalog" class="mobile-nav-link" @click="closeMobileMenu">
-          <span class="nav-icon">📦</span> Каталог
-        </router-link>
-        <router-link to="/about" class="mobile-nav-link" @click="closeMobileMenu">
-          <span class="nav-icon">ℹ️</span> О нас
-        </router-link>
-        <router-link to="/contacts" class="mobile-nav-link" @click="closeMobileMenu">
-          <span class="nav-icon">📞</span> Контакты
-        </router-link>
-      </div>
-    </div>
-  </header>
+    <!-- Модальное окно авторизации -->
+    <AuthModal :isOpen="showAuthModal" :onClose="() => (showAuthModal = false)" />
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import AuthModal from '@/components/ui/AuthModal.vue'
 
 const isMobileMenuOpen = ref(false)
+const showAuthModal = ref(false)
+const auth = useAuthStore()
 
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
 }
-
 const closeMobileMenu = () => {
   isMobileMenuOpen.value = false
+}
+
+// Открытие модального окна из мобильного меню
+const openAuthMobile = () => {
+  showAuthModal.value = true
+  closeMobileMenu()
+}
+
+const isAuthenticated = computed(() => !!auth.token)
+
+const logout = () => {
+  auth.logout()
+  closeMobileMenu()
 }
 </script>
 
@@ -239,6 +275,52 @@ const closeMobileMenu = () => {
 .nav-link:hover .nav-icon {
   transform: scale(1.2);
 }
+
+.mobile-auth-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--gold-color);
+  color: var(--white);
+  border: none;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.mobile-auth-btn:hover {
+  background: var(--gold-light);
+}
+
+/* .auth-buttons {
+  display: flex;
+  align-items: center;
+  margin-left: 1rem;
+}
+
+.btn-auth {
+  background: var(--gold-color);
+  color: var(--white);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-auth:hover {
+  background: var(--gold-light);
+}
+
+.btn-logout {
+  background: #e74c3c;
+}
+
+.btn-logout:hover {
+  background: #c0392b;
+} */
 
 /* Мобильное меню */
 .mobile-menu-btn {
