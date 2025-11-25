@@ -4,13 +4,13 @@ import axios from '@/plugins/axios'
 import router from '@/router'
 
 interface CartItem {
-  product: {
-    _id: string
+  product: string | {
+    _id?: string
+    id?: number
     name: string
     price: number
     image?: string
     title?: string
-    // другие поля товара
   }
   qty: number
 }
@@ -23,7 +23,7 @@ interface User {
   avatar?: string
   googleId?: string
   yandexId?: string
-  favorites: string[] | any[]
+  favorites: string[]
   cart: CartItem[]
   createdAt: string
 }
@@ -39,27 +39,26 @@ export const useAuthStore = defineStore('auth', {
     cartTotalItems: (state): number =>
       state.user?.cart.reduce((sum, item) => sum + item.qty, 0) ?? 0,
     cartTotalPrice: (state): number =>
-      state.user?.cart.reduce((sum, item) => sum + item.product.price * item.qty, 0) ?? 0,
+      state.user?.cart.reduce((sum, item) => {
+        const price = typeof item.product === 'object' ? item.product.price : 0
+        return sum + price * item.qty
+      }, 0) ?? 0,
   },
 
   actions: {
-    // Сохраняем токены и добавляем заголовок Authorization
     setTokens(tokens: { access: string; refresh?: string }) {
       this.token = tokens.access
       localStorage.setItem('accessToken', tokens.access)
       if (tokens.refresh) {
         localStorage.setItem('refreshToken', tokens.refresh)
       }
-
-      // Важно: добавляем Bearer-токен во все запросы axios
       axios.defaults.headers.common['Authorization'] = `Bearer ${tokens.access}`
     },
 
-    // Загружаем данные пользователя
     async fetchMe() {
       try {
         const res = await axios.get('/user/me')
-        this.user = res.data.user || res.data // на случай, если бэк возвращает { user: ... }
+        this.user = res.data.user || res.data
         return this.user
       } catch (err: any) {
         console.error('fetchMe error:', err.response?.data || err.message)
@@ -68,7 +67,6 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    // Загрузка при старте приложения
     async loadFromStorage() {
       const accessToken = localStorage.getItem('accessToken')
       if (!accessToken) return
@@ -79,47 +77,52 @@ export const useAuthStore = defineStore('auth', {
       try {
         await this.fetchMe()
       } catch {
-        // Токен просрочен или недействителен — очищаем
         this.logout()
       }
     },
 
-    // Избранное
-    async addToFavorites(productId: string) {
-      await axios.post(`/user/favorites/${productId}`)
-      if (this.user && !this.user.favorites.some((f: any) => (f._id || f) === productId)) {
-        this.user.favorites.push(productId)
+    // === КЛЮЧЕВЫЕ ИСПРАВЛЕНИЯ ===
+
+    async addToFavorites(productId: string | number) {
+      const idStr = String(productId)
+      await axios.post(`/user/favorites/${idStr}`)
+
+      if (this.user && !this.user.favorites.includes(idStr)) {
+        this.user.favorites.push(idStr)  // сохраняем как string
       }
     },
 
-    async removeFromFavorites(productId: string) {
-      await axios.delete(`/user/favorites/${productId}`)
+    async removeFromFavorites(productId: string | number) {
+      const idStr = String(productId)
+      await axios.delete(`/user/favorites/${idStr}`)
+
       if (this.user) {
-        this.user.favorites = this.user.favorites.filter((f: any) => (f._id || f) !== productId)
+        this.user.favorites = this.user.favorites.filter(f => String(f) !== idStr)
       }
     },
 
-    // Корзина
-    async addToCart(productId: string, qty: number = 1) {
-      await axios.post('/user/cart', { productId, qty })
-      await this.fetchMe() // Лучше перезагрузить данные с сервера
+    async addToCart(productId: string | number, qty: number = 1) {
+      const idStr = String(productId)
+      await axios.post('/user/cart', { productId: idStr, qty })
+      await this.fetchMe()  // обновляем актуальные данные с сервера
     },
 
-    async removeFromCart(productId: string) {
-      await axios.delete(`/user/cart/${productId}`)
+    async removeFromCart(productId: string | number) {
+      const idStr = String(productId)
+      await axios.delete(`/user/cart/${idStr}`)
       await this.fetchMe()
     },
 
-    async updateCartItem(productId: string, qty: number) {
+    async updateCartItem(productId: string | number, qty: number) {
+      const idStr = String(productId)
       if (qty <= 0) {
-        await this.removeFromCart(productId)
+        await this.removeFromCart(idStr)
       } else {
-        await axios.put(`/user/cart/${productId}`, { qty })
+        await axios.put(`/user/cart/${idStr}`, { qty })
         await this.fetchMe()
       }
     },
 
-    // Выход
     logout() {
       this.user = null
       this.token = null

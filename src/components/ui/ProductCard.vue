@@ -10,7 +10,15 @@
     <!-- Изображение -->
     <div class="product-image-wrapper">
       <div class="quick-actions">
-        <button class="qa-btn" @click.stop.prevent="toggleLike">❤</button>
+        <button
+          class="qa-btn"
+          @click.stop.prevent="toggleLike"
+          :class="{ 'qa-btn--active': isLiked }"
+          :aria-label="isLiked ? 'Убрать из избранного' : 'Добавить в избранное'"
+        >
+          <span v-if="isLiked">♥</span>
+          <span v-else>♡</span>
+        </button>
         <button class="qa-btn" @click.stop.prevent="shareProduct">⇄</button>
       </div>
 
@@ -53,9 +61,10 @@
             v-if="product.inStock"
             class="add-cart-btn"
             @click.stop.prevent="addToCart"
-            aria-label="Добавить в корзину"
+            :class="{ 'add-cart-btn--active': inCart }"
           >
-            В корзину
+            <span v-if="inCart">В корзине</span>
+            <span v-else>В корзину</span>
           </button>
         </div>
       </div>
@@ -64,12 +73,12 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import type { Product, Accessory } from '@/types/Product'
+import { useAuthStore } from '@/stores/auth'
 import { formatPrice } from '@/utils/formatters'
 import ProductImage from './ProductImage.vue'
-
-
+import type { Product, Accessory } from '@/types/Product'
 
 interface Props {
   product: Product | Accessory
@@ -81,37 +90,85 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const router = useRouter()
+const auth = useAuthStore()
 
-const emit = defineEmits<{
-  (e: 'toggle-like', id: number): void
-  (e: 'share-product', id: number): void
-  (e: 'add-to-cart', id: number): void
-}>()
+// Проверяем, в избранном ли товар
+const isLiked = computed(() => {
+  if (!auth.user || !props.product.id) return false
+  return auth.user.favorites.some((f: any) => (f._id || f?.id || f) === props.product.id)
+})
 
-function toggleLike() {
-  if (!props.product?.id) return
-  emit('toggle-like', props.product.id)
+// Проверяем, в корзине ли товар
+const inCart = computed(() => {
+  if (!auth.user || !props.product.id) return false
+  return auth.user.cart.some(item => {
+    const productId = typeof item.product === 'string'
+      ? item.product
+      : (item.product as any)._id || (item.product as any).id
+
+    return productId === props.product.id
+  })
+})
+
+const toggleLike = () => {
+  if (!auth.isAuthenticated) {
+    alert('Войдите в аккаунт')
+    return
+  }
+  if (isLiked.value) {
+    auth.removeFromFavorites(props.product.id)
+  } else {
+    auth.addToFavorites(props.product.id)
+  }
+}
+
+const addToCart = () => {
+  if (!auth.isAuthenticated) {
+    alert('Войдите в аккаунт')
+    return
+  }
+  auth.addToCart(props.product.id, 1)
+}
+// Переход на товар
+function goToProduct() {
+  router.push(`/product/${props.product.id}`)
 }
 
 function shareProduct() {
-  if (!props.product?.id) return
-  emit('share-product', props.product.id)
+  if (navigator.share) {
+    navigator.share({
+      title: props.product.name,
+      text: props.product.brand,
+      url: window.location.origin + `/product/${props.product.id}`
+    })
+  }
 }
-
-function addToCart() {
-  if (!props.product?.id) return
-  emit('add-to-cart', props.product.id)
-}
-
-function goToProduct() {
-  if (!props.product || !('id' in props.product)) return
-  router.push(`/product/${(props.product as Product).id}`)
-}
-
-
 </script>
-
 <style scoped>
+
+/* Активное сердечко */
+.qa-btn--active {
+  background: #e74c3c !important;
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(231, 76, 60, 0.4);
+}
+
+.qa-btn--active span {
+  font-weight: bold;
+}
+
+/* Кнопка "В корзине" */
+.add-cart-btn--active {
+  background: #10b981 !important;
+  color: white;
+}
+
+.add-cart-btn--active:hover {
+  background: #059669 !important;
+  color: white;
+}
+
 .product-card.catalog-view {
   background: #fff;
   border-radius: 14px;
@@ -168,10 +225,10 @@ function goToProduct() {
   pointer-events: none;
   background: linear-gradient(
     to bottom,
-    #FBFAF9 0%,
+    #fbfaf9 0%,
     rgba(251, 250, 249, 0) 10%,
     rgba(251, 250, 249, 0) 90%,
-    #FBFAF9 100%
+    #fbfaf9 100%
   );
 }
 

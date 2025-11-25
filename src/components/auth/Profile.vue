@@ -109,7 +109,7 @@ const formatPrice = (value: number) => {
 .profile-container {
   max-width: 1000px;
   margin: 2rem auto;
-  padding: 0 1rem;
+  padding: 150px;
   color: white;
 }
 

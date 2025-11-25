@@ -1,10 +1,21 @@
-export interface Product {
+// src/types/Product.ts
+export interface BaseProduct {
   id: number
   name: string
   brand: string
+  pricePerUnit: number
+  pricePerBox?: number
+  images: string[]
+  category: 'cigars' | 'accessories'
+  inStock: boolean
+  rating: number
+  description: string
+}
+
+export interface Product extends BaseProduct {
+  category: 'cigars'
   country: string
   strength: 'Легкая' | 'Средняя' | 'Полная'
-  size: string
   format: string
   ringGauge: number
   length: number
@@ -19,16 +30,10 @@ export interface Product {
     | 'Фруктовые'
     | 'Землистые'
     | 'Сладкие'
-  description: string
-  pricePerUnit: number // цена за 1 шт
-  pricePerBox?: number // цена за коробку (опционально)
-  images: string[]
-  category: 'cigars' | 'accessories'
-  inStock: boolean
-  rating: number
 }
 
-export interface Accessory extends Product {
+export interface Accessory extends BaseProduct {
+  category: 'accessories'
   type: 'Cutter' | 'Lighter' | 'Humidor' | 'Ashtray' | 'Case'
   material: string
 }
