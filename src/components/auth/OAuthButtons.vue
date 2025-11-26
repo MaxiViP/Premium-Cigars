@@ -10,13 +10,25 @@
 </template>
 
 <script setup lang="ts">
-// Используем абсолютные URL для OAuth
-const baseUrl = import.meta.env.PROD
-  ? 'https://maxivip-premium-cigars-fc19.twc1.net' // замените на ваш продакшен бекенд
-  : 'http://localhost:5000'
+// ✅ ПРАВИЛЬНАЯ ЛОГИКА ДЛЯ БЕКЕНДА
+const getBackendUrl = () => {
+  // Если мы в продакшене, бекенд должен быть на том же домене или указан явно
+  if (import.meta.env.PROD) {
+    // Вариант 1: Бекенд на том же домене (рекомендуется)
+    return window.location.origin
 
+    // Вариант 2: Или укажите явно ваш продакшен бекенд
+    // return 'https://your-backend-domain.com'
+  }
+  // Для разработки
+  return 'http://localhost:5000'
+}
+
+const baseUrl = getBackendUrl()
 const googleUrl = `${baseUrl}/api/auth/google`
 const yandexUrl = `${baseUrl}/api/auth/yandex`
+
+console.log('OAuth URLs:', { googleUrl, yandexUrl })
 </script>
 <style scoped>
 .oauth-buttons {
