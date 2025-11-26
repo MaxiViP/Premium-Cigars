@@ -12,7 +12,7 @@
 <script setup lang="ts">
 // Используем абсолютные URL для OAuth
 const baseUrl = import.meta.env.PROD
-  ? 'https://maxivip-premium-cigars-fc19.twc1.net/' // замените на ваш продакшен бекенд
+  ? 'https://maxivip-premium-cigars-fc19.twc1.net' // замените на ваш продакшен бекенд
   : 'http://localhost:5000'
 
 const googleUrl = `${baseUrl}/api/auth/google`
