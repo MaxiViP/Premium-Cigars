@@ -59,6 +59,27 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
+    toggleFavorite(productId: string | number) {
+      const idStr = String(productId)
+
+      if (this.user?.favorites.includes(idStr)) {
+        return this.removeFromFavorites(idStr)
+      } else {
+        return this.addToFavorites(idStr)
+      }
+    },
+
+    updateCartQty(productId: string | number, qty: number) {
+      return this.updateCartItem(productId, qty)
+    },
+
+    // Добавляем метод setToken для совместимости с компонентом
+    setToken(token: string) {
+      this.token = token
+      localStorage.setItem('accessToken', token)
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+    },
+
     setTokens(tokens: { access: string; refresh?: string }) {
       this.token = tokens.access
       localStorage.setItem('accessToken', tokens.access)

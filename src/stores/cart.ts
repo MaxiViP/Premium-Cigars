@@ -16,6 +16,12 @@ interface CartItem {
   qty: number
 }
 
+// Тип для ответа API пользователя
+export interface UserCartResponse {
+  cart: CartItem[]
+  // другие поля пользователя если нужно
+}
+
 // Тип для продукта в локальной корзине (без авторизации)
 interface LocalCartProduct {
   _id: string

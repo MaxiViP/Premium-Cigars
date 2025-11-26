@@ -48,14 +48,7 @@ const router = createRouter({
     {
       path: '/profile',
       name: 'profile',
-      component: () => import('@/components/auth/Profile.vue'),
-    },
-
-    // Корзина (компонент есть: src/components/auth/Cart.vue)
-    {
-      path: '/cart',
-      name: 'cart',
-      component: () => import('@/components/auth/Cart.vue'),
+      component: () => import('@/components/auth/UserProfile.vue'),
     },
   ],
 

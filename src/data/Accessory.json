@@ -1,0 +1,20 @@
+{
+  "Accessory": [
+    {
+      "id": 1,
+      "name": "Test Accessory",
+      "pricePerUnit": 1000,
+      "images": ["/images/accessory1.jpg"],
+      "category": "accessories",
+      "inStock": true
+    },
+    {
+      "id": 2,
+      "name": "Test Accessory 2",
+      "pricePerUnit": 1500,
+      "images": ["/images/accessory2.jpg"],
+      "category": "accessories",
+      "inStock": false
+    }
+  ]
+}

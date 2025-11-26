@@ -92,20 +92,22 @@ const props = withDefaults(defineProps<Props>(), {
 const router = useRouter()
 const auth = useAuthStore()
 
-// Проверяем, в избранном ли товар
+// Для favorites
 const isLiked = computed(() => {
   if (!auth.user || !props.product.id) return false
-  return auth.user.favorites.some((f: any) => (f._id || f?.id || f) === props.product.id)
+  return auth.user.favorites.some((f: string | { _id?: number | string; id?: number | string }) => {
+    const favId = typeof f === 'string' ? f : f._id ?? f.id
+    return favId === props.product.id
+  })
 })
 
-// Проверяем, в корзине ли товар
+// Для корзины
 const inCart = computed(() => {
   if (!auth.user || !props.product.id) return false
   return auth.user.cart.some(item => {
     const productId = typeof item.product === 'string'
       ? item.product
-      : (item.product as any)._id || (item.product as any).id
-
+      : (item.product._id ?? item.product.id)
     return productId === props.product.id
   })
 })
