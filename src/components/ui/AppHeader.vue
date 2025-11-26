@@ -561,10 +561,13 @@ const isAuthenticated = computed(() => !!auth.token)
     font-size: 0.65rem;
   }
 
-  .mobile-menu-btn {
+  /* .mobile-menu-btn {
+    display: none;
+  } */
+  .nav-links {
     display: none;
   }
-  .auth-buttons {
+   .auth-buttons {
 
   }
   /* .profile-avatar {

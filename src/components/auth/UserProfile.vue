@@ -9,7 +9,7 @@
     <!-- Карточка пользователя -->
     <div class="user-card">
       <div class="avatar-wrapper">
-        <img :src="auth.user?.avatar || '/default-avatar.png'" alt="avatar" class="avatar" />
+        <img :src="auth.user?.avatar || 'default-avatar.svg'" alt="avatar" class="avatar" />class="avatar" />
       </div>
       <div class="user-info">
         <h2>{{ username }}</h2>
@@ -28,7 +28,7 @@
         <div class="stat-label">в избранном</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">{{ formatPrice(auth.cartTotalPrice) }}</div>
+        <div class="stat-value">{{ formatPrice(cartTotal) }}</div>
         <div class="stat-label">на сумму</div>
       </div>
     </div>
@@ -43,13 +43,15 @@
 
       <div v-else class="favorites-grid">
         <div v-for="product in favoriteProducts" :key="product.id" class="favorite-card">
-          <img :src="getProductImage(product.images?.[0])" :alt="product.name" />
+          <img :src="getProductImage(product.images?.[0])" :alt="product.name" class="favorite-img" />
 
           <div class="favorite-info">
-            <h4>{{ product.name }}</h4>
+            <h4 class="favorite-name">{{ product.name }}</h4>
             <p class="price">{{ formatPrice(product.pricePerUnit) }}</p>
 
-            <button @click="toggleFavorite(product.id)" class="remove-favorite-btn">Удалить</button>
+            <button @click="toggleFavorite(product.id)" class="remove-favorite-btn">
+              Удалить
+            </button>
           </div>
         </div>
       </div>
@@ -66,10 +68,10 @@
 
       <div v-else class="cart-items">
         <div v-for="item in cartProducts" :key="item.product.id" class="cart-item">
-          <img :src="getProductImage(item.product.images?.[0])" :alt="item.product.name" />
+          <img :src="getProductImage(item.product.images?.[0])" :alt="item.product.name" class="cart-img" />
 
-          <div class="info">
-            <h4>{{ item.product.name }}</h4>
+          <div class="cart-info">
+            <h4 class="cart-name">{{ item.product.name }}</h4>
             <p class="price">{{ formatPrice(item.product.pricePerUnit) }}</p>
 
             <!-- Количество -->
@@ -83,9 +85,6 @@
               Всего:
               <strong>{{ formatPrice(item.product.pricePerUnit * item.qty) }}</strong>
             </p>
-
-            <!-- Отладочная информация -->
-            <small style="color: #666">ID: {{ item.product.id }}, Qty: {{ item.qty }}</small>
           </div>
 
           <button @click="removeFromCart(item.product.id)" class="remove-btn">Удалить</button>
@@ -93,8 +92,8 @@
 
         <!-- Итог -->
         <div class="cart-total">
-          <strong>Итого: {{ formatPrice(cartTotal) }}</strong>
-          <router-link to="/checkout" class="btn-primary">Оформить заказ</router-link>
+          <strong class="total-text">Итого: {{ formatPrice(cartTotal) }}</strong>
+          <router-link to="/checkout" class="btn-primary checkout-btn">Оформить заказ</router-link>
         </div>
       </div>
     </section>
@@ -262,39 +261,44 @@ const formatPrice = (value: number) =>
     minimumFractionDigits: 0,
   }).format(value)
 </script>
+
 <style scoped>
+/* Базовые стили */
 .profile-container {
-  max-width: 1000px;
-  margin: 2rem auto;
-  padding: 100px 50px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 16px 40px;
+  min-height: 100vh;
 }
 
+/* Заголовок */
 .profile-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .profile-header h1 {
-  font-size: 2.5rem;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
   font-weight: 300;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   color: var(--primary-color);
+  margin: 0;
 }
 
 .logout-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(231, 76, 60, 0.2);
+  background: rgba(231, 76, 60, 0.15);
   color: #e74c3c;
   border: 1px solid #e74c3c;
-  padding: 0.7rem 1.2rem;
+  padding: clamp(0.6rem, 3vw, 0.7rem) clamp(1rem, 4vw, 1.2rem);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s;
-  font-size: 0.95rem;
+  font-size: clamp(0.85rem, 3vw, 0.95rem);
+  white-space: nowrap;
 }
 
 .logout-btn:hover {
@@ -302,97 +306,89 @@ const formatPrice = (value: number) =>
   color: white;
 }
 
+/* Карточка пользователя */
 .user-card {
   background: linear-gradient(135deg, #2c2c2c, #1a1a1a);
   border-radius: 20px;
-  padding: 2rem;
+  padding: clamp(1.5rem, 4vw, 2rem);
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: clamp(1rem, 3vw, 2rem);
   margin-bottom: 2rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   border: 1px solid #333;
+  flex-wrap: wrap;
 }
 
 .avatar-wrapper {
   position: relative;
+  flex-shrink: 0;
 }
 
 .avatar {
-  width: 120px;
-  height: 120px;
+  width: clamp(80px, 20vw, 120px);
+  height: clamp(80px, 20vw, 120px);
   border-radius: 10%;
   object-fit: cover;
-  border: 4px solid #b8860b;
-  background: #110808 url(../images/avatar/avatar.svg) center/cover no-repeat;
-}
-
-.online-indicator {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  width: 24px;
-  height: 24px;
-  background: #27ae60;
-  border: 4px solid #1a1a1a;
-  border-radius: 50%;
+  border: 3px solid #b8860b;
+  background: #110808 center/cover no-repeat;
 }
 
 .user-info h2 {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
   margin: 0 0 0.5rem;
   color: #b8860b;
+  word-break: break-word;
 }
 
-.email,
-.phone {
+.email {
   margin: 0.4rem 0;
   color: #aaa;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 3vw, 1rem);
 }
 
+/* Статистика */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+  gap: clamp(0.75rem, 2vw, 1rem);
   margin-bottom: 3rem;
 }
 
 .stat-card {
   background: #222;
-  padding: 1.5rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
   border-radius: 16px;
   text-align: center;
   border: 1px solid #333;
-  transition: transform 0.3s;
+  transition: all 0.3s;
 }
 
 .stat-card:hover {
-  transform: translateY(-8px);
+  transform: translateY(-4px);
   border-color: #b8860b;
 }
 
 .stat-value {
-  font-size: 2.5rem;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
   font-weight: bold;
   color: #b8860b;
+  line-height: 1;
 }
 
 .stat-label {
   color: #888;
-  font-size: 0.9rem;
+  font-size: clamp(0.8rem, 2.5vw, 0.9rem);
   margin-top: 0.5rem;
 }
 
+/* Секции */
 .section {
-  margin-bottom: 3rem;
+  margin-bottom: clamp(2rem, 5vw, 3rem);
 }
 
 .section h3 {
-  font-size: 1.8rem;
+  font-size: clamp(1.5rem, 4vw, 1.8rem);
   margin-bottom: 1.5rem;
   color: #b8860b;
   position: relative;
@@ -410,26 +406,30 @@ const formatPrice = (value: number) =>
   border-radius: 2px;
 }
 
+/* Пустые состояния */
 .empty-state {
   text-align: center;
-  padding: 3rem 1rem;
+  padding: clamp(2rem, 5vw, 3rem) 1rem;
   color: #888;
   font-style: italic;
 }
 
 .empty-state p {
   margin-bottom: 1.5rem;
+  font-size: clamp(0.9rem, 3vw, 1rem);
 }
 
 .btn-primary {
   display: inline-block;
   background: linear-gradient(45deg, #b8860b, #d4af37);
   color: black;
-  padding: 1rem 2rem;
+  padding: clamp(0.8rem, 3vw, 1rem) clamp(1.5rem, 4vw, 2rem);
   border-radius: 12px;
   text-decoration: none;
   font-weight: bold;
   transition: all 0.3s;
+  font-size: clamp(0.85rem, 3vw, 1rem);
+  text-align: center;
 }
 
 .btn-primary:hover {
@@ -437,147 +437,173 @@ const formatPrice = (value: number) =>
   box-shadow: 0 10px 20px rgba(184, 134, 11, 0.3);
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1.5rem;
-}
-
+/* Избранное */
 .favorites-grid {
   display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: clamp(12px, 3vw, 16px);
+  grid-template-columns: repeat(auto-fill, minmax(min(140px, 100%), 1fr));
 }
 
 .favorite-card {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   background: #fff;
-  padding: 12px;
+  padding: clamp(8px, 2vw, 12px);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s;
 }
 
-.favorite-card img {
+.favorite-card:hover {
+  transform: translateY(-2px);
+}
+
+.favorite-img {
   width: 100%;
+  height: auto;
+  aspect-ratio: 3/4;
+  object-fit: cover;
   border-radius: 8px;
 }
 
 .favorite-info {
   margin-top: 8px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.favorite-name {
+  font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+  margin: 0 0 0.5rem;
+  line-height: 1.3;
+  color: #333;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.price {
+  font-size: clamp(0.9rem, 3vw, 1rem);
+  font-weight: bold;
+  color: #b8860b;
+  margin: 0.25rem 0;
 }
 
 .remove-favorite-btn {
-  margin-top: 6px;
+  margin-top: auto;
   color: #c00;
   background: transparent;
   border: none;
   cursor: pointer;
+  padding: 6px 0;
+  font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+  transition: color 0.2s;
 }
 
-.qty-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.remove-favorite-btn:hover {
+  color: #f00;
 }
 
-.qty-btn {
-  width: 28px;
-  height: 28px;
-  background: #eee;
-  border-radius: 6px;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.favorite-item,
-.cart-item {
-  background: #222;
-  border-radius: 16px;
-  overflow: hidden;
-  transition: all 0.3s;
-  border: 1px solid #333;
-}
-
-.favorite-item:hover,
-.cart-item:hover {
-  transform: translateY(-10px);
-  border-color: #b8860b;
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
-}
-
-.favorite-item img,
-.cart-item img {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-}
-
-.favorite-item p {
-  padding: 1rem;
-  text-align: center;
-  margin: 0;
-  font-weight: 500;
-}
-
+/* Корзина */
 .cart-items {
   background: #1e1e1e;
   border-radius: 16px;
-  padding: 1.5rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
   border: 1px solid #333;
-  color: var(--gold-color);
 }
 
 .cart-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
-
-  padding: 1rem 1rem;
+  gap: clamp(0.75rem, 3vw, 1rem);
+  padding: clamp(0.75rem, 2vw, 1rem);
   border-bottom: 1px solid #333;
+  flex-wrap: wrap;
 }
 
 .cart-item:last-child {
   border-bottom: none;
 }
 
-.cart-item img {
-  width: 80px;
-  height: 80px;
+.cart-img {
+  width: clamp(60px, 15vw, 80px);
+  height: clamp(60px, 15vw, 80px);
   border-radius: 12px;
   object-fit: cover;
+  flex-shrink: 0;
+}
+
+.cart-info {
+  flex: 1;
+  min-width: min(200px, 100%);
+}
+
+.cart-name {
+  font-size: clamp(0.9rem, 3vw, 1rem);
+  margin: 0 0 0.5rem;
+  color: #b8860b;
+  word-break: break-word;
+}
+
+/* Управление количеством */
+.qty-controls {
+  display: flex;
+  align-items: center;
+  gap: clamp(6px, 2vw, 10px);
+  margin: 0.5rem 0;
+}
+
+.qty-btn {
+  width: clamp(24px, 6vw, 28px);
+  height: clamp(24px, 6vw, 28px);
+  background: #eee;
+  border-radius: 6px;
+  border: none;
+  font-size: clamp(16px, 4vw, 20px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qty {
+  font-size: clamp(0.9rem, 3vw, 1rem);
+  font-weight: bold;
+  min-width: 20px;
+  text-align: center;
+}
+
+.sum {
+  font-size: clamp(0.85rem, 2.5vw, 0.9rem);
+  margin: 0.5rem 0 0;
+  color: #ccc;
 }
 
 .remove-btn {
-  margin-left: auto;
-
   background: var(--primary-color, #b8860b);
   color: #fff;
-  padding: 11px 20px;
+  padding: clamp(0.6rem, 2vw, 0.7rem) clamp(1rem, 3vw, 1.2rem);
   border-radius: 8px;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: clamp(0.8rem, 2.5vw, 0.85rem);
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
+
 .remove-btn:hover {
   background: var(--secondary-color);
   color: #000;
   transform: translateY(-1px);
 }
 
-.info h4 {
-  margin: 0 0 0.5rem;
-  color: #b8860b;
-}
-
+/* Итог корзины */
 .cart-total {
   margin-top: 2rem;
-  text-align: right;
-  font-size: 1.4rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -585,19 +611,90 @@ const formatPrice = (value: number) =>
   gap: 1rem;
 }
 
-/* Адаптивность */
+.total-text {
+  font-size: clamp(1.1rem, 4vw, 1.4rem);
+  color: #b8860b;
+}
+
+.checkout-btn {
+  flex-shrink: 0;
+}
+
+/* Адаптивность для мобильных устройств */
 @media (max-width: 768px) {
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
   .user-card {
     flex-direction: column;
     text-align: center;
-  }
-  .profile-header {
-    flex-direction: column;
     gap: 1rem;
-    text-align: center;
   }
+
+  .cart-item {
+    flex-direction: column;
+    text-align: center;
+    align-items: stretch;
+  }
+
+  .cart-info {
+    min-width: auto;
+  }
+
   .cart-total {
     flex-direction: column;
+    text-align: center;
+  }
+
+  .remove-btn {
+    align-self: center;
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-container {
+    padding: 70px 12px 30px;
+  }
+
+  .favorites-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-item {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .qty-controls {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 320px) {
+  .profile-container {
+    padding: 60px 8px 20px;
+  }
+
+  .favorites-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .user-card,
+  .stat-card,
+  .cart-items {
+    border-radius: 12px;
+  }
+
+  .btn-primary,
+  .remove-btn {
+    width: 100%;
     text-align: center;
   }
 }
