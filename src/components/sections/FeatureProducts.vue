@@ -32,7 +32,7 @@
         }"
       >
         <SwiperSlide v-for="product in featuredProducts" :key="product.id">
-          <ProductCard :product="product" catalogView />
+          <ProductCard :product="product" :catalog-view="true" />
         </SwiperSlide>
 
         <!-- Навигация -->
@@ -51,6 +51,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useProductsStore } from '@/stores/products'
+import { useAuthStore } from '@/stores/auth' // Добавляем импорт auth store
 import ProductCard from '@/components/ui/ProductCard.vue'
 
 // Swiper imports
@@ -61,6 +62,7 @@ import 'swiper/css/navigation'
 import 'swiper/css/pagination'
 
 const productsStore = useProductsStore()
+const authStore = useAuthStore() // Инициализируем auth store
 
 // Swiper modules
 const modules = [Autoplay, Navigation]
@@ -91,7 +93,6 @@ onMounted(() => {
   })
 })
 </script>
-
 <style scoped>
 .container-feature {
   margin: 0 auto;
@@ -231,7 +232,7 @@ onMounted(() => {
 
 @media (max-width: 768px) {
   .featured-products {
-    padding:0 0 1.5rem;
+    padding: 0 0 1.5rem;
   }
 
   .products-slider {

@@ -357,10 +357,10 @@ const isAuthenticated = computed(() => !!auth.token)
   align-items: center;
   gap: 10px;
   background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(212, 175, 55, 0.4);
+  border: 2px solid rgba(14, 13, 12, 0.4);
   padding: 0.6rem 1rem;
   border-radius: 16px;
-  color: white;
+  color: var(--primary-color);
   text-decoration: none;
   font-weight: 500;
   transition: all 0.3s;
@@ -386,6 +386,7 @@ const isAuthenticated = computed(() => !!auth.token)
   width: 100%;
   height: 100%;
   object-fit: cover;
+  background: #ccc url(../images/avatar/avatar.svg) center/cover no-repeat;
 }
 
 .profile-name {

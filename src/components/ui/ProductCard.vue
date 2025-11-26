@@ -92,23 +92,43 @@ const props = withDefaults(defineProps<Props>(), {
 const router = useRouter()
 const auth = useAuthStore()
 
-// Для favorites
+// Исправленная логика для favorites
 const isLiked = computed(() => {
   if (!auth.user || !props.product.id) return false
-  return auth.user.favorites.some((f: string | { _id?: number | string; id?: number | string }) => {
-    const favId = typeof f === 'string' ? f : f._id ?? f.id
-    return favId === props.product.id
+
+  const productId = String(props.product.id)
+  const favorites = auth.user.favorites || []
+
+  return favorites.some((favorite: any) => {
+    // Если favorite - строка, сравниваем как строки
+    if (typeof favorite === 'string') {
+      return favorite === productId
+    }
+
+    // Если favorite - объект, ищем ID в разных возможных полях
+    if (typeof favorite === 'object' && favorite !== null) {
+      const favId = String(favorite.id || favorite._id || favorite.productId || '')
+      return favId === productId
+    }
+
+    return false
   })
 })
 
 // Для корзины
 const inCart = computed(() => {
   if (!auth.user || !props.product.id) return false
-  return auth.user.cart.some(item => {
-    const productId = typeof item.product === 'string'
-      ? item.product
-      : (item.product._id ?? item.product.id)
-    return productId === props.product.id
+
+  const productId = String(props.product.id)
+  const cart = auth.user.cart || []
+
+  return cart.some((item) => {
+    const cartProductId = String(
+      typeof item.product === 'string'
+        ? item.product
+        : item.product?.id || item.product?._id || item.product?.productId || '',
+    )
+    return cartProductId === productId
   })
 })
 
@@ -117,10 +137,13 @@ const toggleLike = () => {
     alert('Войдите в аккаунт')
     return
   }
+
+  const productId = String(props.product.id)
+
   if (isLiked.value) {
-    auth.removeFromFavorites(props.product.id)
+    auth.removeFromFavorites(productId)
   } else {
-    auth.addToFavorites(props.product.id)
+    auth.addToFavorites(productId)
   }
 }
 
@@ -129,8 +152,11 @@ const addToCart = () => {
     alert('Войдите в аккаунт')
     return
   }
-  auth.addToCart(props.product.id, 1)
+
+  const productId = String(props.product.id)
+  auth.addToCart(productId, 1)
 }
+
 // Переход на товар
 function goToProduct() {
   router.push(`/product/${props.product.id}`)
@@ -141,13 +167,12 @@ function shareProduct() {
     navigator.share({
       title: props.product.name,
       text: props.product.brand,
-      url: window.location.origin + `/product/${props.product.id}`
+      url: window.location.origin + `/product/${props.product.id}`,
     })
   }
 }
 </script>
 <style scoped>
-
 /* Активное сердечко */
 .qa-btn--active {
   background: #e74c3c !important;

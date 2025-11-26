@@ -43,7 +43,7 @@
 
       <div v-else class="favorites-grid">
         <div v-for="product in favoriteProducts" :key="product.id" class="favorite-card">
-          <img :src="product.images[0] || '/cigar-placeholder.jpg'" alt="product" />
+          <img :src="getProductImage(product.images[0])" :alt="product.name" />
 
           <div class="favorite-info">
             <h4>{{ product.name }}</h4>
@@ -66,7 +66,7 @@
 
       <div v-else class="cart-items">
         <div v-for="item in cartProducts" :key="item.product.id" class="cart-item">
-          <img :src="item.product.images[0] || '/cigar-placeholder.jpg'" alt="product" />
+          <img :src="getProductImage(item.product.images[0])" :alt="item.product.name" />
 
           <div class="info">
             <h4>{{ item.product.name }}</h4>
@@ -83,6 +83,9 @@
               Всего:
               <strong>{{ formatPrice(item.product.pricePerUnit * item.qty) }}</strong>
             </p>
+
+            <!-- Отладочная информация -->
+            <small style="color: #666">ID: {{ item.product.id }}, Qty: {{ item.qty }}</small>
           </div>
 
           <button @click="removeFromCart(item.product.id)" class="remove-btn">Удалить</button>
@@ -90,7 +93,7 @@
 
         <!-- Итог -->
         <div class="cart-total">
-          <strong>Итого: {{ formatPrice(auth.cartTotalPrice) }}</strong>
+          <strong>Итого: {{ formatPrice(cartTotal) }}</strong>
           <router-link to="/checkout" class="btn-primary">Оформить заказ</router-link>
         </div>
       </div>
@@ -115,6 +118,19 @@ const { products } = storeToRefs(catalog)
 const username = computed(() => auth.user?.name || auth.user?.email?.split('@')[0] || 'Гость')
 
 /* -----------------------------
+   ФУНКЦИЯ ДЛЯ ИЗОБРАЖЕНИЙ
+--------------------------------*/
+const getProductImage = (src: string) => {
+  if (!src) return '/images/products/default.webp'
+
+  if (src.startsWith('http') || src.startsWith('/')) {
+    return src
+  }
+
+  return `/images/products/${src}`
+}
+
+/* -----------------------------
    ИЗБРАННОЕ
 --------------------------------*/
 const favoriteProducts = computed<Product[]>(() => {
@@ -133,7 +149,7 @@ const toggleFavorite = (id: number) => {
 }
 
 /* -----------------------------
-   КОРЗИНА
+   КОРЗИНА (ЛОКАЛЬНАЯ ЛОГИКА ДО ФИКСА БЭКЕНДА)
 --------------------------------*/
 const cartProducts = computed(
   () =>
@@ -145,14 +161,67 @@ const cartProducts = computed(
       .filter(Boolean) as { product: Product; qty: number }[],
 )
 
-const updateQty = (productId: number, qty: number) => {
-  if (qty <= 0) return auth.removeFromCart(String(productId))
-  auth.updateCartItem(String(productId), qty)
+// Локальное обновление корзины (временное решение)
+const updateQty = async (productId: number, newQty: number) => {
+  console.log('Updating quantity:', productId, newQty)
+
+  try {
+    if (newQty <= 0) {
+      await auth.removeFromCart(String(productId))
+    } else {
+      await auth.updateCartItem(String(productId), newQty)
+    }
+  } catch (error) {
+    console.error('API error, using local update:', error)
+    // Локальное обновление если API не работает
+    localUpdateCart(productId, newQty)
+  }
 }
 
-const removeFromCart = (productId: number) => {
-  auth.removeFromCart(String(productId))
+// Локальное обновление корзины
+const localUpdateCart = (productId: number, newQty: number) => {
+  if (!auth.user) return
+
+  const cart = [...(auth.user.cart || [])]
+  const existingIndex = cart.findIndex((item) => item.product === String(productId))
+
+  if (newQty <= 0) {
+    // Удалить из корзины
+    if (existingIndex !== -1) {
+      cart.splice(existingIndex, 1)
+    }
+  } else {
+    // Обновить количество
+    if (existingIndex !== -1) {
+      cart[existingIndex] = { ...cart[existingIndex], qty: newQty }
+    } else {
+      // Добавить в корзину
+      cart.push({ product: String(productId), qty: newQty })
+    }
+  }
+
+  // Обновляем локальное состояние
+  auth.user.cart = cart
 }
+
+const removeFromCart = async (productId: number) => {
+  console.log('Removing from cart:', productId)
+  try {
+    await auth.removeFromCart(String(productId))
+  } catch (error) {
+    console.error('API error, using local remove:', error)
+    localUpdateCart(productId, 0) // Устанавливаем количество в 0 для удаления
+  }
+}
+
+/* -----------------------------
+   ОБЩАЯ СУММА КОРЗИНЫ
+--------------------------------*/
+const cartTotal = computed(() => {
+  return cartProducts.value.reduce((total, item) => {
+    return total + item.product.pricePerUnit * item.qty
+  }, 0)
+})
 
 /* -----------------------------
    ФОРМАТ ЦЕНЫ
@@ -169,8 +238,7 @@ const formatPrice = (value: number) =>
 .profile-container {
   max-width: 1000px;
   margin: 2rem auto;
-  padding: 150px;
-  color: white;
+  padding: 100px 50px;
 }
 
 .profile-header {
@@ -184,6 +252,7 @@ const formatPrice = (value: number) =>
   font-size: 2.5rem;
   font-weight: 300;
   letter-spacing: 1px;
+  color: var(--primary-color);
 }
 
 .logout-btn {
@@ -224,9 +293,10 @@ const formatPrice = (value: number) =>
 .avatar {
   width: 120px;
   height: 120px;
-  border-radius: 50%;
+  border-radius: 10%;
   object-fit: cover;
   border: 4px solid #b8860b;
+  background: #110808 url(../images/avatar/avatar.svg) center/cover no-repeat;
 }
 
 .online-indicator {
@@ -352,6 +422,9 @@ const formatPrice = (value: number) =>
 }
 
 .favorite-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   background: #fff;
   padding: 12px;
   border-radius: 12px;
@@ -426,12 +499,15 @@ const formatPrice = (value: number) =>
   border-radius: 16px;
   padding: 1.5rem;
   border: 1px solid #333;
+  color: var(--gold-color);
 }
 
 .cart-item {
   display: flex;
+  align-items: center;
   gap: 1rem;
-  padding: 1rem 0;
+
+  padding: 1rem 1rem;
   border-bottom: 1px solid #333;
 }
 
@@ -444,6 +520,25 @@ const formatPrice = (value: number) =>
   height: 80px;
   border-radius: 12px;
   object-fit: cover;
+}
+
+.remove-btn {
+  margin-left: auto;
+
+  background: var(--primary-color, #b8860b);
+  color: #fff;
+  padding: 11px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.remove-btn:hover {
+  background: var(--secondary-color);
+  color: #000;
+  transform: translateY(-1px);
 }
 
 .info h4 {
