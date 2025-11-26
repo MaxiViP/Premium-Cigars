@@ -14,11 +14,11 @@
 const getBackendUrl = () => {
   // Если мы в продакшене, бекенд должен быть на том же домене или указан явно
   if (import.meta.env.PROD) {
-    // Вариант 1: Бекенд на том же домене (рекомендуется)
-    return window.location.origin
+    // // Вариант 1: Бекенд на том же домене (рекомендуется)
+    // return window.location.origin
 
     // Вариант 2: Или укажите явно ваш продакшен бекенд
-    // return 'https://your-backend-domain.com'
+    return 'https://maxivip-premium-cigars-fc19.twc1.net'
   }
   // Для разработки
   return 'http://localhost:5000'
