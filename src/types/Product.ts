@@ -86,7 +86,7 @@ export type Product = Cigar | Accessory
 
 // Элемент корзины — только ID + количество
 export interface CartItem {
-  product: string // "101", "205"
+  product: string
   qty: number
 }
 

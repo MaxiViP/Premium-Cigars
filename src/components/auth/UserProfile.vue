@@ -43,7 +43,7 @@
 
       <div v-else class="favorites-grid">
         <div v-for="product in favoriteProducts" :key="product.id" class="favorite-card">
-          <img :src="getProductImage(product.images[0])" :alt="product.name" />
+          <img :src="getProductImage(product.images?.[0])" :alt="product.name" />
 
           <div class="favorite-info">
             <h4>{{ product.name }}</h4>
@@ -66,7 +66,7 @@
 
       <div v-else class="cart-items">
         <div v-for="item in cartProducts" :key="item.product.id" class="cart-item">
-          <img :src="getProductImage(item.product.images[0])" :alt="item.product.name" />
+          <img :src="getProductImage(item.product.images?.[0])" :alt="item.product.name" />
 
           <div class="info">
             <h4>{{ item.product.name }}</h4>
@@ -102,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { useCatalogStore } from '@/stores/catalog'
@@ -120,7 +120,7 @@ const username = computed(() => auth.user?.name || auth.user?.email?.split('@')[
 /* -----------------------------
    ФУНКЦИЯ ДЛЯ ИЗОБРАЖЕНИЙ
 --------------------------------*/
-const getProductImage = (src: string) => {
+const getProductImage = (src: string | undefined) => {
   if (!src) return '/images/products/default.webp'
 
   if (src.startsWith('http') || src.startsWith('/')) {
@@ -131,17 +131,31 @@ const getProductImage = (src: string) => {
 }
 
 /* -----------------------------
-   ИЗБРАННОЕ
+   ИЗБРАННОЕ - ИСПРАВЛЕННАЯ ВЕРСИЯ
 --------------------------------*/
 const favoriteProducts = computed<Product[]>(() => {
   const favoriteIds = auth.user?.favorites || []
+  console.log('Favorites updated:', favoriteIds) // Отладка
+
   return favoriteIds
-    .map((id) => products.value.find((p) => p.id === Number(id)))
+    .map((id: any) => {
+      const productId = typeof id === 'string' ? Number(id) : Number(id?.id || id?._id || id)
+      return products.value.find((p) => p.id === productId)
+    })
     .filter((p): p is Product => Boolean(p))
 })
 
+// Добавляем watcher для отладки
+watch(favoriteProducts, (newFavorites) => {
+  console.log('Favorite products changed:', newFavorites)
+}, { deep: true })
+
 const toggleFavorite = (id: number) => {
-  if (auth.user?.favorites.includes(String(id))) {
+  console.log('Toggling favorite for:', id)
+  if (auth.user?.favorites.some((fav: any) => {
+    const favId = typeof fav === 'string' ? fav : String(fav?.id || fav?._id || fav)
+    return favId === String(id)
+  })) {
     auth.removeFromFavorites(String(id))
   } else {
     auth.addToFavorites(String(id))
@@ -155,7 +169,10 @@ const cartProducts = computed(
   () =>
     (auth.user?.cart || [])
       .map((item) => {
-        const product = products.value.find((p) => p.id === Number(item.product))
+        const productId = typeof item.product === 'string'
+          ? Number(item.product)
+          : Number(item.product?.id || item.product?._id || item.product)
+        const product = products.value.find((p) => p.id === productId)
         return product ? { product, qty: item.qty } : null
       })
       .filter(Boolean) as { product: Product; qty: number }[],
@@ -183,7 +200,12 @@ const localUpdateCart = (productId: number, newQty: number) => {
   if (!auth.user) return
 
   const cart = [...(auth.user.cart || [])]
-  const existingIndex = cart.findIndex((item) => item.product === String(productId))
+  const existingIndex = cart.findIndex((item) => {
+    const itemProductId = typeof item.product === 'string'
+      ? item.product
+      : String(item.product?.id || item.product?._id || item.product)
+    return itemProductId === String(productId)
+  })
 
   if (newQty <= 0) {
     // Удалить из корзины
@@ -193,7 +215,14 @@ const localUpdateCart = (productId: number, newQty: number) => {
   } else {
     // Обновить количество
     if (existingIndex !== -1) {
-      cart[existingIndex] = { ...cart[existingIndex], qty: newQty }
+      const existingItem = cart[existingIndex]
+      if (existingItem) {
+        cart[existingIndex] = {
+          ...existingItem,
+          qty: newQty,
+          product: existingItem.product // Сохраняем существующий product
+        }
+      }
     } else {
       // Добавить в корзину
       cart.push({ product: String(productId), qty: newQty })
@@ -233,7 +262,6 @@ const formatPrice = (value: number) =>
     minimumFractionDigits: 0,
   }).format(value)
 </script>
-
 <style scoped>
 .profile-container {
   max-width: 1000px;

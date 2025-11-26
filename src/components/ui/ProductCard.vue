@@ -107,7 +107,7 @@ const isLiked = computed(() => {
 
     // Если favorite - объект, ищем ID в разных возможных полях
     if (typeof favorite === 'object' && favorite !== null) {
-      const favId = String(favorite.id || favorite._id || favorite.productId || '')
+      const favId = String(favorite.id || favorite._id || '')
       return favId === productId
     }
 
@@ -126,7 +126,7 @@ const inCart = computed(() => {
     const cartProductId = String(
       typeof item.product === 'string'
         ? item.product
-        : item.product?.id || item.product?._id || item.product?.productId || '',
+        : item.product?.id || item.product?._id || '',
     )
     return cartProductId === productId
   })

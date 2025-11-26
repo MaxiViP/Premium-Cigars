@@ -60,7 +60,7 @@
               <span class="profile-name">
                 {{ displayName }}
               </span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <svg class="profile-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path d="M19 9l-7 7-7-7" stroke-width="2" />
               </svg>
             </router-link>
@@ -531,8 +531,12 @@ const isAuthenticated = computed(() => !!auth.token)
   transform: translateX(10px);
 }
 
-@media (max-width: 930px) {
+@media (max-width: 1024px) {
   .logo-subtitle {
+    display: none;
+  }
+
+  .nav-text {
     display: none;
   }
 }
@@ -556,12 +560,29 @@ const isAuthenticated = computed(() => !!auth.token)
   .logo-subtitle {
     font-size: 0.65rem;
   }
+
+  .mobile-menu-btn {
+    display: none;
+  }
+  .auth-buttons {
+
+  }
+  /* .profile-avatar {
+    display: none;
+  } */
+  .profile-name {
+    display: none;
+  }
+
+  .profile-svg {
+    display: none;
+  }
 }
 
 @media (max-width: 480px) {
-  .navbar .container {
+  /* .navbar .container {
     padding: 0 2px;
-  }
+  } */
   .logo-text h1 {
     font-size: 1.2rem;
   }
