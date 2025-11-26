@@ -39,6 +39,7 @@
                 <span class="nav-icon">📞</span>
                 <span class="nav-text">Контакты</span>
               </router-link>
+              <button @click="auth.logout" class="logout-btn">Выйти</button>
             </li>
           </ul>
           <!-- АВТОРИЗАЦИЯ: ДЕСКТОП -->
@@ -60,7 +61,14 @@
               <span class="profile-name">
                 {{ displayName }}
               </span>
-              <svg class="profile-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <svg
+                class="profile-svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
                 <path d="M19 9l-7 7-7-7" stroke-width="2" />
               </svg>
             </router-link>
@@ -567,8 +575,7 @@ const isAuthenticated = computed(() => !!auth.token)
   .nav-links {
     display: none;
   }
-   .auth-buttons {
-
+  .auth-buttons {
   }
   /* .profile-avatar {
     display: none;

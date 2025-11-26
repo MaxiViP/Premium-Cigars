@@ -10,9 +10,9 @@
 </template>
 
 <script setup lang="ts">
-const base = import.meta.env.VITE_API_URL?.replace(/\/api$/, '') || 'http://localhost:5000'
-const googleUrl = `${base}/api/auth/google`
-const yandexUrl = `${base}/api/auth/yandex`
+const base = 'https://maxivip-premium-cigars-fc19.twc1.net';
+const googleUrl = `${base}/api/auth/google`;
+const yandexUrl = `${base}/api/auth/yandex`;
 </script>
 <style scoped>
 .oauth-buttons {
