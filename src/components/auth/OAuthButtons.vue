@@ -10,9 +10,13 @@
 </template>
 
 <script setup lang="ts">
-const base = 'https://maxivip-premium-cigars-fc19.twc1.net';
-const googleUrl = `${base}/api/auth/google`;
-const yandexUrl = `${base}/api/auth/yandex`;
+// Используем абсолютные URL для OAuth
+const baseUrl = import.meta.env.PROD
+  ? 'https://your-backend-domain.com' // замените на ваш продакшен бекенд
+  : 'http://localhost:5000'
+
+const googleUrl = `${baseUrl}/api/auth/google`
+const yandexUrl = `${baseUrl}/api/auth/yandex`
 </script>
 <style scoped>
 .oauth-buttons {
