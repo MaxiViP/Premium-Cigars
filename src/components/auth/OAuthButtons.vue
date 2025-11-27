@@ -1,14 +1,14 @@
 <template>
   <div class="oauth-buttons">
-    <a :href="googleUrl" class="oauth google" target="_blank" rel="noopener">
+    <!-- УДАЛИ target="_blank" — вот и всё! -->
+    <a :href="googleUrl" class="oauth google" rel="noopener">
       <img src="/icons/google.svg" alt="" /> Войти через Google
     </a>
-    <a :href="yandexUrl" class="oauth yandex" target="_blank" rel="noopener">
+    <a :href="yandexUrl" class="oauth yandex" rel="noopener">
       <img src="/icons/yandex.svg" alt="" /> Войти через Yandex
     </a>
   </div>
 </template>
-
 <script setup lang="ts">
 // const base = import.meta.env.VITE_API_URL?.replace(/\/api$/, '') || 'http://localhost:5000'
 const googleUrl = `${window.location.origin}/api/auth/google`
