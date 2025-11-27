@@ -2,7 +2,7 @@
 import { defineStore } from 'pinia'
 import axios from '@/plugins/axios'
 import router from '@/router'
-
+import type { AxiosError } from 'axios'
 interface CartItem {
   product:
     | string
@@ -30,16 +30,6 @@ interface User {
   createdAt: string
 }
 
-// Тип для ошибок Axios
-interface AxiosError {
-  response?: {
-    data?: {
-      error?: string
-      message?: string
-    }
-  }
-  message: string
-}
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({

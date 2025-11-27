@@ -57,7 +57,7 @@ const handleOAuth = (provider: 'google' | 'yandex') => {
       if (event.data.access && event.data.refresh) {
         auth.handleOAuthSuccess(event.data.access, event.data.refresh)
       } else {
-        auth.fetchUser() // fallback
+        auth.fetchMe() // fallback
       }
 
       router.push('/profile')
