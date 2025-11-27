@@ -27,7 +27,7 @@ const auth = useAuthStore()
 const getBackendUrl = () => {
   // Если это продакшен-домен — всё равно шлём на твой локальный бэк (или ngrok)
   if (window.location.hostname === 'maxivip-premium-cigars-fc19.twc1.net') {
-    return 'https://твой-нгрок-или-ip.ngrok.io/api'
+    return 'https://maxivip-premium-cigars-fc19.twc1.net/api'
     // или
     // return 'http://твой-внешний-ip:5000/api'
   }
