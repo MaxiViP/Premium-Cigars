@@ -1,19 +1,19 @@
 <template>
   <div class="oauth-buttons">
-    <!-- УДАЛИ target="_blank" — вот и всё! -->
-    <a :href="googleUrl" class="oauth google" rel="noopener">
+    <!-- ЖЁСТКИЕ ссылки ТОЛЬКО на продакшн -->
+    <a href="https://maxivip-premium-cigars-fc19.twc1.net/api/auth/google" class="oauth google" rel="noopener">
       <img src="/icons/google.svg" alt="" /> Войти через Google
     </a>
-    <a :href="yandexUrl" class="oauth yandex" rel="noopener">
+    <a href="https://maxivip-premium-cigars-fc19.twc1.net/api/auth/yandex" class="oauth yandex" rel="noopener">
       <img src="/icons/yandex.svg" alt="" /> Войти через Yandex
     </a>
   </div>
 </template>
+
 <script setup lang="ts">
-// const base = import.meta.env.VITE_API_URL?.replace(/\/api$/, '') || 'http://localhost:5000'
-const googleUrl = `${window.location.origin}/api/auth/google`
-const yandexUrl = `${window.location.origin}/api/auth/yandex`
+// НИЧЕГО НЕ ПИШЕМ ЗДЕСЬ — ВСЁ ЖЁСТКО В TEMPLATE
 </script>
+
 <style scoped>
 .oauth-buttons {
   display: flex;

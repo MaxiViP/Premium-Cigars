@@ -12,43 +12,54 @@
 import AppHeader from '@/components/ui/AppHeader.vue'
 import AppFooter from '@/components/ui/AppFooter.vue'
 import { useAuthStore } from '@/stores/auth'
-import { useRoute, useRouter } from 'vue-router' // ← правильно импортируем
+import { useRoute, useRouter } from 'vue-router'
 import { onMounted, watch } from 'vue'
 
 const auth = useAuthStore()
 const route = useRoute()
-const router = useRouter() // ← правильно вызываем!
+const router = useRouter()
 
-// === 1. Обработка OAuth-редиректа (Google / Yandex) ===
-const handleOAuthCallback = () => {
+// =====================
+// 1. Обработка OAuth-редиректа (Google / Yandex)
+// =====================
+const handleOAuthCallback = async () => {
   const params = new URLSearchParams(window.location.search)
   const access = params.get('access')
   const refresh = params.get('refresh')
 
-  if (access && refresh) {
-    auth.setTokens({ access, refresh })
+  if (!access) return
 
-    // Очищаем query из URL
-    window.history.replaceState({}, '', window.location.pathname)
+  // Сохраняем токены
+  auth.setTokens({ access, refresh: refresh || undefined })
 
+  // Очищаем query из URL
+  window.history.replaceState({}, '', window.location.pathname)
+
+  try {
     // Загружаем данные пользователя
-    auth.fetchMe?.()?.finally(() => {
-      auth.loadFromStorage?.()
-    })
+    await auth.fetchMe()
 
-    // Опционально: редирект на главную, если вдруг на /auth/success
+    // Если мы на странице /auth/success — переходим в профиль
     if (route.path.includes('/auth/success')) {
-      router.replace('/') // ← вот где нужен router!
+      router.replace('/profile')
     }
+  } catch (err) {
+    console.error('OAuth login error:', err)
+    alert('Ошибка входа')
+    router.replace('/')
   }
 }
 
-// === 2. Загрузка при старте приложения ===
+// =====================
+// 2. Загрузка токена при старте приложения
+// =====================
 const initAuth = () => {
   auth.loadFromStorage()
 }
 
-// === 3. Плавная прокрутка вверх при смене страницы ===
+// =====================
+// 3. Плавная прокрутка вверх при смене страницы
+// =====================
 watch(
   () => route.path,
   () => {
@@ -56,7 +67,9 @@ watch(
   }
 )
 
-// === Инициализация ===
+// =====================
+// Инициализация
+// =====================
 onMounted(() => {
   initAuth()
   handleOAuthCallback()

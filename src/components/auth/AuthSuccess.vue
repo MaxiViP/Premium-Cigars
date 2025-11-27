@@ -1,5 +1,3 @@
-<!-- src/components/auth/AuthSuccess.vue -->
-
 <template>
   <div style="text-align: center; padding: 4rem; color: white">
     <h2>Вход выполнен успешно!</h2>
@@ -16,28 +14,32 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 
-onMounted(() => {
-  const { access, refresh } = route.query
+onMounted(async () => {
+  // Получаем query параметры
+  const access = route.query.access
+  const refresh = route.query.refresh
 
-  if (access && typeof access === 'string') {
-    // Сохраняем токены
-    auth.setTokens({
-      access,
-      refresh: typeof refresh === 'string' ? refresh : undefined,
-    })
+  // Проверяем, что access — строка
+  if (typeof access !== 'string') {
+    router.replace('/')
+    return
+  }
 
+  // Сохраняем токены
+  auth.setTokens({
+    access,
+    refresh: typeof refresh === 'string' ? refresh : undefined,
+  })
+
+  try {
     // Загружаем данные пользователя
-    auth
-      .fetchMe()
-      .then(() => {
-        // Убираем query из URL и переходим в профиль
-        router.replace('/profile')
-      })
-      .catch(() => {
-        alert('Ошибка входа')
-        router.replace('/')
-      })
-  } else {
+    await auth.fetchMe()
+
+    // Убираем query из URL и переходим в профиль
+    router.replace('/profile')
+  } catch (err) {
+    console.error('OAuth login error:', err)
+    alert('Ошибка входа')
     router.replace('/')
   }
 })
