@@ -16,10 +16,20 @@ import { useAuthStore } from '@/stores/auth'
 const router = useRouter()
 const auth = useAuthStore()
 
-// Правильное определение backend URL
+
+// const getBackendUrl = () => {
+//   if (import.meta.env.PROD || window.location.hostname === 'maxivip-premium-cigars-fc19.twc1.net') {
+//     return 'https://maxivip-premium-cigars-fc19.twc1.net/api'
+//   }
+//   return 'http://localhost:5000/api'
+// }
+
 const getBackendUrl = () => {
-  if (import.meta.env.PROD || window.location.hostname === 'maxivip-premium-cigars-fc19.twc1.net') {
-    return 'https://maxivip-premium-cigars-fc19.twc1.net/api'
+  // Если это продакшен-домен — всё равно шлём на твой локальный бэк (или ngrok)
+  if (window.location.hostname === 'maxivip-premium-cigars-fc19.twc1.net') {
+    return 'https://твой-нгрок-или-ip.ngrok.io/api'
+    // или
+    // return 'http://твой-внешний-ip:5000/api'
   }
   return 'http://localhost:5000/api'
 }
