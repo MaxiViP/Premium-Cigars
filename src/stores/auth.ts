@@ -45,6 +45,8 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null as User | null,
     token: null as string | null,
+    refreshToken: null as string | null, // Добавляем refresh token
+    isLoading: false,
   }),
 
   getters: {
@@ -59,6 +61,106 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
+    // ========================
+    // УПРАВЛЕНИЕ ТОКЕНАМИ
+    // ========================
+
+    setTokens(tokens: { access: string; refresh?: string }) {
+      this.token = tokens.access
+      this.refreshToken = tokens.refresh || null
+
+      localStorage.setItem('accessToken', tokens.access)
+      if (tokens.refresh) {
+        localStorage.setItem('refreshToken', tokens.refresh)
+      }
+
+      axios.defaults.headers.common['Authorization'] = `Bearer ${tokens.access}`
+    },
+
+    setToken(token: string) {
+      this.setTokens({ access: token })
+    },
+
+    // ========================
+    // ЗАГРУЗКА ДАННЫХ ПОЛЬЗОВАТЕЛЯ
+    // ========================
+
+    async fetchMe() {
+      try {
+        this.isLoading = true
+        const res = await axios.get('/user/me')
+        this.user = res.data.user || res.data
+        console.log('User data loaded:', this.user)
+        return this.user
+      } catch (error) {
+        const err = error as AxiosError
+        console.error('fetchMe error:', err.response?.data || err.message)
+
+        // Если ошибка авторизации - выходим
+        if (err.response?.status === 401) {
+          this.logout()
+        }
+        throw err
+      } finally {
+        this.isLoading = false
+      }
+    },
+
+    async loadFromStorage() {
+      const accessToken = localStorage.getItem('accessToken')
+      const refreshToken = localStorage.getItem('refreshToken')
+
+      if (!accessToken) return false
+
+      this.token = accessToken
+      this.refreshToken = refreshToken
+      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
+
+      try {
+        await this.fetchMe()
+        return true
+      } catch (error) {
+        console.error('Failed to load user from storage:', error)
+        this.logout()
+        return false
+      }
+    },
+
+    // ========================
+    // OAuth УСПЕШНАЯ АВТОРИЗАЦИЯ
+    // ========================
+
+    async handleOAuthSuccess(accessToken: string, refreshToken?: string) {
+      try {
+        console.log('Handling OAuth success with tokens:', {
+          accessToken: !!accessToken,
+          refreshToken: !!refreshToken,
+        })
+
+        // Сохраняем токены
+        this.setTokens({ access: accessToken, refresh: refreshToken })
+
+        // Загружаем данные пользователя
+        await this.fetchMe()
+
+        console.log('OAuth login successful, user:', this.user)
+
+        // Перенаправляем в профиль
+        router.push('/profile')
+
+        return true
+      } catch (error) {
+        console.error('OAuth success handling failed:', error)
+        this.logout()
+        router.push('/auth/failure')
+        return false
+      }
+    },
+
+    // ========================
+    // ИЗБРАННОЕ
+    // ========================
+
     toggleFavorite(productId: string | number) {
       const idStr = String(productId)
 
@@ -69,102 +171,127 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    updateCartQty(productId: string | number, qty: number) {
-      return this.updateCartItem(productId, qty)
-    },
-
-    // Добавляем метод setToken для совместимости с компонентом
-    setToken(token: string) {
-      this.token = token
-      localStorage.setItem('accessToken', token)
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-    },
-
-    setTokens(tokens: { access: string; refresh?: string }) {
-      this.token = tokens.access
-      localStorage.setItem('accessToken', tokens.access)
-      if (tokens.refresh) {
-        localStorage.setItem('refreshToken', tokens.refresh)
-      }
-      axios.defaults.headers.common['Authorization'] = `Bearer ${tokens.access}`
-    },
-
-    async fetchMe() {
-      try {
-        const res = await axios.get('/user/me')
-        this.user = res.data.user || res.data
-        return this.user
-      } catch (error) {
-        const err = error as AxiosError
-        console.error('fetchMe error:', err.response?.data || err.message)
-        this.logout()
-        throw err
-      }
-    },
-
-    async loadFromStorage() {
-      const accessToken = localStorage.getItem('accessToken')
-      if (!accessToken) return
-
-      this.token = accessToken
-      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
-
-      try {
-        await this.fetchMe()
-      } catch {
-        this.logout()
-      }
-    },
-
-    // === КЛЮЧЕВЫЕ ИСПРАВЛЕНИЯ ===
-
     async addToFavorites(productId: string | number) {
       const idStr = String(productId)
-      await axios.post(`/user/favorites/${idStr}`)
+      try {
+        await axios.post(`/user/favorites/${idStr}`)
 
-      if (this.user && !this.user.favorites.includes(idStr)) {
-        this.user.favorites.push(idStr) // сохраняем как string
+        if (this.user && !this.user.favorites.includes(idStr)) {
+          this.user.favorites.push(idStr)
+        }
+      } catch (error) {
+        console.error('Failed to add to favorites:', error)
+        throw error
       }
     },
 
     async removeFromFavorites(productId: string | number) {
       const idStr = String(productId)
-      await axios.delete(`/user/favorites/${idStr}`)
+      try {
+        await axios.delete(`/user/favorites/${idStr}`)
 
-      if (this.user) {
-        this.user.favorites = this.user.favorites.filter((f) => String(f) !== idStr)
+        if (this.user) {
+          this.user.favorites = this.user.favorites.filter((f) => String(f) !== idStr)
+        }
+      } catch (error) {
+        console.error('Failed to remove from favorites:', error)
+        throw error
       }
+    },
+
+    // ========================
+    // КОРЗИНА
+    // ========================
+
+    updateCartQty(productId: string | number, qty: number) {
+      return this.updateCartItem(productId, qty)
     },
 
     async addToCart(productId: string | number, qty: number = 1) {
       const idStr = String(productId)
-      await axios.post('/user/cart', { productId: idStr, qty })
-      await this.fetchMe() // обновляем актуальные данные с сервера
+      try {
+        await axios.post('/user/cart', { productId: idStr, qty })
+        await this.fetchMe() // обновляем актуальные данные с сервера
+      } catch (error) {
+        console.error('Failed to add to cart:', error)
+        throw error
+      }
     },
 
     async removeFromCart(productId: string | number) {
       const idStr = String(productId)
-      await axios.delete(`/user/cart/${idStr}`)
-      await this.fetchMe()
+      try {
+        await axios.delete(`/user/cart/${idStr}`)
+        await this.fetchMe()
+      } catch (error) {
+        console.error('Failed to remove from cart:', error)
+        throw error
+      }
     },
 
     async updateCartItem(productId: string | number, qty: number) {
       const idStr = String(productId)
-      if (qty <= 0) {
-        await this.removeFromCart(idStr)
-      } else {
-        await axios.put(`/user/cart/${idStr}`, { qty })
-        await this.fetchMe()
+      try {
+        if (qty <= 0) {
+          await this.removeFromCart(idStr)
+        } else {
+          await axios.put(`/user/cart/${idStr}`, { qty })
+          await this.fetchMe()
+        }
+      } catch (error) {
+        console.error('Failed to update cart:', error)
+        throw error
       }
     },
 
-    logout() {
-      this.user = null
-      this.token = null
-      delete axios.defaults.headers.common['Authorization']
-      localStorage.removeItem('accessToken')
-      localStorage.removeItem('refreshToken')
-      router.push('/')
+    // ========================
+    // ВЫХОД
+    // ========================
+
+    async logout() {
+      try {
+        // Опционально: уведомляем сервер о выходе
+        await axios.post('/auth/logout')
+      } catch (error) {
+        // Игнорируем ошибки при выходе
+        console.log('Logout request failed (server might be down)')
+      } finally {
+        // Всегда очищаем локальные данные
+        this.user = null
+        this.token = null
+        this.refreshToken = null
+
+        delete axios.defaults.headers.common['Authorization']
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
+
+        router.push('/')
+      }
+    },
+
+    // ========================
+    // ОБНОВЛЕНИЕ ТОКЕНА
+    // ========================
+
+    async refreshTokens() {
+      if (!this.refreshToken) {
+        throw new Error('No refresh token available')
+      }
+
+      try {
+        const response = await axios.post('/auth/refresh', {
+          refreshToken: this.refreshToken,
+        })
+
+        const { access, refresh } = response.data.tokens
+        this.setTokens({ access, refresh })
+
+        return true
+      } catch (error) {
+        console.error('Token refresh failed:', error)
+        this.logout()
+        return false
+      }
     },
   },
 })

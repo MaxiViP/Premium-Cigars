@@ -1,33 +1,97 @@
 <template>
   <div class="oauth-buttons">
-    <a :href="googleUrl" class="oauth google" rel="noopener">
+    <a @click.prevent="handleOAuth('google')" href="#" class="oauth google" rel="noopener">
       <img src="/icons/google.svg" alt="" /> Войти через Google
     </a>
-    <a :href="yandexUrl" class="oauth yandex" rel="noopener">
+    <a @click.prevent="handleOAuth('yandex')" href="#" class="oauth yandex" rel="noopener">
       <img src="/icons/yandex.svg" alt="" /> Войти через Yandex
     </a>
   </div>
 </template>
 
 <script setup lang="ts">
-// Определяем URL backend в зависимости от среды
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const router = useRouter()
+const auth = useAuthStore()
+
+// Правильное определение backend URL
 const getBackendUrl = () => {
-  if (import.meta.env.PROD) {
-    return import.meta.env.VITE_BACKEND_URL || 'https://maxivip-premium-cigars-fc19.twc1.net/api'
+  if (import.meta.env.PROD || window.location.hostname === 'maxivip-premium-cigars-fc19.twc1.net') {
+    return 'https://maxivip-premium-cigars-fc19.twc1.net/api'
   }
-  return import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api'
+  return 'http://localhost:5000/api'
 }
 
 const backendUrl = getBackendUrl()
 
-// Ссылки на OAuth
-const googleUrl = `${backendUrl}/auth/google`
-const yandexUrl = `${backendUrl}/auth/yandex`
+const handleOAuth = (provider: 'google' | 'yandex') => {
+  const url = `${backendUrl}/auth/${provider}`
+  console.log(`Opening OAuth for ${provider}:`, url)
 
-console.log('OAuth URLs:', { googleUrl, yandexUrl })
+  const popup = window.open(
+    url,
+    'oauth',
+    'width=600,height=700,left=200,top=100,scrollbars=yes,resizable=yes'
+  )
+
+  if (!popup) {
+    alert('Разрешите всплывающие окна для этого сайта!')
+    return
+  }
+
+  // Слушаем сообщения от попапа
+  const messageHandler = (event: MessageEvent) => {
+    // КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: проверяем origin правильно!
+    const expectedOrigin = window.location.origin
+    if (event.origin !== expectedOrigin) {
+      console.log('Ignored message from wrong origin:', event.origin)
+      return
+    }
+
+    if (event.data?.type === 'oauth-success') {
+      console.log('OAuth success! Tokens received')
+
+      // Лучше использовать токены из сообщения, а не заново фетчить
+      if (event.data.access && event.data.refresh) {
+        auth.handleOAuthSuccess(event.data.access, event.data.refresh)
+      } else {
+        auth.fetchUser() // fallback
+      }
+
+      router.push('/profile')
+      cleanup()
+    }
+
+    if (event.data?.type === 'oauth-failed') {
+      alert('Ошибка авторизации. Попробуйте ещё раз.')
+      cleanup()
+    }
+  }
+
+  // Проверка закрытия попапа
+  const closedChecker = setInterval(() => {
+    if (popup.closed) {
+      console.log('OAuth popup closed')
+      cleanup()
+    }
+  }, 500)
+
+  const cleanup = () => {
+    window.removeEventListener('message', messageHandler)
+    clearInterval(closedChecker)
+  }
+
+  window.addEventListener('message', messageHandler)
+}
+
+console.log('OAuth backend URL:', backendUrl)
+console.log('Current hostname:', window.location.hostname)
 </script>
 
 <style scoped>
+/* твой стиль остаётся без изменений */
 .oauth-buttons {
   display: flex;
   flex-direction: column;
@@ -46,6 +110,7 @@ console.log('OAuth URLs:', { googleUrl, yandexUrl })
   font-weight: 500;
   transition: all 0.2s;
   color: #000;
+  cursor: pointer;
 }
 
 .oauth.google {

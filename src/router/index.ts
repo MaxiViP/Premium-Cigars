@@ -29,22 +29,24 @@ const router = createRouter({
       name: 'contacts',
       component: () => import('@/views/ContactsView.vue'),
     },
-
-    // Вход по телефону (компонент есть: src/components/auth/LoginPhone.vue)
     {
       path: '/login',
       name: 'login',
       component: () => import('@/components/auth/LoginPhone.vue'),
     },
-
-    // OAuth success (компонент есть: src/components/auth/AuthSuccess.vue)
+    // ✅ ДОБАВЬТЕ ЭТОТ МАРШРУТ
     {
       path: '/auth/success',
-      name: 'auth-success',
+      name: 'AuthSuccess',
       component: () => import('@/components/auth/AuthSuccess.vue'),
+      meta: { requiresAuth: false, hideNavigation: true },
     },
-
-    // Личный кабинет (компонент есть: src/components/Profile.vue)
+    // ✅ ДОБАВЬТЕ МАРШРУТ ДЛЯ ОШИБОК
+    {
+      path: '/auth/failure',
+      name: 'auth-failure',
+      component: () => import('@/components/auth/AuthFailure.vue'),
+    },
     {
       path: '/profile',
       name: 'profile',
@@ -52,7 +54,6 @@ const router = createRouter({
     },
   ],
 
-  // Всегда прокручивать наверх при навигации
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
       return savedPosition
