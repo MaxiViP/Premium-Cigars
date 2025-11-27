@@ -1,17 +1,30 @@
 <template>
   <div class="oauth-buttons">
-    <!-- ЖЁСТКИЕ ссылки ТОЛЬКО на продакшн -->
-    <a href="https://maxivip-premium-cigars-fc19.twc1.net/api/auth/google" class="oauth google" rel="noopener">
+    <a :href="googleUrl" class="oauth google" rel="noopener">
       <img src="/icons/google.svg" alt="" /> Войти через Google
     </a>
-    <a href="https://maxivip-premium-cigars-fc19.twc1.net/api/auth/yandex" class="oauth yandex" rel="noopener">
+    <a :href="yandexUrl" class="oauth yandex" rel="noopener">
       <img src="/icons/yandex.svg" alt="" /> Войти через Yandex
     </a>
   </div>
 </template>
 
 <script setup lang="ts">
-// НИЧЕГО НЕ ПИШЕМ ЗДЕСЬ — ВСЁ ЖЁСТКО В TEMPLATE
+// Определяем URL backend в зависимости от среды
+const getBackendUrl = () => {
+  if (import.meta.env.PROD) {
+    return import.meta.env.VITE_BACKEND_URL || 'https://maxivip-premium-cigars-fc19.twc1.net/api'
+  }
+  return import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api'
+}
+
+const backendUrl = getBackendUrl()
+
+// Ссылки на OAuth
+const googleUrl = `${backendUrl}/auth/google`
+const yandexUrl = `${backendUrl}/auth/yandex`
+
+console.log('OAuth URLs:', { googleUrl, yandexUrl })
 </script>
 
 <style scoped>

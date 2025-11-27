@@ -15,11 +15,9 @@ const router = useRouter()
 const auth = useAuthStore()
 
 onMounted(async () => {
-  // Получаем query параметры
   const access = route.query.access
   const refresh = route.query.refresh
 
-  // Проверяем, что access — строка
   if (typeof access !== 'string') {
     router.replace('/')
     return
@@ -35,7 +33,7 @@ onMounted(async () => {
     // Загружаем данные пользователя
     await auth.fetchMe()
 
-    // Убираем query из URL и переходим в профиль
+    // Перенаправляем в профиль
     router.replace('/profile')
   } catch (err) {
     console.error('OAuth login error:', err)

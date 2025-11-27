@@ -19,6 +19,28 @@ const auth = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 
+
+onMounted(async () => {
+  if (route.path === '/auth/success') {
+    const access = route.query.access as string | undefined
+    const refresh = route.query.refresh as string | undefined
+
+    if (!access) {
+      router.replace('/')
+      return
+    }
+
+    auth.setTokens({ access, refresh })
+    try {
+      await auth.fetchMe()
+      router.replace('/profile')
+    } catch (err) {
+      console.error('OAuth login error:', err)
+      router.replace('/')
+    }
+  }
+})
+
 // =====================
 // 1. Обработка OAuth-редиректа (Google / Yandex)
 // =====================
