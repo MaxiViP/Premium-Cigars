@@ -1,15 +1,9 @@
 // src/plugins/axios.ts
 import axios from 'axios'
-
-// 🔥 ОБНОВЛЕННАЯ ФУНКЦИЯ - используем ваш бэкенд на Render
-const getBaseURL = (): string => {
-  return import.meta.env.PROD
-    ? 'https://premium-cigars-backend.onrender.com/api'
-    : 'http://localhost:5000/api'
-}
-
+import { getBackendUrl } from '@/config/api'
+ 
 const instance = axios.create({
-  baseURL: getBaseURL(),
+  baseURL: getBackendUrl(),
   timeout: 15000, // Увеличим таймаут для Render
   headers: {
     'Content-Type': 'application/json',

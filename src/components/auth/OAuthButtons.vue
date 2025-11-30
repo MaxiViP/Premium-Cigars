@@ -16,13 +16,10 @@ import { useAuthStore } from '@/stores/auth'
 const router = useRouter()
 const auth = useAuthStore()
 
-// 🔥 ОБНОВЛЕННАЯ ФУНКЦИЯ - используем ваш бэкенд на Render
 const getBackendUrl = (): string => {
-  // В продакшене используем ваш развернутый бэкенд
   if (import.meta.env.PROD) {
     return 'https://premium-cigars-backend.onrender.com/api'
   }
-  // В разработке - локальный бэкенд
   return 'http://localhost:5000/api'
 }
 
@@ -31,7 +28,6 @@ const handleOAuth = (provider: 'google' | 'yandex') => {
   const url = `${backendUrl}/auth/${provider}`
 
   console.log('🚀 OAuth URL:', url)
-  console.log('📍 Current environment:', import.meta.env.PROD ? 'PRODUCTION' : 'DEVELOPMENT')
 
   const popup = window.open(
     url,
@@ -45,13 +41,15 @@ const handleOAuth = (provider: 'google' | 'yandex') => {
   }
 
   const messageHandler = (event: MessageEvent) => {
-    const expectedOrigin = window.location.origin
-    console.log('📨 Received message from:', event.origin)
+    // Разрешаем сообщения только от нашего фронтенда
+    const allowedOrigins = [window.location.origin]
 
-    if (event.origin !== expectedOrigin) {
+    if (!allowedOrigins.includes(event.origin)) {
       console.log('❌ Ignored message from wrong origin:', event.origin)
       return
     }
+
+    console.log('📨 Received OAuth message:', event.data)
 
     if (event.data?.type === 'oauth-success') {
       console.log('✅ OAuth success! Tokens received')
@@ -65,7 +63,7 @@ const handleOAuth = (provider: 'google' | 'yandex') => {
 
     if (event.data?.type === 'oauth-failed') {
       console.error('❌ OAuth failed:', event.data.error)
-      alert('Ошибка авторизации. Попробуйте ещё раз.')
+      alert('Ошибка авторизации: ' + (event.data.error || 'Неизвестная ошибка'))
       cleanup()
     }
   }
@@ -84,13 +82,7 @@ const handleOAuth = (provider: 'google' | 'yandex') => {
 
   window.addEventListener('message', messageHandler)
 }
-
-// Логи для отладки
-console.log('🔧 Backend URL:', getBackendUrl())
-console.log('🌐 Current hostname:', window.location.hostname)
-console.log('🚀 Environment:', import.meta.env.MODE)
 </script>
-
 <style scoped>
 /* твой стиль остаётся без изменений */
 .oauth-buttons {
