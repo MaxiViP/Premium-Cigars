@@ -3,13 +3,13 @@
     <!-- Заголовок -->
     <header class="profile-header">
       <h1>Личный кабинет</h1>
-      <button @click="auth.logout" class="logout-btn">Выйти</button>
+      <button @click="logout" class="logout-btn">Выйти</button>
     </header>
 
     <!-- Карточка пользователя -->
     <div class="user-card">
       <div class="avatar-wrapper">
-        <img :src="auth.user?.avatar || 'default-avatar.svg'" alt="avatar" class="avatar" />class="avatar" />
+        <img :src="auth.user?.avatar || 'default-avatar.svg'" alt="avatar" class="avatar"/>
       </div>
       <div class="user-info">
         <h2>{{ username }}</h2>
@@ -106,10 +106,36 @@ import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { useCatalogStore } from '@/stores/catalog'
 import type { Product } from '@/types/Product'
+import { useRouter } from 'vue-router'
 
 const auth = useAuthStore()
 const catalog = useCatalogStore()
 const { products } = storeToRefs(catalog)
+
+
+const router = useRouter()
+
+
+/* -----------------------------
+   ВЫХОД ИЗ АККАУНТА
+--------------------------------*/
+const logout = async () => {
+  try {
+    console.log('Logging out...')
+
+    // Вызываем logout из store
+    await auth.logout()
+
+    // Редирект на главную
+    router.push('/')
+
+    // Опционально: обновляем страницу для чистого состояния
+    // window.location.reload()
+
+  } catch (error) {
+    console.error('Logout error:', error)
+  }
+}
 
 /* -----------------------------
    USERNAME

@@ -84,7 +84,6 @@
 
           <button @click="verifyCode" :disabled="loading" class="btn-submit">Подтвердить</button>
 
-          <!-- ИСПРАВЛЕНО: теперь без ошибки парсинга -->
           <button
             @click="
               () => {
@@ -113,7 +112,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import OAuthButtons from '@/components/auth/OAuthButtons.vue'
@@ -148,6 +147,21 @@ const getErrorMessage = (error: unknown): string => {
   return 'Неизвестная ошибка'
 }
 
+// ========================
+// АВТОМАТИЧЕСКОЕ ЗАКРЫТИЕ ПРИ УСПЕШНОЙ АВТОРИЗАЦИИ
+// ========================
+
+// Следим за состоянием авторизации
+watch(
+  () => auth.isAuthenticated,
+  (isAuthenticated) => {
+    if (isAuthenticated && props.isOpen) {
+      console.log('User authenticated, closing modal...')
+      success('Авторизация успешна!')
+    }
+  }
+)
+
 // Методы
 const toggleMode = () => {
   mode.value = mode.value === 'login' ? 'register' : 'login'
@@ -166,7 +180,7 @@ const submitEmail = async () => {
 
     auth.setTokens(res.data.tokens)
     await auth.fetchMe()
-    success('Вход успешен!')
+    // Модальное окно закроется автоматически через watch
   } catch (error) {
     alert(getErrorMessage(error))
   } finally {
@@ -192,7 +206,7 @@ const verifyCode = async () => {
     const res = await axios.post('/auth/phone/verify', { phone: phone.value, code: code.value })
     auth.setTokens(res.data.tokens)
     await auth.fetchMe()
-    success('Вход через телефон успешен!')
+    // Модальное окно закроется автоматически через watch
   } catch (error) {
     alert(getErrorMessage(error))
   } finally {
@@ -203,18 +217,29 @@ const verifyCode = async () => {
 const success = (msg: string) => {
   successMessage.value = msg
   setTimeout(() => {
-    props.onClose()
+    closeModal()
     router.push('/profile')
   }, 1200)
 }
 
-const close = () => {
-  email.value = password.value = phone.value = code.value = ''
+const closeModal = () => {
+  // Сбрасываем все состояния
+  email.value = ''
+  password.value = ''
+  phone.value = ''
+  code.value = ''
   phoneStep.value = 1
   mode.value = 'login'
   activeTab.value = 'email'
   successMessage.value = ''
+  loading.value = false
+
+  // Закрываем модальное окно
   props.onClose()
+}
+
+const close = () => {
+  closeModal()
 }
 
 // Обработка OAuth success редиректа
@@ -228,11 +253,31 @@ onMounted(() => {
       successMessage.value = 'Вход через Google/Yandex успешен!'
       setTimeout(() => {
         router.replace('/profile')
-        props.onClose?.()
+        closeModal()
       }, 1200)
     })
   }
 })
+
+// Следим за изменениями маршрута для OAuth
+watch(
+  () => route.path,
+  (newPath) => {
+    if (newPath === '/auth/success' && route.query.access && props.isOpen) {
+      const access = route.query.access as string
+      const refresh = route.query.refresh as string
+
+      auth.setTokens({ access, refresh })
+      auth.fetchMe().then(() => {
+        successMessage.value = 'Вход через Google/Yandex успешен!'
+        setTimeout(() => {
+          router.replace('/profile')
+          closeModal()
+        }, 1200)
+      })
+    }
+  }
+)
 </script>
 <style scoped>
 .modal-overlay {

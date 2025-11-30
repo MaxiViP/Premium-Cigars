@@ -30,7 +30,6 @@ interface User {
   createdAt: string
 }
 
-
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null as User | null,
@@ -239,27 +238,26 @@ export const useAuthStore = defineStore('auth', {
     // ========================
 
     async logout() {
-      try {
-        // Опционально: уведомляем сервер о выходе
-        await axios.post('/auth/logout')
-      } catch (error) {
-        // Игнорируем ошибки при выходе
-        console.log('Logout request failed (server might be down)')
-      } finally {
-        // Всегда очищаем локальные данные
-        this.user = null
-        this.token = null
-        this.refreshToken = null
+      // 1. Немедленно очищаем состояние
+      this.user = null
+      this.token = null
+      this.refreshToken = null
 
-        delete axios.defaults.headers.common['Authorization']
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
+      // 2. Очищаем localStorage
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
+      localStorage.removeItem('user')
 
-        router.push('/')
-      }
-    },
+      // 3. Очищаем заголовки
+      delete axios.defaults.headers.common['Authorization']
 
-    // ========================
+      // 4. Пытаемся уведомить сервер (неблокирующе)
+      axios.post('/auth/logout').catch(() => {})
+
+      // 5. Редирект и обновление
+      router.push('/')
+      setTimeout(() => window.location.reload(), 100)
+    }, // ========================
     // ОБНОВЛЕНИЕ ТОКЕНА
     // ========================
 
