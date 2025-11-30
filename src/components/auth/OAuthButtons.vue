@@ -12,19 +12,15 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { getBackendUrl } from '@/config/api'
 
 const router = useRouter()
 const auth = useAuthStore()
 
-const getBackendUrl = (): string => {
-  if (import.meta.env.PROD) {
-    return 'https://premium-cigars-backend.onrender.com/api'
-  }
-  return 'http://localhost:5000/api'
-}
-
 const handleOAuth = (provider: 'google' | 'yandex') => {
+
   const backendUrl = getBackendUrl()
+  const backendOrigin = new URL(backendUrl).origin   // ← добавляем
   const url = `${backendUrl}/auth/${provider}`
 
   console.log('🚀 OAuth URL:', url)
@@ -32,7 +28,7 @@ const handleOAuth = (provider: 'google' | 'yandex') => {
   const popup = window.open(
     url,
     'oauth',
-    'width=600,height=700,left=200,top=100,scrollbars=yes,resizable=yes'
+    'width=600,height=700,left=200,top=100,scrollbars=yes,resizable=yes',
   )
 
   if (!popup) {
@@ -41,8 +37,12 @@ const handleOAuth = (provider: 'google' | 'yandex') => {
   }
 
   const messageHandler = (event: MessageEvent) => {
-    // Разрешаем сообщения только от нашего фронтенда
-    const allowedOrigins = [window.location.origin]
+
+    // Разрешаем сообщения от фронта и от бэка
+    const allowedOrigins = [
+      window.location.origin,
+      backendOrigin
+    ]
 
     if (!allowedOrigins.includes(event.origin)) {
       console.log('❌ Ignored message from wrong origin:', event.origin)
@@ -83,8 +83,9 @@ const handleOAuth = (provider: 'google' | 'yandex') => {
   window.addEventListener('message', messageHandler)
 }
 </script>
+
 <style scoped>
-/* твой стиль остаётся без изменений */
+/* стиль без изменений */
 .oauth-buttons {
   display: flex;
   flex-direction: column;
