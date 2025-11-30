@@ -120,22 +120,17 @@ export const useAuthStore = defineStore('auth', {
     // ========================
 
     // В stores/auth.ts обновите OAuth обработку
+    // В методе handleOAuthSuccess
     async handleOAuthSuccess(accessToken: string, refreshToken?: string) {
       try {
-        console.log('Handling OAuth success with tokens:', {
-          accessToken: !!accessToken,
-          refreshToken: !!refreshToken,
-        })
+        console.log('🔑 Handling OAuth success with tokens')
 
-        // Сохраняем токены
         this.setTokens({ access: accessToken, refresh: refreshToken })
-
-        // Загружаем данные пользователя
         await this.fetchMe()
 
-        console.log('OAuth login successful, user:', this.user)
+        console.log('✅ OAuth login successful, user:', this.user?.email)
 
-        // Отправляем сообщение об успехе в opener (если есть)
+        // Отправляем сообщение об успехе в opener
         if (window.opener) {
           window.opener.postMessage(
             {
@@ -147,14 +142,11 @@ export const useAuthStore = defineStore('auth', {
           )
         }
 
-        // Перенаправляем в профиль
         router.push('/profile')
-
         return true
       } catch (error) {
-        console.error('OAuth success handling failed:', error)
+        console.error('❌ OAuth success handling failed:', error)
 
-        // Отправляем сообщение об ошибке
         if (window.opener) {
           window.opener.postMessage(
             {
@@ -166,37 +158,9 @@ export const useAuthStore = defineStore('auth', {
         }
 
         this.logout()
-        router.push('/auth/failure')
         return false
       }
     },
-
-    // async handleOAuthSuccess(accessToken: string, refreshToken?: string) {
-    //   try {
-    //     console.log('Handling OAuth success with tokens:', {
-    //       accessToken: !!accessToken,
-    //       refreshToken: !!refreshToken,
-    //     })
-
-    //     // Сохраняем токены
-    //     this.setTokens({ access: accessToken, refresh: refreshToken })
-
-    //     // Загружаем данные пользователя
-    //     await this.fetchMe()
-
-    //     console.log('OAuth login successful, user:', this.user)
-
-    //     // Перенаправляем в профиль
-    //     router.push('/profile')
-
-    //     return true
-    //   } catch (error) {
-    //     console.error('OAuth success handling failed:', error)
-    //     this.logout()
-    //     router.push('/auth/failure')
-    //     return false
-    //   }
-    // },
 
     // ========================
     // ИЗБРАННОЕ

@@ -12,16 +12,26 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { getBackendUrl } from '@/config/api'
 
 const router = useRouter()
 const auth = useAuthStore()
+
+// 🔥 ОБНОВЛЕННАЯ ФУНКЦИЯ - используем ваш бэкенд на Render
+const getBackendUrl = (): string => {
+  // В продакшене используем ваш развернутый бэкенд
+  if (import.meta.env.PROD) {
+    return 'https://premium-cigars-backend.onrender.com/api'
+  }
+  // В разработке - локальный бэкенд
+  return 'http://localhost:5000/api'
+}
 
 const handleOAuth = (provider: 'google' | 'yandex') => {
   const backendUrl = getBackendUrl()
   const url = `${backendUrl}/auth/${provider}`
 
-  console.log(`Opening OAuth for ${provider}:`, url)
+  console.log('🚀 OAuth URL:', url)
+  console.log('📍 Current environment:', import.meta.env.PROD ? 'PRODUCTION' : 'DEVELOPMENT')
 
   const popup = window.open(
     url,
@@ -34,38 +44,35 @@ const handleOAuth = (provider: 'google' | 'yandex') => {
     return
   }
 
-  // Слушаем сообщения от попапа
   const messageHandler = (event: MessageEvent) => {
-    // КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: проверяем origin правильно!
     const expectedOrigin = window.location.origin
+    console.log('📨 Received message from:', event.origin)
+
     if (event.origin !== expectedOrigin) {
-      console.log('Ignored message from wrong origin:', event.origin)
+      console.log('❌ Ignored message from wrong origin:', event.origin)
       return
     }
 
     if (event.data?.type === 'oauth-success') {
-      console.log('OAuth success! Tokens received')
+      console.log('✅ OAuth success! Tokens received')
 
       if (event.data.access && event.data.refresh) {
         auth.handleOAuthSuccess(event.data.access, event.data.refresh)
-      } else {
-        auth.fetchMe() // fallback
+        router.push('/profile')
       }
-
-      router.push('/profile')
       cleanup()
     }
 
     if (event.data?.type === 'oauth-failed') {
+      console.error('❌ OAuth failed:', event.data.error)
       alert('Ошибка авторизации. Попробуйте ещё раз.')
       cleanup()
     }
   }
 
-  // Проверка закрытия попапа
   const closedChecker = setInterval(() => {
     if (popup.closed) {
-      console.log('OAuth popup closed')
+      console.log('📪 OAuth popup closed by user')
       cleanup()
     }
   }, 500)
@@ -78,8 +85,10 @@ const handleOAuth = (provider: 'google' | 'yandex') => {
   window.addEventListener('message', messageHandler)
 }
 
-console.log('OAuth backend URL:', getBackendUrl())
-console.log('Current hostname:', window.location.hostname)
+// Логи для отладки
+console.log('🔧 Backend URL:', getBackendUrl())
+console.log('🌐 Current hostname:', window.location.hostname)
+console.log('🚀 Environment:', import.meta.env.MODE)
 </script>
 
 <style scoped>

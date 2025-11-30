@@ -5,11 +5,11 @@
 
       <!-- Вкладки -->
       <div class="tabs">
-        <button :class="{ active: activeTab === 'email' }" @click="activeTab = 'email'">
-          Email / Пароль
-        </button>
         <button :class="{ active: activeTab === 'phone' }" @click="activeTab = 'phone'">
           Телефон
+        </button>
+        <button :class="{ active: activeTab === 'email' }" @click="activeTab = 'email'">
+          Email / Пароль
         </button>
       </div>
 
@@ -159,7 +159,7 @@ watch(
       console.log('User authenticated, closing modal...')
       success('Авторизация успешна!')
     }
-  }
+  },
 )
 
 // Методы
@@ -230,13 +230,26 @@ const closeModal = () => {
   code.value = ''
   phoneStep.value = 1
   mode.value = 'login'
-  activeTab.value = 'email'
+  activeTab.value = 'phone'
   successMessage.value = ''
   loading.value = false
 
   // Закрываем модальное окно
   props.onClose()
 }
+
+watch(
+  () => props.isOpen,
+  (value) => {
+    if (value) {
+      // модалка открылась → ставим телефон
+      activeTab.value = 'phone'
+      phoneStep.value = 1
+      code.value = ''
+    }
+  }
+)
+
 
 const close = () => {
   closeModal()
@@ -276,7 +289,7 @@ watch(
         }, 1200)
       })
     }
-  }
+  },
 )
 </script>
 <style scoped>
