@@ -1,12 +1,13 @@
 // src/plugins/axios.ts
 import axios from 'axios'
 import { getBackendUrl } from '@/config/api'
- 
+
 const instance = axios.create({
   baseURL: getBackendUrl(),
   timeout: 15000, // Увеличим таймаут для Render
   headers: {
     'Content-Type': 'application/json',
+    withCredentials: true,
   },
 })
 
