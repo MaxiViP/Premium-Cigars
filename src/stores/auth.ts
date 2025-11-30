@@ -119,6 +119,7 @@ export const useAuthStore = defineStore('auth', {
     // OAuth УСПЕШНАЯ АВТОРИЗАЦИЯ
     // ========================
 
+    // В stores/auth.ts обновите OAuth обработку
     async handleOAuthSuccess(accessToken: string, refreshToken?: string) {
       try {
         console.log('Handling OAuth success with tokens:', {
@@ -134,17 +135,68 @@ export const useAuthStore = defineStore('auth', {
 
         console.log('OAuth login successful, user:', this.user)
 
+        // Отправляем сообщение об успехе в opener (если есть)
+        if (window.opener) {
+          window.opener.postMessage(
+            {
+              type: 'oauth-success',
+              access: accessToken,
+              refresh: refreshToken,
+            },
+            window.location.origin,
+          )
+        }
+
         // Перенаправляем в профиль
         router.push('/profile')
 
         return true
       } catch (error) {
         console.error('OAuth success handling failed:', error)
+
+        // Отправляем сообщение об ошибке
+        if (window.opener) {
+          window.opener.postMessage(
+            {
+              type: 'oauth-failed',
+              error: 'Authentication failed',
+            },
+            window.location.origin,
+          )
+        }
+
         this.logout()
         router.push('/auth/failure')
         return false
       }
     },
+
+    // async handleOAuthSuccess(accessToken: string, refreshToken?: string) {
+    //   try {
+    //     console.log('Handling OAuth success with tokens:', {
+    //       accessToken: !!accessToken,
+    //       refreshToken: !!refreshToken,
+    //     })
+
+    //     // Сохраняем токены
+    //     this.setTokens({ access: accessToken, refresh: refreshToken })
+
+    //     // Загружаем данные пользователя
+    //     await this.fetchMe()
+
+    //     console.log('OAuth login successful, user:', this.user)
+
+    //     // Перенаправляем в профиль
+    //     router.push('/profile')
+
+    //     return true
+    //   } catch (error) {
+    //     console.error('OAuth success handling failed:', error)
+    //     this.logout()
+    //     router.push('/auth/failure')
+    //     return false
+    //   }
+    // },
 
     // ========================
     // ИЗБРАННОЕ

@@ -12,32 +12,15 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { getBackendUrl } from '@/config/api'
 
 const router = useRouter()
 const auth = useAuthStore()
 
-
-// const getBackendUrl = () => {
-//   if (import.meta.env.PROD || window.location.hostname === 'maxivip-premium-cigars-fc19.twc1.net') {
-//     return 'https://maxivip-premium-cigars-fc19.twc1.net/api'
-//   }
-//   return 'http://localhost:5000/api'
-// }
-
-const getBackendUrl = () => {
-  // Если это продакшен-домен — всё равно шлём на твой локальный бэк (или ngrok)
-  if (window.location.hostname === 'maxivip-premium-cigars-fc19.twc1.net') {
-    return 'https://maxivip-premium-cigars-fc19.twc1.net/api'
-    // или
-    // return 'http://твой-внешний-ip:5000/api'
-  }
-  return 'http://localhost:5000/api'
-}
-
-const backendUrl = getBackendUrl()
-
 const handleOAuth = (provider: 'google' | 'yandex') => {
+  const backendUrl = getBackendUrl()
   const url = `${backendUrl}/auth/${provider}`
+
   console.log(`Opening OAuth for ${provider}:`, url)
 
   const popup = window.open(
@@ -63,7 +46,6 @@ const handleOAuth = (provider: 'google' | 'yandex') => {
     if (event.data?.type === 'oauth-success') {
       console.log('OAuth success! Tokens received')
 
-      // Лучше использовать токены из сообщения, а не заново фетчить
       if (event.data.access && event.data.refresh) {
         auth.handleOAuthSuccess(event.data.access, event.data.refresh)
       } else {
@@ -96,7 +78,7 @@ const handleOAuth = (provider: 'google' | 'yandex') => {
   window.addEventListener('message', messageHandler)
 }
 
-console.log('OAuth backend URL:', backendUrl)
+console.log('OAuth backend URL:', getBackendUrl())
 console.log('Current hostname:', window.location.hostname)
 </script>
 
