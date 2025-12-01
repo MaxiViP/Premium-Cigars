@@ -1756,6 +1756,9 @@ onMounted(() => {
 }
 
 .catalog-product-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   transition: transform 0.2s ease;
 
   &:hover {

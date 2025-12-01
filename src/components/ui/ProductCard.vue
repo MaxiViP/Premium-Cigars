@@ -204,6 +204,7 @@ function shareProduct() {
   transition: all 0.28s ease;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   cursor: pointer;
   outline: none;
   height: 100%;
@@ -326,6 +327,7 @@ function shareProduct() {
   margin-bottom: 4px;
 }
 .product-name {
+  height: 50px;
   font-size: 1.18rem;
   font-weight: 700;
   color: #1a1a1a;

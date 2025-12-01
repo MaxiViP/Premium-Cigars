@@ -39,7 +39,6 @@
                 <span class="nav-icon">📞</span>
                 <span class="nav-text">Контакты</span>
               </router-link>
-              <button @click="auth.logout" class="logout-btn">Выйти</button>
             </li>
           </ul>
           <!-- АВТОРИЗАЦИЯ: ДЕСКТОП -->
@@ -61,6 +60,7 @@
               <span class="profile-name">
                 {{ displayName }}
               </span>
+              <!-- <button @click="auth.logout" class="logout-btn">Выйти</button> -->
               <svg
                 class="profile-svg"
                 width="16"

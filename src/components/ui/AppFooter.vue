@@ -18,8 +18,8 @@
           <h4>Категории</h4>
           <div class="line"></div>
           <ul>
-            <li><router-link to="/catalog?category=cigars">Сигары</router-link></li>
-            <li><router-link to="/catalog?category=accessories">Аксессуары</router-link></li>
+            <li class="link-item"><router-link to="/catalog?category=cigars">Сигары</router-link></li>
+            <li class="link-item"><router-link to="/catalog?category=accessories">Аксессуары</router-link></li>
           </ul>
         </div>
 
@@ -108,14 +108,14 @@ const scrollToTop = () => {
   padding: 4rem 0 2rem;
   position: relative;
   font-family: 'Georgia', serif;
-  border-radius: 25px 25px 0 0;
+  border-radius: 10px 10px 0 0;
 }
 
 /* Верхняя сетка футера */
 .footer-content {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 3rem;
+  gap: 1rem;
   margin-bottom: 3rem;
   margin-left: 0;
 }
@@ -170,6 +170,19 @@ const scrollToTop = () => {
   margin-bottom: 0.7rem;
 }
 
+.link-item a {
+
+  text-decoration: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+.link-item a:hover {
+  background-color: #f0f0f0;
+  color: #42b983;
+}
+
+/*
 .footer-section_img {
   background: url('/images/background/1.jpg');
   background-size: 50%;
@@ -179,7 +192,7 @@ const scrollToTop = () => {
   background: url('/images/background/tabak_list.jpg');
   background-size: 55%;
   margin: -15px;
-}
+} */
 
 .footer-section_info p {
   text-align: center;

@@ -1,91 +1,30 @@
 <template>
   <div class="oauth-buttons">
-    <a @click.prevent="handleOAuth('google')" href="#" class="oauth google" rel="noopener">
+    <a @click.prevent="handleOAuth('google')" class="oauth google" rel="noopener">
       <img src="/icons/google.svg" alt="" /> Войти через Google
     </a>
-    <a @click.prevent="handleOAuth('yandex')" href="#" class="oauth yandex" rel="noopener">
+    <a @click.prevent="handleOAuth('yandex')" class="oauth yandex" rel="noopener">
       <img src="/icons/yandex.svg" alt="" /> Войти через Yandex
     </a>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
 import { getBackendUrl } from '@/config/api'
 
-const router = useRouter()
-const auth = useAuthStore()
-
+// Самое простое и надёжное решение 2025 года
 const handleOAuth = (provider: 'google' | 'yandex') => {
-
-  const backendUrl = getBackendUrl()
-  const backendOrigin = new URL(backendUrl).origin   // ← добавляем
+  const backendUrl = getBackendUrl() // уже заканчивается на /api
   const url = `${backendUrl}/auth/${provider}`
 
-  console.log('🚀 OAuth URL:', url)
+  console.log('Redirecting to OAuth:', url)
 
-  const popup = window.open(
-    url,
-    'oauth',
-    'width=600,height=700,left=200,top=100,scrollbars=yes,resizable=yes',
-  )
-
-  if (!popup) {
-    alert('Разрешите всплывающие окна для этого сайта!')
-    return
-  }
-
-  const messageHandler = (event: MessageEvent) => {
-
-    // Разрешаем сообщения от фронта и от бэка
-    const allowedOrigins = [
-      window.location.origin,
-      backendOrigin
-    ]
-
-    if (!allowedOrigins.includes(event.origin)) {
-      console.log('❌ Ignored message from wrong origin:', event.origin)
-      return
-    }
-
-    console.log('📨 Received OAuth message:', event.data)
-
-    if (event.data?.type === 'oauth-success') {
-      console.log('✅ OAuth success! Tokens received')
-
-      if (event.data.access && event.data.refresh) {
-        auth.handleOAuthSuccess(event.data.access, event.data.refresh)
-        router.push('/profile')
-      }
-      cleanup()
-    }
-
-    if (event.data?.type === 'oauth-failed') {
-      console.error('❌ OAuth failed:', event.data.error)
-      alert('Ошибка авторизации: ' + (event.data.error || 'Неизвестная ошибка'))
-      cleanup()
-    }
-  }
-
-  const closedChecker = setInterval(() => {
-    if (popup.closed) {
-      console.log('📪 OAuth popup closed by user')
-      cleanup()
-    }
-  }, 500)
-
-  const cleanup = () => {
-    window.removeEventListener('message', messageHandler)
-    clearInterval(closedChecker)
-  }
-
-  window.addEventListener('message', messageHandler)
+  // Просто редиректим на бэкенд — никаких popup!
+  window.location.href = url
 }
 </script>
 
 <style scoped>
-/* стиль без изменений */
 .oauth-buttons {
   display: flex;
   flex-direction: column;

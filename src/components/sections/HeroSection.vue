@@ -74,7 +74,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0 25px 25px;
+  border-radius: 0 10px 10px;
   background-image: url('/hero.jpg');
   background-position: center;
   background-size: cover;
