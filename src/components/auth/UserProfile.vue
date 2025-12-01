@@ -448,6 +448,7 @@ const formatPrice = (value: number): string =>
     minimumFractionDigits: 0,
   }).format(value)
 </script>
+
 <style scoped>
 /* Кнопка удаления с крестиком */
 .remove-favorite-btn {
@@ -625,7 +626,7 @@ const formatPrice = (value: number): string =>
 .profile-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 80px 16px 40px;
+  padding: 80px 16px 0;
   min-height: 100vh;
 }
 
@@ -864,6 +865,10 @@ const formatPrice = (value: number): string =>
   color: #f00;
 }
 
+.cart-clickable-area {
+  display: contents;
+}
+
 /* Корзина */
 .cart-items {
   background: #1e1e1e;
@@ -875,6 +880,7 @@ const formatPrice = (value: number): string =>
 .cart-item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: clamp(0.75rem, 3vw, 1rem);
   padding: clamp(0.75rem, 2vw, 1rem);
   border-bottom: 1px solid #333;
@@ -1020,7 +1026,7 @@ const formatPrice = (value: number): string =>
 
 @media (max-width: 480px) {
   .profile-container {
-    padding: 70px 12px 30px;
+    padding: 70px 12px 0;
   }
 
   .favorites-grid {
