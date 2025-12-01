@@ -144,22 +144,26 @@ const router = useRouter()
 /* -----------------------------
    СОСТОЯНИЕ ДЛЯ ОТСЧЕТА УДАЛЕНИЯ
 --------------------------------*/
-const countdowns = ref<
-  Record<number, { value: number | string; timerId?: number; resetting?: boolean }>
->({})
+interface CountdownData {
+  value: number | string
+  timerId?: ReturnType<typeof setTimeout>
+  resetting?: boolean
+}
+
+const countdowns = ref<Record<number, CountdownData>>({})
 
 // Проверяем, идет ли отсчет для конкретного товара
-const isCounting = (productId: number) => {
-  return (
-    countdowns.value[productId] !== undefined &&
-    countdowns.value[productId].value !== '✕' &&
-    typeof countdowns.value[productId].value === 'number' &&
-    countdowns.value[productId].value > 0
-  )
+const isCounting = (productId: number): boolean => {
+  const countdown = countdowns.value[productId]
+  if (!countdown) return false
+
+  return countdown.value !== '✕' &&
+         typeof countdown.value === 'number' &&
+         countdown.value > 0
 }
 
 // Получаем текущее значение отсчета
-const getCountdownValue = (productId: number) => {
+const getCountdownValue = (productId: number): number | string => {
   const countdown = countdowns.value[productId]
   return countdown ? countdown.value : 0
 }
@@ -167,12 +171,14 @@ const getCountdownValue = (productId: number) => {
 /* -----------------------------
    ОБРАБОТЧИК УДАЛЕНИЯ С ОТСЧЕТОМ
 --------------------------------*/
-const handleRemoveClick = (productId: number) => {
+const handleRemoveClick = (productId: number): void => {
+  const countdown = countdowns.value[productId]
+
   // Если уже идет отсчет
-  if (isCounting(productId)) {
+  if (isCounting(productId) && countdown) {
     // Сбрасываем отсчет с анимацией
-    if (countdowns.value[productId].timerId) {
-      clearTimeout(countdowns.value[productId].timerId)
+    if (countdown.timerId) {
+      clearTimeout(countdown.timerId)
     }
 
     // Анимация сброса
@@ -190,9 +196,10 @@ const handleRemoveClick = (productId: number) => {
 
   // Начинаем отсчет с 3
   let count = 3
-  countdowns.value[productId] = { value: count }
+  const initialData: CountdownData = { value: count }
+  countdowns.value[productId] = initialData
 
-  const timerId = window.setInterval(() => {
+  const timerId = setInterval(() => {
     count--
 
     if (count > 0) {
@@ -204,13 +211,16 @@ const handleRemoveClick = (productId: number) => {
       // Выполняем удаление
       toggleFavorite(productId)
     }
-  }, 1000) as unknown as number
+  }, 1000)
+
+  // Сохраняем timerId
+  countdowns.value[productId] = { value: count, timerId }
 }
 
 /* -----------------------------
    ВЫХОД ИЗ АККАУНТА
 --------------------------------*/
-const logout = async () => {
+const logout = async (): Promise<void> => {
   try {
     console.log('Logging out...')
     await auth.logout()
@@ -228,7 +238,7 @@ const username = computed(() => auth.user?.name || auth.user?.email?.split('@')[
 /* -----------------------------
    ФУНКЦИЯ ДЛЯ ИЗОБРАЖЕНИЙ
 --------------------------------*/
-const getProductImage = (src: string | undefined) => {
+const getProductImage = (src: string | undefined): string => {
   if (!src) return '/images/products/default.webp'
 
   if (src.startsWith('http') || src.startsWith('/')) {
@@ -241,35 +251,58 @@ const getProductImage = (src: string | undefined) => {
 /* -----------------------------
    ИЗБРАННОЕ - ИСПРАВЛЕННАЯ ВЕРСИЯ
 --------------------------------*/
+interface FavoriteItem {
+  id?: string | number
+  _id?: string | number
+}
+
 const favoriteProducts = computed<Product[]>(() => {
   const favoriteIds = auth.user?.favorites || []
   console.log('Favorites updated:', favoriteIds)
 
   return favoriteIds
-    .map((id: any) => {
-      const productId = typeof id === 'string' ? Number(id) : Number(id?.id || id?._id || id)
+    .map((id: FavoriteItem | string | number) => {
+      let productId: number
+
+      if (typeof id === 'string') {
+        productId = Number(id)
+      } else if (typeof id === 'number') {
+        productId = id
+      } else {
+        // Объект с полями id или _id
+        const idValue = id.id || id._id || id
+        productId = typeof idValue === 'string' ? Number(idValue) : Number(idValue)
+      }
+
       return products.value.find((p) => p.id === productId)
     })
     .filter((p): p is Product => Boolean(p))
 })
 
 // Добавляем watcher для отладки
-watch(
-  favoriteProducts,
-  (newFavorites) => {
-    console.log('Favorite products changed:', newFavorites)
-  },
-  { deep: true },
-)
+watch(favoriteProducts, (newFavorites) => {
+  console.log('Favorite products changed:', newFavorites)
+}, { deep: true })
 
-const toggleFavorite = (id: number) => {
+const toggleFavorite = (id: number): void => {
   console.log('Toggling favorite for:', id)
-  if (
-    auth.user?.favorites.some((fav: any) => {
-      const favId = typeof fav === 'string' ? fav : String(fav?.id || fav?._id || fav)
-      return favId === String(id)
-    })
-  ) {
+  if (!auth.user?.favorites) return
+
+  const isFavorite = auth.user.favorites.some((fav: FavoriteItem | string | number) => {
+    let favId: string
+
+    if (typeof fav === 'string') {
+      favId = fav
+    } else if (typeof fav === 'number') {
+      favId = String(fav)
+    } else {
+      favId = String(fav.id || fav._id || fav)
+    }
+
+    return favId === String(id)
+  })
+
+  if (isFavorite) {
     auth.removeFromFavorites(String(id))
   } else {
     auth.addToFavorites(String(id))
@@ -279,22 +312,33 @@ const toggleFavorite = (id: number) => {
 /* -----------------------------
    КОРЗИНА (ЛОКАЛЬНАЯ ЛОГИКА ДО ФИКСА БЭКЕНДА)
 --------------------------------*/
-const cartProducts = computed(
-  () =>
-    (auth.user?.cart || [])
-      .map((item) => {
-        const productId =
-          typeof item.product === 'string'
-            ? Number(item.product)
-            : Number(item.product?.id || item.product?._id || item.product)
-        const product = products.value.find((p) => p.id === productId)
-        return product ? { product, qty: item.qty } : null
-      })
-      .filter(Boolean) as { product: Product; qty: number }[],
-)
+interface CartItem {
+  product: string | { id?: string | number; _id?: string | number }
+  qty: number
+}
+
+const cartProducts = computed(() => {
+  const cartItems = auth.user?.cart || [] as CartItem[]
+
+  return cartItems
+    .map((item) => {
+      let productId: number
+
+      if (typeof item.product === 'string') {
+        productId = Number(item.product)
+      } else {
+        const idValue = item.product.id || item.product._id || item.product
+        productId = typeof idValue === 'string' ? Number(idValue) : Number(idValue)
+      }
+
+      const product = products.value.find((p) => p.id === productId)
+      return product ? { product, qty: item.qty } : null
+    })
+    .filter(Boolean) as { product: Product; qty: number }[]
+})
 
 // Локальное обновление корзины (временное решение)
-const updateQty = async (productId: number, newQty: number) => {
+const updateQty = async (productId: number, newQty: number): Promise<void> => {
   console.log('Updating quantity:', productId, newQty)
 
   try {
@@ -310,15 +354,19 @@ const updateQty = async (productId: number, newQty: number) => {
 }
 
 // Локальное обновление корзины
-const localUpdateCart = (productId: number, newQty: number) => {
+const localUpdateCart = (productId: number, newQty: number): void => {
   if (!auth.user) return
 
   const cart = [...(auth.user.cart || [])]
   const existingIndex = cart.findIndex((item) => {
-    const itemProductId =
-      typeof item.product === 'string'
-        ? item.product
-        : String(item.product?.id || item.product?._id || item.product)
+    let itemProductId: string
+
+    if (typeof item.product === 'string') {
+      itemProductId = item.product
+    } else {
+      itemProductId = String(item.product.id || item.product._id || item.product)
+    }
+
     return itemProductId === String(productId)
   })
 
@@ -335,7 +383,7 @@ const localUpdateCart = (productId: number, newQty: number) => {
         cart[existingIndex] = {
           ...existingItem,
           qty: newQty,
-          product: existingItem.product,
+          product: existingItem.product
         }
       }
     } else {
@@ -348,7 +396,7 @@ const localUpdateCart = (productId: number, newQty: number) => {
   auth.user.cart = cart
 }
 
-const removeFromCart = async (productId: number) => {
+const removeFromCart = async (productId: number): Promise<void> => {
   console.log('Removing from cart:', productId)
   try {
     await auth.removeFromCart(String(productId))
@@ -370,14 +418,13 @@ const cartTotal = computed(() => {
 /* -----------------------------
    ФОРМАТ ЦЕНЫ
 --------------------------------*/
-const formatPrice = (value: number) =>
+const formatPrice = (value: number): string =>
   new Intl.NumberFormat('ru-RU', {
     style: 'currency',
     currency: 'RUB',
     minimumFractionDigits: 0,
   }).format(value)
 </script>
-
 <style scoped>
 /* Кнопка удаления с крестиком */
 .remove-favorite-btn {
