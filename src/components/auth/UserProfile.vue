@@ -121,9 +121,13 @@
 
               <!-- Количество -->
               <div class="qty-controls">
-                <button @click.stop="updateQty(item.product.id, item.qty - 1)" class="qty-btn">−</button>
+                <button @click.stop="updateQty(item.product.id, item.qty - 1)" class="qty-btn">
+                  −
+                </button>
                 <span class="qty">{{ item.qty }}</span>
-                <button @click.stop="updateQty(item.product.id, item.qty + 1)" class="qty-btn">+</button>
+                <button @click.stop="updateQty(item.product.id, item.qty + 1)" class="qty-btn">
+                  +
+                </button>
               </div>
 
               <p class="sum">
@@ -132,7 +136,16 @@
               </p>
             </div>
           </div>
-          <button @click="removeFromCart(item.product.id)" class="remove-btn">Удалить</button>
+          <button
+            @click.stop="handleRemoveFromCart(item.product.id)"
+            class="remove-btn"
+            :class="{ counting: isCartCounting(item.product.id) }"
+          >
+            <span v-if="!isCartCounting(item.product.id)">Удалить</span>
+            <span v-else class="cart-countdown">
+              {{ getCartCountdownValue(item.product.id) }}
+            </span>
+          </button>
         </div>
 
         <!-- Итог -->
@@ -333,6 +346,78 @@ const toggleFavorite = (id: number): void => {
 }
 
 /* -----------------------------
+   СОСТОЯНИЕ ДЛЯ ОТСЧЕТА УДАЛЕНИЯ КОРЗИНЫ
+--------------------------------*/
+interface CartCountdownData {
+  value: number | string
+  timerId?: ReturnType<typeof setTimeout>
+  resetting?: boolean
+}
+
+const cartCountdowns = ref<Record<number, CartCountdownData>>({})
+
+// Проверяем, идет ли отсчет для удаления из корзины
+const isCartCounting = (productId: number): boolean => {
+  const countdown = cartCountdowns.value[productId]
+  if (!countdown) return false
+  return countdown.value !== '✕' && typeof countdown.value === 'number' && countdown.value > 0
+}
+
+// Получаем текущее значение отсчета для корзины
+const getCartCountdownValue = (productId: number): number | string => {
+  const countdown = cartCountdowns.value[productId]
+  return countdown ? countdown.value : 0
+}
+
+/* -----------------------------
+   ОБРАБОТЧИК УДАЛЕНИЯ ИЗ КОРЗИНЫ С ОТСЧЕТОМ
+--------------------------------*/
+const handleRemoveFromCart = (productId: number): void => {
+  const countdown = cartCountdowns.value[productId]
+
+  // Если уже идет отсчет
+  if (isCartCounting(productId) && countdown) {
+    // Сбрасываем отсчет
+    if (countdown.timerId) {
+      clearTimeout(countdown.timerId)
+    }
+
+    // Анимация сброса
+    cartCountdowns.value[productId] = {
+      value: '✕',
+      resetting: true,
+    }
+
+    setTimeout(() => {
+      delete cartCountdowns.value[productId]
+    }, 300)
+
+    return
+  }
+
+  // Начинаем отсчет с 3
+  let count = 3
+  cartCountdowns.value[productId] = { value: count }
+
+  const timerId = setInterval(() => {
+    count--
+
+    if (count > 0) {
+      cartCountdowns.value[productId] = { value: count, timerId }
+    } else {
+      clearInterval(timerId)
+      delete cartCountdowns.value[productId]
+
+      // Выполняем удаление из корзины
+      removeFromCart(productId)
+    }
+  }, 1000)
+
+  // Сохраняем timerId
+  cartCountdowns.value[productId] = { value: count, timerId }
+}
+
+/* -----------------------------
    КОРЗИНА (ЛОКАЛЬНАЯ ЛОГИКА ДО ФИКСА БЭКЕНДА)
 --------------------------------*/
 interface CartItem {
@@ -450,6 +535,48 @@ const formatPrice = (value: number): string =>
 </script>
 
 <style scoped>
+/* Стили для кнопки удаления с отсчетом в корзине */
+.remove-btn.counting {
+  background: #ff4444 !important;
+  animation: pulse 1s infinite;
+  min-width: 60px;
+  color: white !important;
+  font-weight: bold;
+}
+
+.remove-btn.counting:hover {
+  background: #ff3333 !important;
+  transform: translateY(-1px) !important;
+}
+
+.remove-btn.counting .cart-countdown {
+  font-size: 1.1em;
+  font-weight: bold;
+  animation: countdown 0.3s ease;
+}
+
+/* Анимация пульсации для отсчета */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(255, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 68, 68, 0);
+  }
+}
+
+.remove-btn.counting .cart-countdown {
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+.cart-countdown {
+  animation: countdown 0.3s ease;
+}
+
 /* Кнопка удаления с крестиком */
 .remove-favorite-btn {
   position: absolute;
