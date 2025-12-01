@@ -41,20 +41,35 @@
         <p>Вы ещё ничего не добавили в избранное</p>
       </div>
 
-      <div v-else class="favorites-grid">
-        <div v-for="product in favoriteProducts" :key="product.id" class="favorite-card">
-          <img :src="getProductImage(product.images?.[0])" :alt="product.name" class="favorite-img" />
+     <div v-else class="favorites-grid">
+  <div v-for="product in favoriteProducts" :key="product.id" class="favorite-card">
+    <img :src="getProductImage(product.images?.[0])" :alt="product.name" class="favorite-img" />
 
-          <div class="favorite-info">
-            <h4 class="favorite-name">{{ product.name }}</h4>
-            <p class="price">{{ formatPrice(product.pricePerUnit) }}</p>
+    <div class="favorite-info">
+      <h4 class="favorite-name">{{ product.name }}</h4>
+      <p class="price">{{ formatPrice(product.pricePerUnit) }}</p>
 
-            <button @click="toggleFavorite(product.id)" class="remove-favorite-btn">
-              Удалить
-            </button>
-          </div>
-        </div>
-      </div>
+      <!-- Кнопка с крестиком и отсчетом -->
+      <button
+        @click="handleRemoveClick(product.id)"
+        class="remove-favorite-btn"
+        :class="{ counting: isCounting(product.id) }"
+      >
+        <!-- Крестик по умолчанию -->
+        <span v-if="!isCounting(product.id)" class="cross-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </span>
+
+        <!-- Отсчет при активации -->
+        <span v-else class="countdown">
+          {{ getCountdownValue(product.id) }}
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
     </section>
 
     <!-- Корзина -->
@@ -107,6 +122,46 @@ import { useAuthStore } from '@/stores/auth'
 import { useCatalogStore } from '@/stores/catalog'
 import type { Product } from '@/types/Product'
 import { useRouter } from 'vue-router'
+
+
+// Улучшенный обработчик с плавными переходами
+const handleRemoveClick = (productId) => {
+  // Если уже идет отсчет
+  if (isCounting(productId)) {
+    // Сбрасываем отсчет с анимацией
+    clearTimeout(countdowns.value[productId].timerId)
+
+    // Анимация сброса
+    countdowns.value[productId] = {
+      value: '✕',
+      resetting: true
+    }
+
+    setTimeout(() => {
+      delete countdowns.value[productId]
+    }, 300)
+
+    return
+  }
+
+  // Начинаем отсчет
+  let count = 3
+  countdowns.value[productId] = { value: count }
+
+  const timerId = setInterval(() => {
+    count--
+
+    if (count > 0) {
+      countdowns.value[productId] = { value: count, timerId }
+    } else {
+      clearInterval(timerId)
+      delete countdowns.value[productId]
+      toggleFavorite(productId)
+    }
+  }, 1000)
+}
+
+
 
 const auth = useAuthStore()
 const catalog = useCatalogStore()
@@ -289,6 +344,47 @@ const formatPrice = (value: number) =>
 </script>
 
 <style scoped>
+
+
+/* Анимация сброса */
+.remove-favorite-btn.resetting {
+  animation: resetAnimation 0.3s ease;
+  background: #4CAF50;
+}
+
+@keyframes resetAnimation {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(-180deg) scale(1.2);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+/* Плавное появление/исчезновение */
+.cross-icon, .countdown {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.remove-favorite-btn.counting .countdown {
+  animation: numberChange 0.3s ease;
+}
+
+@keyframes numberChange {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
 /* Базовые стили */
 .profile-container {
   max-width: 1200px;
@@ -649,12 +745,12 @@ const formatPrice = (value: number) =>
 /* Адаптивность для мобильных устройств */
 @media (max-width: 768px) {
   .profile-header {
-    flex-direction: column;
+    /* flex-direction: column; */
     text-align: center;
   }
 
   .user-card {
-    flex-direction: column;
+    /* flex-direction: column; */
     text-align: center;
     gap: 1rem;
   }

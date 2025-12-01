@@ -2,11 +2,13 @@
   <section class="featured-products" ref="sectionRef">
     <div class="container-feature">
       <!-- Заголовок с параллаксом -->
-      <div class="section-heading" :style="parallaxStyle">
-        <h2 tabindex="-1" autofocus>Рекомендуемые товары</h2>
+      <div  class="section-heading" :style="parallaxStyle">
+        <div tabindex="-6" autofocus class="heading-focus-wrapper">
+        <h2 >Рекомендуемые товары</h2>
         <p>Лучшие сигары и аксессуары из нашей коллекции</p>
         <div class="decor-line"></div>
       </div>
+     </div>
 
       <!-- Skeleton Loader -->
       <div v-if="loading" class="skeleton-container">
@@ -80,7 +82,7 @@
 
       <!-- Кнопка -->
       <div class="catalog-btn-wrapper">
-        <router-link to="/catalog" class="catalog-btn">
+        <router-link to="/catalog" class="catalog-btn" >
           <span>Весь каталог</span>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path
@@ -179,6 +181,14 @@ onMounted(() => {
   max-width: 1440px;
   margin: 0 auto;
   padding: 0 2rem;
+}
+
+.heading-focus-wrapper {
+  outline: none; /* Убираем стандартный outline */
+}
+
+.heading-focus-wrapper:focus {
+  outline: none;
 }
 
 /* SECTION */

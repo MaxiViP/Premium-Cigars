@@ -315,7 +315,7 @@ watch(
 
 .close-btn {
   position: absolute;
-  top: 1rem;
+  top: 5px;
   right: 1rem;
   background: none;
   border: none;
