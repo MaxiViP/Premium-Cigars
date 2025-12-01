@@ -18,8 +18,12 @@
           <h4>Категории</h4>
           <div class="line"></div>
           <ul>
-            <li class="link-item"><router-link to="/catalog?category=cigars">Сигары</router-link></li>
-            <li class="link-item"><router-link to="/catalog?category=accessories">Аксессуары</router-link></li>
+            <li class="link-item">
+              <router-link to="/catalog?category=cigars">Сигары</router-link>
+            </li>
+            <li class="link-item">
+              <router-link to="/catalog?category=accessories">Аксессуары</router-link>
+            </li>
           </ul>
         </div>
 
@@ -171,7 +175,6 @@ const scrollToTop = () => {
 }
 
 .link-item a {
-
   text-decoration: none;
   padding: 5px 10px;
   border-radius: 4px;
@@ -287,7 +290,7 @@ const scrollToTop = () => {
 
 @media (max-width: 480px) {
   .app-footer {
-    border-radius: 50px 50px 0 0;
+    border-radius: 15px 15px 0 0;
     padding: 2rem 0;
   }
 
@@ -295,6 +298,4 @@ const scrollToTop = () => {
     gap: 1rem;
   }
 }
-
-
 </style>

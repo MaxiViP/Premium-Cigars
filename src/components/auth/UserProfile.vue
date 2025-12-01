@@ -157,9 +157,7 @@ const isCounting = (productId: number): boolean => {
   const countdown = countdowns.value[productId]
   if (!countdown) return false
 
-  return countdown.value !== '✕' &&
-         typeof countdown.value === 'number' &&
-         countdown.value > 0
+  return countdown.value !== '✕' && typeof countdown.value === 'number' && countdown.value > 0
 }
 
 // Получаем текущее значение отсчета
@@ -280,9 +278,13 @@ const favoriteProducts = computed<Product[]>(() => {
 })
 
 // Добавляем watcher для отладки
-watch(favoriteProducts, (newFavorites) => {
-  console.log('Favorite products changed:', newFavorites)
-}, { deep: true })
+watch(
+  favoriteProducts,
+  (newFavorites) => {
+    console.log('Favorite products changed:', newFavorites)
+  },
+  { deep: true },
+)
 
 const toggleFavorite = (id: number): void => {
   console.log('Toggling favorite for:', id)
@@ -318,7 +320,7 @@ interface CartItem {
 }
 
 const cartProducts = computed(() => {
-  const cartItems = auth.user?.cart || [] as CartItem[]
+  const cartItems = auth.user?.cart || ([] as CartItem[])
 
   return cartItems
     .map((item) => {
@@ -383,7 +385,7 @@ const localUpdateCart = (productId: number, newQty: number): void => {
         cart[existingIndex] = {
           ...existingItem,
           qty: newQty,
-          product: existingItem.product
+          product: existingItem.product,
         }
       }
     } else {
@@ -966,12 +968,18 @@ const formatPrice = (value: number): string =>
     /* flex-direction: column; */
     text-align: center;
     gap: 1rem;
+    margin-bottom: 5px;
+  }
+
+  .stats-grid {
+    gap: clamp(0.3rem, 1vw, 0.3rem);
+    margin-bottom: 1rem;
   }
 
   .cart-item {
-    flex-direction: column;
+    /* flex-direction: column; */
     text-align: center;
-    align-items: stretch;
+    /* align-items: stretch; */
   }
 
   .cart-info {
@@ -999,7 +1007,7 @@ const formatPrice = (value: number): string =>
   }
 
   .stats-grid {
-    grid-template-columns: 1fr;
+    /* grid-template-columns: 1fr; */
   }
 
   .cart-item {
@@ -1013,7 +1021,7 @@ const formatPrice = (value: number): string =>
 
 @media (max-width: 320px) {
   .profile-container {
-    padding: 60px 8px 20px;
+    padding: 60px 8px 0;
   }
 
   .favorites-grid {
