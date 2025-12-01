@@ -42,7 +42,16 @@
       </div>
 
       <div v-else class="favorites-grid">
-        <div v-for="product in favoriteProducts" :key="product.id" class="favorite-card">
+        <div
+          v-for="product in favoriteProducts"
+          :key="product.id"
+          class="favorite-card"
+          role="link"
+          tabindex="0"
+          @click="goToProduct(product.id)"
+          @keydown.enter.prevent="goToProduct(product.id)"
+          @keydown.space.prevent="goToProduct(product.id)"
+        >
           <img
             :src="getProductImage(product.images?.[0])"
             :alt="product.name"
@@ -51,7 +60,7 @@
 
           <!-- Кнопка удаления в правом верхнем углу -->
           <button
-            @click="handleRemoveClick(product.id)"
+            @click.stop="handleRemoveClick(product.id)"
             class="remove-favorite-btn"
             :class="{ counting: isCounting(product.id) }"
           >
@@ -92,29 +101,37 @@
 
       <div v-else class="cart-items">
         <div v-for="item in cartProducts" :key="item.product.id" class="cart-item">
-          <img
-            :src="getProductImage(item.product.images?.[0])"
-            :alt="item.product.name"
-            class="cart-img"
-          />
+          <div
+            class="cart-clickable-area"
+            @click="goToProduct(item.product.id)"
+            role="link"
+            tabindex="0"
+            @keydown.enter.prevent="goToProduct(item.product.id)"
+            @keydown.space.prevent="goToProduct(item.product.id)"
+          >
+            <img
+              :src="getProductImage(item.product.images?.[0])"
+              :alt="item.product.name"
+              class="cart-img"
+            />
 
-          <div class="cart-info">
-            <h4 class="cart-name">{{ item.product.name }}</h4>
-            <p class="price">{{ formatPrice(item.product.pricePerUnit) }}</p>
+            <div class="cart-info">
+              <h4 class="cart-name">{{ item.product.name }}</h4>
+              <p class="price">{{ formatPrice(item.product.pricePerUnit) }}</p>
 
-            <!-- Количество -->
-            <div class="qty-controls">
-              <button @click="updateQty(item.product.id, item.qty - 1)" class="qty-btn">−</button>
-              <span class="qty">{{ item.qty }}</span>
-              <button @click="updateQty(item.product.id, item.qty + 1)" class="qty-btn">+</button>
+              <!-- Количество -->
+              <div class="qty-controls">
+                <button @click="updateQty(item.product.id, item.qty - 1)" class="qty-btn">−</button>
+                <span class="qty">{{ item.qty }}</span>
+                <button @click="updateQty(item.product.id, item.qty + 1)" class="qty-btn">+</button>
+              </div>
+
+              <p class="sum">
+                Всего:
+                <strong>{{ formatPrice(item.product.pricePerUnit * item.qty) }}</strong>
+              </p>
             </div>
-
-            <p class="sum">
-              Всего:
-              <strong>{{ formatPrice(item.product.pricePerUnit * item.qty) }}</strong>
-            </p>
           </div>
-
           <button @click="removeFromCart(item.product.id)" class="remove-btn">Удалить</button>
         </div>
 
@@ -140,6 +157,10 @@ const auth = useAuthStore()
 const catalog = useCatalogStore()
 const { products } = storeToRefs(catalog)
 const router = useRouter()
+
+const goToProduct = (productId: number | string) => {
+  router.push(`/product/${productId}`)
+}
 
 /* -----------------------------
    СОСТОЯНИЕ ДЛЯ ОТСЧЕТА УДАЛЕНИЯ
