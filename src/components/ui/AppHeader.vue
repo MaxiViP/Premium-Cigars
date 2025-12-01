@@ -398,7 +398,7 @@ const isAuthenticated = computed(() => !!auth.token)
 }
 
 .profile-name {
-  max-width: 120px;
+  /* max-width: 120px; */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

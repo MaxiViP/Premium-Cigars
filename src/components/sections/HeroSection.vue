@@ -75,7 +75,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 0 10px 10px;
-  background-image: url('/hero.jpg');
+  background-image: url('/hero2.jpg');
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
