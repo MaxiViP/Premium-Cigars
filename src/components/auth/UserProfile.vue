@@ -9,7 +9,7 @@
     <!-- Карточка пользователя -->
     <div class="user-card">
       <div class="avatar-wrapper">
-        <img :src="auth.user?.avatar || 'default-avatar.svg'" alt="avatar" class="avatar"/>
+        <img :src="auth.user?.avatar || 'default-avatar.svg'" alt="avatar" class="avatar" />
       </div>
       <div class="user-info">
         <h2>{{ username }}</h2>
@@ -41,35 +41,44 @@
         <p>Вы ещё ничего не добавили в избранное</p>
       </div>
 
-     <div v-else class="favorites-grid">
-  <div v-for="product in favoriteProducts" :key="product.id" class="favorite-card">
-    <img :src="getProductImage(product.images?.[0])" :alt="product.name" class="favorite-img" />
+      <div v-else class="favorites-grid">
+        <div v-for="product in favoriteProducts" :key="product.id" class="favorite-card">
+          <img
+            :src="getProductImage(product.images?.[0])"
+            :alt="product.name"
+            class="favorite-img"
+          />
 
-    <div class="favorite-info">
-      <h4 class="favorite-name">{{ product.name }}</h4>
-      <p class="price">{{ formatPrice(product.pricePerUnit) }}</p>
+          <!-- Кнопка удаления в правом верхнем углу -->
+          <button
+            @click="handleRemoveClick(product.id)"
+            class="remove-favorite-btn"
+            :class="{ counting: isCounting(product.id) }"
+          >
+            <!-- Крестик по умолчанию -->
+            <span v-if="!isCounting(product.id)" class="cross-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M12 4L4 12M4 4L12 12"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </span>
 
-      <!-- Кнопка с крестиком и отсчетом -->
-      <button
-        @click="handleRemoveClick(product.id)"
-        class="remove-favorite-btn"
-        :class="{ counting: isCounting(product.id) }"
-      >
-        <!-- Крестик по умолчанию -->
-        <span v-if="!isCounting(product.id)" class="cross-icon">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </span>
+            <!-- Отсчет при активации -->
+            <span v-else class="countdown">
+              {{ getCountdownValue(product.id) }}
+            </span>
+          </button>
 
-        <!-- Отсчет при активации -->
-        <span v-else class="countdown">
-          {{ getCountdownValue(product.id) }}
-        </span>
-      </button>
-    </div>
-  </div>
-</div>
+          <div class="favorite-info">
+            <h4 class="favorite-name">{{ product.name }}</h4>
+            <p class="price">{{ formatPrice(product.pricePerUnit) }}</p>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Корзина -->
@@ -83,7 +92,11 @@
 
       <div v-else class="cart-items">
         <div v-for="item in cartProducts" :key="item.product.id" class="cart-item">
-          <img :src="getProductImage(item.product.images?.[0])" :alt="item.product.name" class="cart-img" />
+          <img
+            :src="getProductImage(item.product.images?.[0])"
+            :alt="item.product.name"
+            class="cart-img"
+          />
 
           <div class="cart-info">
             <h4 class="cart-name">{{ item.product.name }}</h4>
@@ -116,25 +129,56 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, watch, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { useCatalogStore } from '@/stores/catalog'
 import type { Product } from '@/types/Product'
 import { useRouter } from 'vue-router'
 
+const auth = useAuthStore()
+const catalog = useCatalogStore()
+const { products } = storeToRefs(catalog)
+const router = useRouter()
 
-// Улучшенный обработчик с плавными переходами
-const handleRemoveClick = (productId) => {
+/* -----------------------------
+   СОСТОЯНИЕ ДЛЯ ОТСЧЕТА УДАЛЕНИЯ
+--------------------------------*/
+const countdowns = ref<
+  Record<number, { value: number | string; timerId?: number; resetting?: boolean }>
+>({})
+
+// Проверяем, идет ли отсчет для конкретного товара
+const isCounting = (productId: number) => {
+  return (
+    countdowns.value[productId] !== undefined &&
+    countdowns.value[productId].value !== '✕' &&
+    typeof countdowns.value[productId].value === 'number' &&
+    countdowns.value[productId].value > 0
+  )
+}
+
+// Получаем текущее значение отсчета
+const getCountdownValue = (productId: number) => {
+  const countdown = countdowns.value[productId]
+  return countdown ? countdown.value : 0
+}
+
+/* -----------------------------
+   ОБРАБОТЧИК УДАЛЕНИЯ С ОТСЧЕТОМ
+--------------------------------*/
+const handleRemoveClick = (productId: number) => {
   // Если уже идет отсчет
   if (isCounting(productId)) {
     // Сбрасываем отсчет с анимацией
-    clearTimeout(countdowns.value[productId].timerId)
+    if (countdowns.value[productId].timerId) {
+      clearTimeout(countdowns.value[productId].timerId)
+    }
 
     // Анимация сброса
     countdowns.value[productId] = {
       value: '✕',
-      resetting: true
+      resetting: true,
     }
 
     setTimeout(() => {
@@ -144,11 +188,11 @@ const handleRemoveClick = (productId) => {
     return
   }
 
-  // Начинаем отсчет
+  // Начинаем отсчет с 3
   let count = 3
   countdowns.value[productId] = { value: count }
 
-  const timerId = setInterval(() => {
+  const timerId = window.setInterval(() => {
     count--
 
     if (count > 0) {
@@ -156,20 +200,12 @@ const handleRemoveClick = (productId) => {
     } else {
       clearInterval(timerId)
       delete countdowns.value[productId]
+
+      // Выполняем удаление
       toggleFavorite(productId)
     }
-  }, 1000)
+  }, 1000) as unknown as number
 }
-
-
-
-const auth = useAuthStore()
-const catalog = useCatalogStore()
-const { products } = storeToRefs(catalog)
-
-
-const router = useRouter()
-
 
 /* -----------------------------
    ВЫХОД ИЗ АККАУНТА
@@ -177,16 +213,8 @@ const router = useRouter()
 const logout = async () => {
   try {
     console.log('Logging out...')
-
-    // Вызываем logout из store
     await auth.logout()
-
-    // Редирект на главную
     router.push('/')
-
-    // Опционально: обновляем страницу для чистого состояния
-    // window.location.reload()
-
   } catch (error) {
     console.error('Logout error:', error)
   }
@@ -215,7 +243,7 @@ const getProductImage = (src: string | undefined) => {
 --------------------------------*/
 const favoriteProducts = computed<Product[]>(() => {
   const favoriteIds = auth.user?.favorites || []
-  console.log('Favorites updated:', favoriteIds) // Отладка
+  console.log('Favorites updated:', favoriteIds)
 
   return favoriteIds
     .map((id: any) => {
@@ -226,16 +254,22 @@ const favoriteProducts = computed<Product[]>(() => {
 })
 
 // Добавляем watcher для отладки
-watch(favoriteProducts, (newFavorites) => {
-  console.log('Favorite products changed:', newFavorites)
-}, { deep: true })
+watch(
+  favoriteProducts,
+  (newFavorites) => {
+    console.log('Favorite products changed:', newFavorites)
+  },
+  { deep: true },
+)
 
 const toggleFavorite = (id: number) => {
   console.log('Toggling favorite for:', id)
-  if (auth.user?.favorites.some((fav: any) => {
-    const favId = typeof fav === 'string' ? fav : String(fav?.id || fav?._id || fav)
-    return favId === String(id)
-  })) {
+  if (
+    auth.user?.favorites.some((fav: any) => {
+      const favId = typeof fav === 'string' ? fav : String(fav?.id || fav?._id || fav)
+      return favId === String(id)
+    })
+  ) {
     auth.removeFromFavorites(String(id))
   } else {
     auth.addToFavorites(String(id))
@@ -249,9 +283,10 @@ const cartProducts = computed(
   () =>
     (auth.user?.cart || [])
       .map((item) => {
-        const productId = typeof item.product === 'string'
-          ? Number(item.product)
-          : Number(item.product?.id || item.product?._id || item.product)
+        const productId =
+          typeof item.product === 'string'
+            ? Number(item.product)
+            : Number(item.product?.id || item.product?._id || item.product)
         const product = products.value.find((p) => p.id === productId)
         return product ? { product, qty: item.qty } : null
       })
@@ -270,7 +305,6 @@ const updateQty = async (productId: number, newQty: number) => {
     }
   } catch (error) {
     console.error('API error, using local update:', error)
-    // Локальное обновление если API не работает
     localUpdateCart(productId, newQty)
   }
 }
@@ -281,9 +315,10 @@ const localUpdateCart = (productId: number, newQty: number) => {
 
   const cart = [...(auth.user.cart || [])]
   const existingIndex = cart.findIndex((item) => {
-    const itemProductId = typeof item.product === 'string'
-      ? item.product
-      : String(item.product?.id || item.product?._id || item.product)
+    const itemProductId =
+      typeof item.product === 'string'
+        ? item.product
+        : String(item.product?.id || item.product?._id || item.product)
     return itemProductId === String(productId)
   })
 
@@ -300,7 +335,7 @@ const localUpdateCart = (productId: number, newQty: number) => {
         cart[existingIndex] = {
           ...existingItem,
           qty: newQty,
-          product: existingItem.product // Сохраняем существующий product
+          product: existingItem.product,
         }
       }
     } else {
@@ -319,7 +354,7 @@ const removeFromCart = async (productId: number) => {
     await auth.removeFromCart(String(productId))
   } catch (error) {
     console.error('API error, using local remove:', error)
-    localUpdateCart(productId, 0) // Устанавливаем количество в 0 для удаления
+    localUpdateCart(productId, 0)
   }
 }
 
@@ -344,12 +379,100 @@ const formatPrice = (value: number) =>
 </script>
 
 <style scoped>
+/* Кнопка удаления с крестиком */
+.remove-favorite-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 2;
+  padding: 0;
+  margin: 0;
+}
 
+.remove-favorite-btn:hover {
+  background: #fff;
+  border-color: #ff4444;
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(255, 68, 68, 0.2);
+}
+
+.remove-favorite-btn:hover .cross-icon svg {
+  stroke: #ff4444;
+}
+
+/* Крестик */
+.cross-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke: #666;
+  transition: stroke 0.3s ease;
+}
+
+/* Состояние отсчета */
+.remove-favorite-btn.counting {
+  background: #ff4444;
+  border-color: #ff4444;
+  color: white;
+  animation: pulse 1s infinite;
+  width: 36px;
+  height: 36px;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(255, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 68, 68, 0);
+  }
+}
+
+/* Текст отсчета */
+.countdown {
+  font-size: 14px;
+  font-weight: 600;
+  animation: countdown 0.3s ease;
+}
+
+@keyframes countdown {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Позиционирование карточки */
+.favorite-card {
+  position: relative;
+  /* ... остальные стили карточки ... */
+}
+
+/* Чтобы крестик не наезжал на текст */
+.favorite-info {
+  padding-right: 40px; /* Отступ для крестика */
+}
 
 /* Анимация сброса */
 .remove-favorite-btn.resetting {
   animation: resetAnimation 0.3s ease;
-  background: #4CAF50;
+  background: #4caf50;
 }
 
 @keyframes resetAnimation {
@@ -365,8 +488,11 @@ const formatPrice = (value: number) =>
 }
 
 /* Плавное появление/исчезновение */
-.cross-icon, .countdown {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+.cross-icon,
+.countdown {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .remove-favorite-btn.counting .countdown {
@@ -384,6 +510,46 @@ const formatPrice = (value: number) =>
   }
 }
 
+/* Анимация сброса */
+.remove-favorite-btn.resetting {
+  animation: resetAnimation 0.3s ease;
+  background: #4caf50;
+}
+
+@keyframes resetAnimation {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(-180deg) scale(1.2);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+/* Плавное появление/исчезновение */
+.cross-icon,
+.countdown {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.remove-favorite-btn.counting .countdown {
+  animation: numberChange 0.3s ease;
+}
+
+@keyframes numberChange {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 
 /* Базовые стили */
 .profile-container {
