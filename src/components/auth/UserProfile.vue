@@ -121,9 +121,9 @@
 
               <!-- Количество -->
               <div class="qty-controls">
-                <button @click="updateQty(item.product.id, item.qty - 1)" class="qty-btn">−</button>
+                <button @click.stop="updateQty(item.product.id, item.qty - 1)" class="qty-btn">−</button>
                 <span class="qty">{{ item.qty }}</span>
-                <button @click="updateQty(item.product.id, item.qty + 1)" class="qty-btn">+</button>
+                <button @click.stop="updateQty(item.product.id, item.qty + 1)" class="qty-btn">+</button>
               </div>
 
               <p class="sum">
