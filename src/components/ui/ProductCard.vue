@@ -12,7 +12,7 @@
       <div class="quick-actions">
         <button
           class="qa-btn"
-          @click.stop.prevent="toggleLike"
+          @click.stop.prevent="toggleLike()"
           :class="{ 'qa-btn--active': isLiked }"
           :aria-label="isLiked ? 'Убрать из избранного' : 'Добавить в избранное'"
         >
@@ -60,10 +60,10 @@
           <button
             v-if="product.inStock"
             class="add-cart-btn"
-            @click.stop.prevent="addToCart"
-            :class="{ 'add-cart-btn--active': inCart }"
+            @click.stop.prevent="addToCart()"
+            :class="{ 'add-cart-btn--active': isInCart }"
           >
-            <span v-if="inCart">В корзине</span>
+            <span v-if="isInCart">В корзине</span>
             <span v-else>В корзину</span>
           </button>
         </div>
@@ -71,14 +71,12 @@
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-import { formatPrice } from '@/utils/formatters'
+import { useProductActions } from '@/composables/useProductActions'
 import ProductImage from './ProductImage.vue'
 import type { Product, Accessory } from '@/types/Product'
+import { formatPrice } from '@/utils/formatters'
 
 interface Props {
   product: Product | Accessory
@@ -90,72 +88,9 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const router = useRouter()
-const auth = useAuthStore()
 
-// Исправленная логика для favorites
-const isLiked = computed(() => {
-  if (!auth.user || !props.product.id) return false
-
-  const productId = String(props.product.id)
-  const favorites = auth.user.favorites || []
-
-  return favorites.some((favorite: any) => {
-    // Если favorite - строка, сравниваем как строки
-    if (typeof favorite === 'string') {
-      return favorite === productId
-    }
-
-    // Если favorite - объект, ищем ID в разных возможных полях
-    if (typeof favorite === 'object' && favorite !== null) {
-      const favId = String(favorite.id || favorite._id || '')
-      return favId === productId
-    }
-
-    return false
-  })
-})
-
-// Для корзины
-const inCart = computed(() => {
-  if (!auth.user || !props.product.id) return false
-
-  const productId = String(props.product.id)
-  const cart = auth.user.cart || []
-
-  return cart.some((item) => {
-    const cartProductId = String(
-      typeof item.product === 'string'
-        ? item.product
-        : item.product?.id || item.product?._id || '',
-    )
-    return cartProductId === productId
-  })
-})
-
-const toggleLike = () => {
-  if (!auth.isAuthenticated) {
-    alert('Войдите в аккаунт')
-    return
-  }
-
-  const productId = String(props.product.id)
-
-  if (isLiked.value) {
-    auth.removeFromFavorites(productId)
-  } else {
-    auth.addToFavorites(productId)
-  }
-}
-
-const addToCart = () => {
-  if (!auth.isAuthenticated) {
-    alert('Войдите в аккаунт')
-    return
-  }
-
-  const productId = String(props.product.id)
-  auth.addToCart(productId, 1)
-}
+// Используем композицию для всех действий с товаром
+const { isLiked, isInCart, toggleLike, addToCart } = useProductActions(props.product.id)
 
 // Переход на товар
 function goToProduct() {

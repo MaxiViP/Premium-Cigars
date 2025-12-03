@@ -21,19 +21,22 @@
                 <div v-else class="out-of-stock-badge">Нет в наличии</div>
               </div>
               <div class="quick-actions">
-                <button class="qa-btn" @click.stop.prevent="handleToggleLike(product.id)">
-                  ❤
+                <button
+                  class="qa-btn"
+                  @click.stop.prevent="handleToggleLike()"
+                  :class="{ 'qa-btn--active': isProductLiked }"
+                  :aria-label="isProductLiked ? 'Убрать из избранного' : 'Добавить в избранное'"
+                >
+                  <span v-if="isProductLiked">♥</span>
+                  <span v-else>♡</span>
                 </button>
-                <button class="qa-btn" @click.stop.prevent="handleShareProduct(product.id)">
-                  ⇄
-                </button>
- 
+                <button class="qa-btn" @click.stop.prevent="handleShareProduct">⇄</button>
               </div>
             </div>
 
             <div class="main-image">
               <img
-                :src="getImageUrl(product.images[0])"
+                :src="getImageUrl(mainImage || product.images[0])"
                 :alt="product.name"
                 class="product-image"
               />
@@ -46,6 +49,7 @@
                 :src="getImageUrl(image)"
                 :alt="`${product.name} - фото ${index + 1}`"
                 class="thumbnail"
+                :class="{ 'thumbnail-active': (mainImage || product.images[0]) === image }"
                 @click="setMainImage(image)"
               />
             </div>
@@ -75,8 +79,14 @@
             </div>
 
             <div class="product-actions">
-              <button class="add-to-cart-btn" :disabled="!product.inStock" @click="addToCart">
-                {{ product.inStock ? 'Добавить в корзину' : 'Нет в наличии' }}
+              <button
+                class="add-to-cart-btn"
+                :disabled="!product.inStock"
+                @click="addToCart"
+                :class="{ 'add-cart-btn--active': isInCart }"
+              >
+                <span v-if="isInCart">В корзине</span>
+                <span v-else>{{ product.inStock ? 'Добавить в корзину' : 'Нет в наличии' }}</span>
               </button>
             </div>
 
@@ -155,9 +165,6 @@
               :key="relatedProduct.id"
               :product="relatedProduct"
               class="related-product-card"
-              @toggle-like="handleToggleLike"
-              @share-product="handleShareProduct"
-              @add-to-cart="handleAddRelatedToCart"
             />
           </div>
         </div>
@@ -178,49 +185,54 @@
 import { computed, ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProductsStore } from '@/stores/products'
+import { useProductActions } from '@/composables/useProductActions'
 import ProductCard from '@/components/ui/ProductCard.vue'
 import { formatPrice } from '@/utils/formatters'
 import type { Product } from '@/types/Product'
 
-function toggleLike(productId: number) {
-  console.log('toggle like', productId)
-}
-
-function shareProduct(productId: number) {
-  console.log('share product', productId)
-}
-
-function addRelatedToCart(productId: number) {
-  console.log('add to cart', productId)
-}
-
-// В секции script
-const handleToggleLike = (productId: number) => {
-  toggleLike(productId)
-}
-
-const handleShareProduct = (productId: number) => {
-  shareProduct(productId)
-}
-
-const handleAddRelatedToCart = (productId: number) => {
-  addRelatedToCart(productId)
-}
-
 const route = useRoute()
-
 const productsStore = useProductsStore()
-const mainImage = ref('')
+const mainImage = ref<string>('')
 
+// Получаем ID товара из роута
 const productId = computed(() => {
   const id = route.params.id
   return typeof id === 'string' ? parseInt(id) : Number(id)
 })
 
+// Получаем данные товара
 const product = computed(() => {
   return productsStore.getProductById(productId.value) as Product | undefined
 })
 
+// Используем композицию для действий с товаром
+const {
+  isLiked: isProductLiked,
+  isInCart,
+  toggleLike: toggleProductLike,
+  addToCart: addProductToCart,
+} = useProductActions(productId.value)
+
+// Обработчики действий
+const handleToggleLike = () => {
+  toggleProductLike()
+}
+
+const handleShareProduct = () => {
+  if (navigator.share && product.value) {
+    navigator.share({
+      title: product.value.name,
+      text: product.value.brand,
+      url: window.location.origin + `/product/${product.value.id}`,
+    })
+  }
+}
+
+const addToCart = () => {
+  addProductToCart()
+}
+
+// Похожие товары
 const relatedProducts = computed(() => {
   if (!product.value) return []
 
@@ -234,7 +246,8 @@ const relatedProducts = computed(() => {
     .slice(0, 4)
 })
 
-const getImageUrl = (imageName: string | undefined) => {
+// Работа с изображениями
+const getImageUrl = (imageName: string | undefined): string => {
   if (!imageName) {
     return '/images/products/default.jpg'
   }
@@ -250,21 +263,42 @@ const setMainImage = (image: string) => {
   mainImage.value = image
 }
 
-const addToCart = () => {
-  if (product.value) {
-    // Здесь будет логика добавления в корзину
-    alert(`Товар "${product.value.name}" добавлен в корзину!`)
-  }
-}
-
 onMounted(() => {
   if (product.value && product.value.images.length > 0) {
-    mainImage.value = product.value?.images[0] ?? ''
+    mainImage.value = product.value.images[0]
   }
 })
 </script>
 
 <style scoped>
+/* Добавьте эти стили в существующие */
+.qa-btn--active {
+  background: #e74c3c !important;
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(231, 76, 60, 0.4);
+}
+
+.qa-btn--active span {
+  font-weight: bold;
+}
+
+.add-cart-btn--active {
+  background: #10b981 !important;
+  color: white;
+}
+
+.add-cart-btn--active:hover {
+  background: #059669 !important;
+  color: white;
+}
+
+.thumbnail-active {
+  border-color: var(--primary-color) !important;
+  border-width: 3px !important;
+}
+
+/* Остальные стили остаются без изменений */
 .product-page {
   min-height: 100vh;
   background: #ffffff;
@@ -423,16 +457,16 @@ onMounted(() => {
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--primary-color);
-  flex-shrink: 1; /* позволяет элементам уменьшаться */
-  min-width: 0; /* обязательно, чтобы flex-shrink работал */
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .price-item {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  flex-shrink: 1; /* позволяет элементам уменьшаться */
-  min-width: 0; /* обязательно, чтобы flex-shrink работал */
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .price-label {
@@ -518,21 +552,6 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
-.wishlist-btn {
-  padding: 1rem 1.5rem;
-  background: transparent;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.wishlist-btn:hover {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-}
-
 .product-description {
   margin-bottom: 2rem;
 }
@@ -567,7 +586,6 @@ onMounted(() => {
 .specs-grid {
   display: flex;
   flex-direction: column;
-  /* gap: 0.75rem; */
 }
 
 .spec-item {
@@ -741,16 +759,9 @@ onMounted(() => {
     margin-bottom: 0;
   }
 
-  .product-info {
-  }
-
   .price-item {
     flex-wrap: wrap;
   }
-
-  /* .main-image {
-    height: 300px;
-  } */
 
   .image-thumbnails {
     justify-content: center;

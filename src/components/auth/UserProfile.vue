@@ -62,10 +62,10 @@
           <button
             @click.stop="handleRemoveClick(product.id)"
             class="remove-favorite-btn"
-            :class="{ counting: isCounting(product.id) }"
+            :class="{ counting: isFavoriteCounting(product.id) }"
           >
             <!-- Крестик по умолчанию -->
-            <span v-if="!isCounting(product.id)" class="cross-icon">
+            <span v-if="!isFavoriteCounting(product.id)" class="cross-icon">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path
                   d="M12 4L4 12M4 4L12 12"
@@ -78,7 +78,7 @@
 
             <!-- Отсчет при активации -->
             <span v-else class="countdown">
-              {{ getCountdownValue(product.id) }}
+              {{ getFavoriteCountdownValue(product.id) }}
             </span>
           </button>
 
@@ -121,11 +121,17 @@
 
               <!-- Количество -->
               <div class="qty-controls">
-                <button @click.stop="updateQty(item.product.id, item.qty - 1)" class="qty-btn">
+                <button
+                  @click.stop="updateCartQuantity(item.product.id, item.qty - 1)"
+                  class="qty-btn"
+                >
                   −
                 </button>
                 <span class="qty">{{ item.qty }}</span>
-                <button @click.stop="updateQty(item.product.id, item.qty + 1)" class="qty-btn">
+                <button
+                  @click.stop="updateCartQuantity(item.product.id, item.qty + 1)"
+                  class="qty-btn"
+                >
                   +
                 </button>
               </div>
@@ -137,7 +143,7 @@
             </div>
           </div>
           <button
-            @click.stop="handleRemoveFromCart(item.product.id)"
+            @click.stop="handleCartCountdown(item.product.id)"
             class="remove-btn"
             :class="{ counting: isCartCounting(item.product.id) }"
           >
@@ -159,94 +165,33 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch, ref } from 'vue'
+import { computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCatalogStore } from '@/stores/catalog'
+import { useProductActions } from '@/composables/useProductActions'
+import { useCountdownActions } from '@/composables/useCountdownActions'
 import type { Product } from '@/types/Product'
-import { useRouter } from 'vue-router'
 
 const auth = useAuthStore()
 const catalog = useCatalogStore()
 const { products } = storeToRefs(catalog)
 const router = useRouter()
 
+// Используем композиции
+const { toggleLike, updateCartQuantity } = useProductActions()
+const {
+  isCounting: isFavoriteCounting,
+  getCountdownValue: getFavoriteCountdownValue,
+  handleCountdown: handleFavoriteCountdown,
+  isCounting: isCartCounting,
+  getCountdownValue: getCartCountdownValue,
+  handleCountdown: handleCartCountdownAction,
+} = useCountdownActions()
+
 const goToProduct = (productId: number | string) => {
   router.push(`/product/${productId}`)
-}
-
-/* -----------------------------
-   СОСТОЯНИЕ ДЛЯ ОТСЧЕТА УДАЛЕНИЯ
---------------------------------*/
-interface CountdownData {
-  value: number | string
-  timerId?: ReturnType<typeof setTimeout>
-  resetting?: boolean
-}
-
-const countdowns = ref<Record<number, CountdownData>>({})
-
-// Проверяем, идет ли отсчет для конкретного товара
-const isCounting = (productId: number): boolean => {
-  const countdown = countdowns.value[productId]
-  if (!countdown) return false
-
-  return countdown.value !== '✕' && typeof countdown.value === 'number' && countdown.value > 0
-}
-
-// Получаем текущее значение отсчета
-const getCountdownValue = (productId: number): number | string => {
-  const countdown = countdowns.value[productId]
-  return countdown ? countdown.value : 0
-}
-
-/* -----------------------------
-   ОБРАБОТЧИК УДАЛЕНИЯ С ОТСЧЕТОМ
---------------------------------*/
-const handleRemoveClick = (productId: number): void => {
-  const countdown = countdowns.value[productId]
-
-  // Если уже идет отсчет
-  if (isCounting(productId) && countdown) {
-    // Сбрасываем отсчет с анимацией
-    if (countdown.timerId) {
-      clearTimeout(countdown.timerId)
-    }
-
-    // Анимация сброса
-    countdowns.value[productId] = {
-      value: '✕',
-      resetting: true,
-    }
-
-    setTimeout(() => {
-      delete countdowns.value[productId]
-    }, 300)
-
-    return
-  }
-
-  // Начинаем отсчет с 3
-  let count = 3
-  const initialData: CountdownData = { value: count }
-  countdowns.value[productId] = initialData
-
-  const timerId = setInterval(() => {
-    count--
-
-    if (count > 0) {
-      countdowns.value[productId] = { value: count, timerId }
-    } else {
-      clearInterval(timerId)
-      delete countdowns.value[productId]
-
-      // Выполняем удаление
-      toggleFavorite(productId)
-    }
-  }, 1000)
-
-  // Сохраняем timerId
-  countdowns.value[productId] = { value: count, timerId }
 }
 
 /* -----------------------------
@@ -272,16 +217,12 @@ const username = computed(() => auth.user?.name || auth.user?.email?.split('@')[
 --------------------------------*/
 const getProductImage = (src: string | undefined): string => {
   if (!src) return '/images/products/default.webp'
-
-  if (src.startsWith('http') || src.startsWith('/')) {
-    return src
-  }
-
+  if (src.startsWith('http') || src.startsWith('/')) return src
   return `/images/products/${src}`
 }
 
 /* -----------------------------
-   ИЗБРАННОЕ - ИСПРАВЛЕННАЯ ВЕРСИЯ
+   ИЗБРАННОЕ
 --------------------------------*/
 interface FavoriteItem {
   id?: string | number
@@ -290,28 +231,23 @@ interface FavoriteItem {
 
 const favoriteProducts = computed<Product[]>(() => {
   const favoriteIds = auth.user?.favorites || []
-  console.log('Favorites updated:', favoriteIds)
-
   return favoriteIds
     .map((id: FavoriteItem | string | number) => {
       let productId: number
-
       if (typeof id === 'string') {
         productId = Number(id)
       } else if (typeof id === 'number') {
         productId = id
       } else {
-        // Объект с полями id или _id
         const idValue = id.id || id._id || id
         productId = typeof idValue === 'string' ? Number(idValue) : Number(idValue)
       }
-
       return products.value.find((p) => p.id === productId)
     })
     .filter((p): p is Product => Boolean(p))
 })
 
-// Добавляем watcher для отладки
+// Отслеживаем изменения избранного
 watch(
   favoriteProducts,
   (newFavorites) => {
@@ -320,105 +256,19 @@ watch(
   { deep: true },
 )
 
-const toggleFavorite = (id: number): void => {
-  console.log('Toggling favorite for:', id)
-  if (!auth.user?.favorites) return
-
-  const isFavorite = auth.user.favorites.some((fav: FavoriteItem | string | number) => {
-    let favId: string
-
-    if (typeof fav === 'string') {
-      favId = fav
-    } else if (typeof fav === 'number') {
-      favId = String(fav)
-    } else {
-      favId = String(fav.id || fav._id || fav)
-    }
-
-    return favId === String(id)
-  })
-
-  if (isFavorite) {
-    auth.removeFromFavorites(String(id))
-  } else {
-    auth.addToFavorites(String(id))
-  }
+// Обработчик удаления из избранного с отсчетом
+const handleRemoveClick = (productId: number): void => {
+  handleFavoriteCountdown(
+    productId,
+    () => {
+      toggleLike(productId)
+    },
+    'favorite',
+  )
 }
 
 /* -----------------------------
-   СОСТОЯНИЕ ДЛЯ ОТСЧЕТА УДАЛЕНИЯ КОРЗИНЫ
---------------------------------*/
-interface CartCountdownData {
-  value: number | string
-  timerId?: ReturnType<typeof setTimeout>
-  resetting?: boolean
-}
-
-const cartCountdowns = ref<Record<number, CartCountdownData>>({})
-
-// Проверяем, идет ли отсчет для удаления из корзины
-const isCartCounting = (productId: number): boolean => {
-  const countdown = cartCountdowns.value[productId]
-  if (!countdown) return false
-  return countdown.value !== '✕' && typeof countdown.value === 'number' && countdown.value > 0
-}
-
-// Получаем текущее значение отсчета для корзины
-const getCartCountdownValue = (productId: number): number | string => {
-  const countdown = cartCountdowns.value[productId]
-  return countdown ? countdown.value : 0
-}
-
-/* -----------------------------
-   ОБРАБОТЧИК УДАЛЕНИЯ ИЗ КОРЗИНЫ С ОТСЧЕТОМ
---------------------------------*/
-const handleRemoveFromCart = (productId: number): void => {
-  const countdown = cartCountdowns.value[productId]
-
-  // Если уже идет отсчет
-  if (isCartCounting(productId) && countdown) {
-    // Сбрасываем отсчет
-    if (countdown.timerId) {
-      clearTimeout(countdown.timerId)
-    }
-
-    // Анимация сброса
-    cartCountdowns.value[productId] = {
-      value: '✕',
-      resetting: true,
-    }
-
-    setTimeout(() => {
-      delete cartCountdowns.value[productId]
-    }, 300)
-
-    return
-  }
-
-  // Начинаем отсчет с 3
-  let count = 3
-  cartCountdowns.value[productId] = { value: count }
-
-  const timerId = setInterval(() => {
-    count--
-
-    if (count > 0) {
-      cartCountdowns.value[productId] = { value: count, timerId }
-    } else {
-      clearInterval(timerId)
-      delete cartCountdowns.value[productId]
-
-      // Выполняем удаление из корзины
-      removeFromCart(productId)
-    }
-  }, 1000)
-
-  // Сохраняем timerId
-  cartCountdowns.value[productId] = { value: count, timerId }
-}
-
-/* -----------------------------
-   КОРЗИНА (ЛОКАЛЬНАЯ ЛОГИКА ДО ФИКСА БЭКЕНДА)
+   КОРЗИНА
 --------------------------------*/
 interface CartItem {
   product: string | { id?: string | number; _id?: string | number }
@@ -427,91 +277,30 @@ interface CartItem {
 
 const cartProducts = computed(() => {
   const cartItems = auth.user?.cart || ([] as CartItem[])
-
   return cartItems
     .map((item) => {
       let productId: number
-
       if (typeof item.product === 'string') {
         productId = Number(item.product)
       } else {
         const idValue = item.product.id || item.product._id || item.product
         productId = typeof idValue === 'string' ? Number(idValue) : Number(idValue)
       }
-
       const product = products.value.find((p) => p.id === productId)
       return product ? { product, qty: item.qty } : null
     })
     .filter(Boolean) as { product: Product; qty: number }[]
 })
 
-// Локальное обновление корзины (временное решение)
-const updateQty = async (productId: number, newQty: number): Promise<void> => {
-  console.log('Updating quantity:', productId, newQty)
-
-  try {
-    if (newQty <= 0) {
-      await auth.removeFromCart(String(productId))
-    } else {
-      await auth.updateCartItem(String(productId), newQty)
-    }
-  } catch (error) {
-    console.error('API error, using local update:', error)
-    localUpdateCart(productId, newQty)
-  }
-}
-
-// Локальное обновление корзины
-const localUpdateCart = (productId: number, newQty: number): void => {
-  if (!auth.user) return
-
-  const cart = [...(auth.user.cart || [])]
-  const existingIndex = cart.findIndex((item) => {
-    let itemProductId: string
-
-    if (typeof item.product === 'string') {
-      itemProductId = item.product
-    } else {
-      itemProductId = String(item.product.id || item.product._id || item.product)
-    }
-
-    return itemProductId === String(productId)
-  })
-
-  if (newQty <= 0) {
-    // Удалить из корзины
-    if (existingIndex !== -1) {
-      cart.splice(existingIndex, 1)
-    }
-  } else {
-    // Обновить количество
-    if (existingIndex !== -1) {
-      const existingItem = cart[existingIndex]
-      if (existingItem) {
-        cart[existingIndex] = {
-          ...existingItem,
-          qty: newQty,
-          product: existingItem.product,
-        }
-      }
-    } else {
-      // Добавить в корзину
-      cart.push({ product: String(productId), qty: newQty })
-    }
-  }
-
-  // Обновляем локальное состояние
-  auth.user.cart = cart
-}
-
-const removeFromCart = async (productId: number): Promise<void> => {
-  console.log('Removing from cart:', productId)
-  try {
-    await auth.removeFromCart(String(productId))
-  } catch (error) {
-    console.error('API error, using local remove:', error)
-    localUpdateCart(productId, 0)
-  }
+// Обработчик удаления из корзины с отсчетом
+const handleCartCountdown = (productId: number): void => {
+  handleCartCountdownAction(
+    productId,
+    () => {
+      updateCartQuantity(productId, 0)
+    },
+    'cart',
+  )
 }
 
 /* -----------------------------
@@ -533,7 +322,6 @@ const formatPrice = (value: number): string =>
     minimumFractionDigits: 0,
   }).format(value)
 </script>
-
 <style scoped>
 /* Стили для кнопки удаления с отсчетом в корзине */
 .remove-btn.counting {
