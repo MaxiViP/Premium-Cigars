@@ -962,7 +962,7 @@ const formatPrice = (value: number): string =>
 .cart-qty-section {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
   gap: 1rem;
   padding: 0.75rem;
   background: rgba(42, 42, 42, 0.5);
