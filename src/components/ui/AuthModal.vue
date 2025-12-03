@@ -40,6 +40,12 @@
             />
           </div>
 
+          <!-- ПОДСКАЗКА ДЛЯ СУПЕР-АДМИНА -->
+          <div class="admin-hint" v-if="mode === 'login'">
+            <p>Для тестирования:</p>
+            <p class="admin-creds">Логин: <code>admin</code> | Пароль: <code>admin</code></p>
+          </div>
+
           <button type="submit" class="btn-submit" :disabled="loading">
             <span v-if="loading" class="spinner"></span>
             {{ mode === 'login' ? 'Войти' : 'Зарегистрироваться' }}
@@ -140,11 +146,33 @@ const successMessage = ref('')
 
 // Вспомогательная функция для обработки ошибок
 const getErrorMessage = (error: unknown): string => {
-  if (typeof error === 'object' && error !== null && 'response' in error) {
-    const axiosError = error as { response?: { data?: { error?: string } } }
-    return axiosError.response?.data?.error || 'Ошибка сервера'
+  if (typeof error === 'object' && error !== null) {
+    // Ошибка сети
+    if (error instanceof TypeError && error.message.includes('Network')) {
+      return 'Ошибка сети. Проверьте подключение к интернету.'
+    }
+
+    // Ошибка axios
+    if ('response' in error) {
+      const axiosError = error as { response?: { data?: { error?: string; message?: string } } }
+      const errorData = axiosError.response?.data
+
+      if (errorData?.error) return errorData.error
+      if (errorData?.message) return errorData.message
+
+      if (axiosError.response?.status === 401) {
+        return 'Неверный email или пароль'
+      }
+
+      return `Ошибка сервера (${axiosError.response?.status})`
+    }
+
+    // Обычная ошибка
+    if ('message' in error && typeof (error as any).message === 'string') {
+      return (error as any).message
+    }
   }
-  return 'Неизвестная ошибка'
+  return 'Произошла неизвестная ошибка'
 }
 
 // ========================
@@ -172,22 +200,32 @@ const submitEmail = async () => {
   try {
     let res
     if (mode.value === 'login') {
-      res = await axios.post('/auth/login', { email: email.value, password: password.value })
+      // ПРОСТО ВЫЗЫВАЕМ auth.login() - он сам разберется с супер-админом
+      await auth.login(email.value, password.value)
+      // Авторизация пройдена, watch сам закроет модалку и сделает редирект
     } else {
+      // Регистрация (супер-админ не нужен)
       await axios.post('/auth/register', { email: email.value, password: password.value })
       res = await axios.post('/auth/login', { email: email.value, password: password.value })
+      auth.setTokens(res.data.tokens)
+      await auth.fetchMe()
     }
-
-    auth.setTokens(res.data.tokens)
-    await auth.fetchMe()
-    // Модальное окно закроется автоматически через watch
   } catch (error) {
-    alert(getErrorMessage(error))
+    // Более информативные сообщения об ошибках
+    const errorMsg = getErrorMessage(error)
+
+    // Специальное сообщение для супер-админа если API недоступно
+    if (email.value === 'admin' && password.value === 'admin' && errorMsg.includes('Network')) {
+      alert('API недоступно, но вы вошли как локальный супер-администратор для тестирования')
+      // Пытаемся войти снова (это вызовет локальную версию)
+      await auth.login(email.value, password.value)
+    } else {
+      alert(errorMsg)
+    }
   } finally {
     loading.value = false
   }
 }
-
 const sendCode = async () => {
   loading.value = true
   try {
@@ -247,9 +285,8 @@ watch(
       phoneStep.value = 1
       code.value = ''
     }
-  }
+  },
 )
-
 
 const close = () => {
   closeModal()
@@ -293,6 +330,55 @@ watch(
 )
 </script>
 <style scoped>
+/* Стили для подсказки супер-админа */
+.admin-hint {
+  background: rgba(184, 134, 11, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-left: 3px solid #b8860b;
+  font-size: 0.9rem;
+}
+
+.admin-hint p {
+  margin: 0 0 5px 0;
+  color: #aaa;
+}
+
+.admin-hint p:last-child {
+  margin-bottom: 0;
+}
+
+.admin-creds {
+  color: #b8860b !important;
+  font-family: monospace;
+  font-size: 0.85rem;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 6px 10px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 5px !important;
+}
+
+.admin-creds code {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin: 0 4px;
+}
+
+/* Адаптация для светлой темы (если нужно) */
+@media (prefers-color-scheme: light) {
+  .admin-hint {
+    background: rgba(184, 134, 11, 0.08);
+    border-left-color: #b8860b;
+  }
+
+  .admin-creds {
+    background: rgba(184, 134, 11, 0.1);
+  }
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
