@@ -207,10 +207,10 @@ const product = computed(() => {
 
 // Используем композицию для действий с товаром
 const {
-  isLiked: isProductLiked,
+  isLiked: isProductLiked, // переименовываем для ясности
   isInCart,
-  toggleLike: toggleProductLike,
-  addToCart: addProductToCart,
+  toggleLike: toggleProductLike, // переименовываем для ясности
+  addToCart: addProductToCart, // переименовываем для ясности
 } = useProductActions(productId.value)
 
 // Обработчики действий
@@ -348,7 +348,7 @@ onMounted(() => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 3rem;
-  margin-bottom: 3rem;
+  /* margin-bottom: 3rem; */
 }
 
 .product-main_action {
@@ -572,8 +572,8 @@ onMounted(() => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 3rem;
-  margin-bottom: 3rem;
-  padding: 2rem 0;
+  /* margin-bottom: 3rem;
+  padding: 2rem 0; */
   border-top: 1px solid #f0f0f0;
 }
 
