@@ -146,33 +146,11 @@ const successMessage = ref('')
 
 // Вспомогательная функция для обработки ошибок
 const getErrorMessage = (error: unknown): string => {
-  if (typeof error === 'object' && error !== null) {
-    // Ошибка сети
-    if (error instanceof TypeError && error.message.includes('Network')) {
-      return 'Ошибка сети. Проверьте подключение к интернету.'
-    }
-
-    // Ошибка axios
-    if ('response' in error) {
-      const axiosError = error as { response?: { data?: { error?: string; message?: string } } }
-      const errorData = axiosError.response?.data
-
-      if (errorData?.error) return errorData.error
-      if (errorData?.message) return errorData.message
-
-      if (axiosError.response?.status === 401) {
-        return 'Неверный email или пароль'
-      }
-
-      return `Ошибка сервера (${axiosError.response?.status})`
-    }
-
-    // Обычная ошибка
-    if ('message' in error && typeof (error as any).message === 'string') {
-      return (error as any).message
-    }
+  if (typeof error === 'object' && error !== null && 'response' in error) {
+    const axiosError = error as { response?: { data?: { error?: string } } }
+    return axiosError.response?.data?.error || 'Ошибка сервера'
   }
-  return 'Произошла неизвестная ошибка'
+  return 'Неизвестная ошибка'
 }
 
 // ========================
