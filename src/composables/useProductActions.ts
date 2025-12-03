@@ -1,7 +1,8 @@
 // src/composables/useProductActions.ts
-import { computed } from 'vue'
+import { computed, ComputedRef } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 
+// Локальные типы для этой композиции
 type FavoriteItem = string | number | { id?: string | number; _id?: string | number }
 
 interface CartItem {
@@ -9,11 +10,22 @@ interface CartItem {
   qty: number
 }
 
-export function useProductActions(productId?: number | string) {
+// Определяем возвращаемый тип явно
+interface UseProductActionsReturn {
+  isLiked: ComputedRef<boolean>
+  isInCart: ComputedRef<boolean>
+  toggleLike: (customId?: number | string) => void
+  addToCart: (customId?: number | string, quantity?: number) => void
+  removeFromCart: (customId?: number | string) => void
+  updateCartQuantity: (customId: number | string, newQty: number) => void
+  auth: ReturnType<typeof useAuthStore>
+}
+
+export function useProductActions(productId?: number | string): UseProductActionsReturn {
   const auth = useAuthStore()
 
   // Вычисляемое свойство для проверки, находится ли товар в избранном
-  const isLiked = computed(() => {
+  const isLiked: ComputedRef<boolean> = computed(() => {
     if (!auth.isAuthenticated || !auth.user || !productId) return false
 
     const idToCheck = String(productId)
@@ -35,7 +47,7 @@ export function useProductActions(productId?: number | string) {
   })
 
   // Вычисляемое свойство для проверки, находится ли товар в корзине
-  const isInCart = computed(() => {
+  const isInCart: ComputedRef<boolean> = computed(() => {
     if (!auth.isAuthenticated || !auth.user || !productId) return false
 
     const idToCheck = String(productId)

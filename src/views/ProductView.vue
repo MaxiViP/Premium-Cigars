@@ -23,21 +23,21 @@
               <div class="quick-actions">
                 <button
                   class="qa-btn"
-                  @click.stop.prevent="handleToggleLike()"
-                  :class="{ 'qa-btn--active': isProductLiked }"
-                  :aria-label="isProductLiked ? 'Убрать из избранного' : 'Добавить в избранное'"
+                  @click.stop.prevent="handleToggleLike"
+                  :class="{ 'qa-btn--active': isLiked }"
+                  :aria-label="isLiked ? 'Убрать из избранного' : 'Добавить в избранное'"
                 >
-                  <span v-if="isProductLiked">♥</span>
+                  <span v-if="isLiked">♥</span>
                   <span v-else>♡</span>
                 </button>
-                <button class="qa-btn" @click.stop.prevent="handleShareProduct">⇄</button>
+                <button class="qa-btn" @click.stop.prevent="shareProduct">⇄</button>
               </div>
             </div>
 
             <div class="main-image">
               <img
-                :src="getImageUrl(mainImage || product.images[0])"
-                :alt="product.name"
+                :src="getImageUrl(currentMainImage)"
+                :alt="product?.name || 'Товар'"
                 class="product-image"
               />
             </div>
@@ -49,7 +49,7 @@
                 :src="getImageUrl(image)"
                 :alt="`${product.name} - фото ${index + 1}`"
                 class="thumbnail"
-                :class="{ 'thumbnail-active': (mainImage || product.images[0]) === image }"
+                :class="{ 'thumbnail-active': currentMainImage === image }"
                 @click="setMainImage(image)"
               />
             </div>
@@ -82,7 +82,7 @@
               <button
                 class="add-to-cart-btn"
                 :disabled="!product.inStock"
-                @click="addToCart"
+                @click="handleAddToCart"
                 :class="{ 'add-cart-btn--active': isInCart }"
               >
                 <span v-if="isInCart">В корзине</span>
@@ -206,19 +206,24 @@ const product = computed(() => {
 })
 
 // Используем композицию для действий с товаром
-const {
-  isLiked: isProductLiked, // переименовываем для ясности
-  isInCart,
-  toggleLike: toggleProductLike, // переименовываем для ясности
-  addToCart: addProductToCart, // переименовываем для ясности
-} = useProductActions(productId.value)
+const { isLiked, isInCart, toggleLike, addToCart } = useProductActions(productId.value)
 
-// Обработчики действий
-const handleToggleLike = () => {
-  toggleProductLike()
+// Обертки для обработчиков, которые принимают PointerEvent
+const handleToggleLike = (event: MouseEvent) => {
+  event.stopPropagation()
+  event.preventDefault()
+  toggleLike()
 }
 
-const handleShareProduct = () => {
+const handleAddToCart = (event: MouseEvent) => {
+  event.stopPropagation()
+  addToCart()
+}
+
+const shareProduct = (event: MouseEvent) => {
+  event.stopPropagation()
+  event.preventDefault()
+
   if (navigator.share && product.value) {
     navigator.share({
       title: product.value.name,
@@ -226,10 +231,6 @@ const handleShareProduct = () => {
       url: window.location.origin + `/product/${product.value.id}`,
     })
   }
-}
-
-const addToCart = () => {
-  addProductToCart()
 }
 
 // Похожие товары
@@ -248,7 +249,8 @@ const relatedProducts = computed(() => {
 
 // Работа с изображениями
 const getImageUrl = (imageName: string | undefined): string => {
-  if (!imageName) {
+  // Проверяем, что imageName не undefined
+  if (!imageName || imageName.trim() === '') {
     return '/images/products/default.jpg'
   }
 
@@ -259,19 +261,26 @@ const getImageUrl = (imageName: string | undefined): string => {
   return `/images/products/${imageName}`
 }
 
-const setMainImage = (image: string) => {
-  mainImage.value = image
+const setMainImage = (image: string | undefined) => {
+  if (image) {
+    mainImage.value = image
+  }
 }
+const currentMainImage = computed<string>(() => {
+  const fallback = 'default.jpg'
+  const firstImage = product.value?.images[0]
+  return mainImage.value || firstImage || fallback
+})
 
 onMounted(() => {
-  if (product.value && product.value.images.length > 0) {
-    mainImage.value = product.value.images[0]
+  const images = product.value?.images
+  if (images && images.length > 0) {
+    mainImage.value = images[0] as string // или просто images[0]
   }
 })
 </script>
 
 <style scoped>
-/* Добавьте эти стили в существующие */
 .qa-btn--active {
   background: #e74c3c !important;
   color: white;
