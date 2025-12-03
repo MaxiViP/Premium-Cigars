@@ -175,6 +175,7 @@ import { useCountdownActions } from '@/composables/useCountdownActions'
 import type { Product } from '@/types/Product'
 
 const auth = useAuthStore()
+
 const catalog = useCatalogStore()
 const { products } = storeToRefs(catalog)
 const router = useRouter()
