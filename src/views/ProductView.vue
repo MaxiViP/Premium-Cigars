@@ -30,16 +30,12 @@
                   <span v-if="isLiked">♥</span>
                   <span v-else>♡</span>
                 </button>
-                <button class="qa-btn" @click.stop.prevent="shareProduct">⇄</button>
+                <button class="qa-btn" @click.stop.prevent="shareProduct">Share</button>
               </div>
             </div>
 
             <div class="main-image">
-              <img
-                :src="getImageUrl(currentMainImage)"
-                :alt="product?.name || 'Товар'"
-                class="product-image"
-              />
+              <img :src="getImageUrl(currentMainImage)" :alt="product.name" class="product-image" />
             </div>
 
             <div v-if="product.images.length > 1" class="image-thumbnails">
@@ -78,15 +74,35 @@
               </div>
             </div>
 
+            <!-- КНОПКИ ДОБАВЛЕНИЯ В КОРЗИНУ С КОЛИЧЕСТВОМ -->
             <div class="product-actions">
+              <!-- Если уже в корзине — показываем + / – -->
+              <div v-if="cartQuantity > 0" class="quantity-controls">
+                <button
+                  class="qty-btn qty-btn--minus"
+                  @click="changeQuantity(-1)"
+                  :disabled="!product.inStock"
+                >
+                  −
+                </button>
+                <span class="qty-display">{{ cartQuantity }}</span>
+                <button
+                  class="qty-btn qty-btn--plus"
+                  @click="changeQuantity(1)"
+                  :disabled="!product.inStock"
+                >
+                  +
+                </button>
+              </div>
+
+              <!-- Если нет в корзине — обычная кнопка -->
               <button
+                v-else
                 class="add-to-cart-btn"
                 :disabled="!product.inStock"
-                @click="handleAddToCart"
-                :class="{ 'add-cart-btn--active': isInCart }"
+                @click="addToCart"
               >
-                <span v-if="isInCart">В корзине</span>
-                <span v-else>{{ product.inStock ? 'Добавить в корзину' : 'Нет в наличии' }}</span>
+                {{ product.inStock ? 'Добавить в корзину' : 'Нет в наличии' }}
               </button>
             </div>
 
@@ -170,9 +186,9 @@
         </div>
       </div>
 
-      <!-- Сообщение если товар не найден -->
+      <!-- Товар не найден -->
       <div v-else class="product-not-found">
-        <div class="not-found-icon">🚬</div>
+        <div class="not-found-icon">Cigar</div>
         <h2>Товар не найден</h2>
         <p>Извините, запрашиваемый товар не существует или был удален</p>
         <router-link to="/catalog" class="back-to-catalog-btn"> Вернуться в каталог </router-link>
@@ -182,9 +198,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProductsStore } from '@/stores/products'
+import { useCartStore } from '@/stores/cart' // ← наш крутой store
 import { useProductActions } from '@/composables/useProductActions'
 import ProductCard from '@/components/ui/ProductCard.vue'
 import { formatPrice } from '@/utils/formatters'
@@ -192,43 +209,68 @@ import type { Product } from '@/types/Product'
 
 const route = useRoute()
 const productsStore = useProductsStore()
+const cartStore = useCartStore()
+
 const mainImage = ref<string>('')
 
-// Получаем ID товара из роута
+// ID товара
 const productId = computed(() => {
   const id = route.params.id
   return typeof id === 'string' ? parseInt(id) : Number(id)
 })
 
-// Получаем данные товара
+// Товар
 const product = computed(() => {
   return productsStore.getProductById(productId.value) as Product | undefined
 })
 
-// Используем композицию для действий с товаром
-const { isLiked, isInCart, toggleLike, addToCart } = useProductActions(productId.value)
+// Лайк (оставляем как было)
+const { isLiked, toggleLike } = useProductActions(productId.value)
 
-// Обертки для обработчиков, которые принимают PointerEvent
-const handleToggleLike = (event: MouseEvent) => {
-  event.stopPropagation()
-  event.preventDefault()
+const handleToggleLike = (e: MouseEvent) => {
+  e.stopPropagation()
   toggleLike()
 }
 
-const handleAddToCart = (event: MouseEvent) => {
-  event.stopPropagation()
-  addToCart()
+// Количество в корзине
+const cartQuantity = computed(() => {
+  if (!product.value) return 0
+  const item = cartStore.items.find((i) =>
+    typeof i.product === 'string'
+      ? i.product === product.value?._id
+      : i.product._id === product.value?._id,
+  )
+  return item?.qty || 0
+})
+
+// Добавление одной штуки
+const addToCart = () => {
+  const id = product.value?._id
+  if (id) {
+    cartStore.add(id, 1)
+  }
 }
 
-const shareProduct = (event: MouseEvent) => {
-  event.stopPropagation()
-  event.preventDefault()
+// Изменение количества (+1 или -1)
+const changeQuantity = (delta: number) => {
+  const id = product.value?._id
+  if (!id) return
 
+  const newQty = cartQuantity.value + delta
+
+  if (newQty <= 0) {
+    cartStore.remove(id)
+  } else {
+    cartStore.update(id, newQty)
+  }
+}
+const shareProduct = (e: MouseEvent) => {
+  e.stopPropagation()
   if (navigator.share && product.value) {
     navigator.share({
       title: product.value.name,
       text: product.value.brand,
-      url: window.location.origin + `/product/${product.value.id}`,
+      url: window.location.href,
     })
   }
 }
@@ -249,38 +291,71 @@ const relatedProducts = computed(() => {
 
 // Работа с изображениями
 const getImageUrl = (imageName: string | undefined): string => {
-  // Проверяем, что imageName не undefined
-  if (!imageName || imageName.trim() === '') {
-    return '/images/products/default.jpg'
-  }
-
-  if (imageName.startsWith('http') || imageName.startsWith('/')) {
-    return imageName
-  }
-
+  if (!imageName || imageName.trim() === '') return '/images/products/default.jpg'
+  if (imageName.startsWith('http') || imageName.startsWith('/')) return imageName
   return `/images/products/${imageName}`
 }
 
-const setMainImage = (image: string | undefined) => {
-  if (image) {
-    mainImage.value = image
-  }
+const setMainImage = (image: string) => {
+  mainImage.value = image
 }
-const currentMainImage = computed<string>(() => {
-  const fallback = 'default.jpg'
-  const firstImage = product.value?.images[0]
-  return mainImage.value || firstImage || fallback
-})
 
-onMounted(() => {
-  const images = product.value?.images
-  if (images && images.length > 0) {
-    mainImage.value = images[0] as string // или просто images[0]
-  }
+const currentMainImage = computed<string>(() => {
+  return mainImage.value || product.value?.images?.[0] || 'default.jpg'
 })
 </script>
 
 <style scoped>
+/* Кнопки количества */
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 8px 12px;
+  width: fit-content;
+}
+
+.qty-btn {
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: white;
+  border-radius: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #495057;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.qty-btn:hover:not(:disabled) {
+  background: var(--primary-color);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.qty-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.qty-display {
+  min-width: 50px;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  user-select: none;
+}
+
 .qa-btn--active {
   background: #e74c3c !important;
   color: white;
@@ -774,6 +849,15 @@ onMounted(() => {
 
   .image-thumbnails {
     justify-content: center;
+  }
+
+  .quantity-controls {
+    width: 100%;
+    justify-content: center;
+  }
+  .qty-btn {
+    width: 50px;
+    height: 50px;
   }
 }
 </style>

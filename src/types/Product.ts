@@ -1,4 +1,5 @@
 // src/types/Product.ts
+
 export interface BaseProduct {
   id: number
   name: string
@@ -39,6 +40,9 @@ export interface BaseProduct {
     | 'Кофейные'
   flavorNotes: string[]
   size: string
+
+  // Добавляем только это поле — и всё!
+  _id: string
 }
 
 // Сигары
