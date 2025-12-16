@@ -897,8 +897,8 @@ const formatPrice = (value: number): string =>
 }
 
 .cart-img {
-  width: clamp(80px, 20vw, 120px);
-  height: clamp(80px, 20vw, 120px);
+  width: clamp(80px, 20vw, 200px);
+  height: clamp(80px, 30vw, 200px);
   border-radius: 14px;
   object-fit: cover;
   border: 2px solid #444;
@@ -936,6 +936,10 @@ const formatPrice = (value: number): string =>
 .cart-name:hover {
   color: #d4af37;
   text-decoration: underline;
+}
+
+.cart-price {
+  font-size: clamp(1.2rem, 3.5vw, 1.5rem);
 }
 
 .item-price {
@@ -996,8 +1000,8 @@ const formatPrice = (value: number): string =>
 .qty-btn {
   width: 38px;
   height: 38px;
-  background: linear-gradient(145deg, #3a3a3a, #2d2d2d);
-  border: none;
+  background: #3a3a3a;
+  border: 2px solid #444;
   border-radius: 10px;
   color: #fff;
   font-size: 1.6rem;
@@ -1006,40 +1010,25 @@ const formatPrice = (value: number): string =>
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.qty-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(145deg, #b8860b, #d4af37);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  border-radius: inherit;
-}
-
-.qty-btn:hover:not(:disabled)::before {
-  opacity: 1;
+  transition: all 0.2s ease;
 }
 
 .qty-btn:hover:not(:disabled) {
+  background: #b8860b;
   color: #000;
-  transform: scale(1.15) translateY(-2px);
-  box-shadow: 0 6px 15px rgba(184, 134, 11, 0.3);
+  border-color: #d4af37;
+  transform: scale(1.1);
+}
+
+.qty-btn:active:not(:disabled) {
+  transform: scale(0.95);
 }
 
 .qty-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-  background: #2a2a2a;
+  border-color: #333;
 }
-
 /* Отображение количества */
 .qty {
   font-size: 1.3rem;
@@ -1239,6 +1228,7 @@ const formatPrice = (value: number): string =>
   justify-content: space-between;
   align-items: center;
   padding: 1rem 0;
+  font-size: x-large;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   transition: all 0.3s ease;
 }
@@ -1346,7 +1336,7 @@ const formatPrice = (value: number): string =>
   }
 
   .cart-item-controls {
-    display:flow;
+    display: flow;
     grid-template-rows: auto;
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
@@ -1395,7 +1385,12 @@ const formatPrice = (value: number): string =>
   }
 
   .remove-btn {
-    width: 100%;
+    width: 40%;
+  }
+
+  .remove-text {
+    font-weight: 150;
+    font-size: small;
   }
 
   .summary-details {
@@ -1425,7 +1420,7 @@ const formatPrice = (value: number): string =>
 /* Мобильные (480px и меньше) */
 @media (max-width: 480px) {
   .cart-item {
-     grid-template-columns: 1fr  ;
+    grid-template-columns: 1fr;
   }
   .cart-item-controls {
     gap: 1rem;
@@ -1456,8 +1451,9 @@ const formatPrice = (value: number): string =>
   }
 
   .remove-btn {
+    width: 30%;
     padding: 0.8rem 1.2rem;
-    font-size: 1rem;
+
     min-height: 48px;
   }
 
@@ -1594,10 +1590,10 @@ const formatPrice = (value: number): string =>
     gap: 0.875rem;
   }
 
-  .stats-grid {
+  /* .stats-grid {
     grid-template-columns: 1fr;
     gap: 0.875rem;
-  }
+  } */
 }
 
 @media (max-width: 320px) {

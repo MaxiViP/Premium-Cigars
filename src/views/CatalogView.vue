@@ -1840,9 +1840,9 @@ onMounted(() => {
     font-size: 1.5rem;
   }
 
-  .category-tabs {
+  /* .category-tabs {
     flex-direction: column;
-  }
+  } */
 
   .products-grid {
     grid-template-columns: 1fr;
@@ -1858,7 +1858,7 @@ onMounted(() => {
 
   .catalog-controls {
     justify-content: justify-content;
-    flex-direction: column;
+ 
   }
 }
 </style>
