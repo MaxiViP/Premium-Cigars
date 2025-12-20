@@ -267,7 +267,7 @@ const handlePaymentSuccess = async () => {
     await auth.clearCart()
 
     // Показываем уведомление
-    alert('✅ Заказ успешно оплачен и корзина очищена!')
+    // alert('✅ Заказ успешно оплачен и корзина очищена!')
 
     // Обновляем данные пользователя
     if (!auth.isSuperAdmin()) {
