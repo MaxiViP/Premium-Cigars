@@ -1,7 +1,7 @@
 <template>
   <div class="profile-container">
     <!-- Заголовок -->
-    <header class="profile-header">
+    <header class="profile-header" id="profile-header" tabindex="-1">
       <h1>Личный кабинет</h1>
       <button @click="logout" class="logout-btn">Выйти</button>
     </header>
@@ -261,16 +261,40 @@ const openCheckout = () => {
 }
 
 // Обработчик успешной оплаты
-const handlePaymentSuccess = () => {
-  // Очищаем корзину после успешной оплаты
-  auth.clearCart()
-  showNotification('Заказ успешно оплачен!', 'success')
-}
+const handlePaymentSuccess = async () => {
+  try {
+    // Очищаем корзину после успешной оплаты
+    await auth.clearCart()
 
-// Функция уведомления
-const showNotification = (message: string, type = 'success') => {
-  // Можно использовать toast-библиотеку или свой компонент
-  alert(`${type === 'success' ? '✅' : '❌'} ${message}`)
+    // Показываем уведомление
+    alert('✅ Заказ успешно оплачен и корзина очищена!')
+
+    // Обновляем данные пользователя
+    if (!auth.isSuperAdmin()) {
+      await auth.fetchMe()
+    }
+
+    // Закрываем модальное окно
+    showCheckoutModal.value = false
+
+    // Прокручиваем страницу наверх и фокусируемся
+    setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth', // плавная прокрутка
+      })
+
+      // Фокусируемся на заголовке профиля
+      const header = document.querySelector('.profile-header')
+      if (header) {
+        ;(header as HTMLElement).focus()
+        ;(header as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }, 100)
+  } catch (error) {
+    console.error('Ошибка очистки корзины:', error)
+    alert('⚠️ Заказ оплачен, но возникла проблема с обновлением корзины.')
+  }
 }
 
 const auth = useAuthStore()
