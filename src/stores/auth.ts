@@ -54,95 +54,95 @@ export const useAuthStore = defineStore('auth', {
     // ОБНОВЛЕННЫЙ МЕТОД ВХОДА
     // ========================
     async login(email: string, password: string): Promise<User | null> {
-  try {
-    this.isLoading = true
+      try {
+        this.isLoading = true
 
-    // ПРОВЕРКА СУПЕР-АДМИНА
-    if (email === 'admin@example.com' && password === 'admin') {
-      console.log('🔐 Вход как супер-администратор')
+        // ПРОВЕРКА СУПЕР-АДМИНА
+        if (email === 'admin@example.com' && password === 'admin') {
+          console.log('🔐 Вход как супер-администратор')
 
-      const superAdmin: User = {
-        _id: 'super_admin_1',
-        email: 'admin@example.com',
-        name: 'Администратор',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
-        favorites: ['1', '2', '3', '4', '5'],
-        cart: [
-          { product: '1', qty: 2 },
-          { product: '2', qty: 1 },
-          { product: '3', qty: 3 },
-        ],
-        createdAt: new Date().toISOString(),
-      }
+          const superAdmin: User = {
+            _id: 'super_admin_1',
+            email: 'admin@example.com',
+            name: 'Администратор',
+            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
+            favorites: ['1', '2', '3', '4', '5'],
+            cart: [
+              { product: '1', qty: 2 },
+              { product: '2', qty: 1 },
+              { product: '3', qty: 3 },
+            ],
+            createdAt: new Date().toISOString(),
+          }
 
-      this.user = superAdmin
-      const testToken = 'super_admin_token_' + Date.now()
-      this.setToken(testToken)
-      localStorage.setItem('superAdmin', 'true')
-      localStorage.setItem('user', JSON.stringify(superAdmin))
+          this.user = superAdmin
+          const testToken = 'super_admin_token_' + Date.now()
+          this.setToken(testToken)
+          localStorage.setItem('superAdmin', 'true')
+          localStorage.setItem('user', JSON.stringify(superAdmin))
 
-      console.log('✅ Супер-администратор авторизован')
-      return this.user
-    }
-
-    // Пытаемся обычную авторизацию
-    try {
-      const res = await axios.post('/auth/login', { email, password })
-
-      if (res.data.tokens) {
-        this.setTokens(res.data.tokens)
-        this.user = res.data.user
-        localStorage.setItem('user', JSON.stringify(res.data.user))
-        localStorage.removeItem('superAdmin')
-        return this.user
-      }
-
-      if (res.data.token) {
-        this.setToken(res.data.token)
-        this.user = res.data.user
-        localStorage.setItem('user', JSON.stringify(res.data.user))
-        localStorage.removeItem('superAdmin')
-        return this.user
-      }
-
-      throw new Error('Invalid response format')
-    } catch (apiError) {
-      // Если API недоступно и это попытка входа супер-админа
-      if (email === 'admin@example.com' && password === 'admin') {
-        console.warn('API недоступно, создаем локального супер-админа')
-
-        const offlineSuperAdmin: User = {
-          _id: 'super_admin_offline',
-          email: 'admin@example.com',
-          name: 'Администратор (оффлайн)',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
-          favorites: ['1', '2', '3'],
-          cart: [
-            { product: '1', qty: 1 },
-            { product: '2', qty: 2 },
-          ],
-          createdAt: new Date().toISOString(),
+          console.log('✅ Супер-администратор авторизован')
+          return this.user
         }
 
-        this.user = offlineSuperAdmin
-        const testToken = 'offline_super_admin_token_' + Date.now()
-        this.setToken(testToken)
-        localStorage.setItem('superAdmin', 'true')
-        localStorage.setItem('user', JSON.stringify(offlineSuperAdmin))
+        // Пытаемся обычную авторизацию
+        try {
+          const res = await axios.post('/auth/login', { email, password })
 
-        console.log('✅ Супер-администратор авторизован (оффлайн режим)')
-        return this.user
+          if (res.data.tokens) {
+            this.setTokens(res.data.tokens)
+            this.user = res.data.user
+            localStorage.setItem('user', JSON.stringify(res.data.user))
+            localStorage.removeItem('superAdmin')
+            return this.user
+          }
+
+          if (res.data.token) {
+            this.setToken(res.data.token)
+            this.user = res.data.user
+            localStorage.setItem('user', JSON.stringify(res.data.user))
+            localStorage.removeItem('superAdmin')
+            return this.user
+          }
+
+          throw new Error('Invalid response format')
+        } catch (apiError) {
+          // Если API недоступно и это попытка входа супер-админа
+          if (email === 'admin@example.com' && password === 'admin') {
+            console.warn('API недоступно, создаем локального супер-админа')
+
+            const offlineSuperAdmin: User = {
+              _id: 'super_admin_offline',
+              email: 'admin@example.com',
+              name: 'Администратор (оффлайн)',
+              avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
+              favorites: ['1', '2', '3'],
+              cart: [
+                { product: '1', qty: 1 },
+                { product: '2', qty: 2 },
+              ],
+              createdAt: new Date().toISOString(),
+            }
+
+            this.user = offlineSuperAdmin
+            const testToken = 'offline_super_admin_token_' + Date.now()
+            this.setToken(testToken)
+            localStorage.setItem('superAdmin', 'true')
+            localStorage.setItem('user', JSON.stringify(offlineSuperAdmin))
+
+            console.log('✅ Супер-администратор авторизован (оффлайн режим)')
+            return this.user
+          }
+
+          throw apiError // Пробрасываем ошибку для обычных пользователей
+        }
+      } catch (error) {
+        console.error('Login error:', error)
+        throw error
+      } finally {
+        this.isLoading = false
       }
-
-      throw apiError // Пробрасываем ошибку для обычных пользователей
-    }
-  } catch (error) {
-    console.error('Login error:', error)
-    throw error
-  } finally {
-    this.isLoading = false
-  }
-},
+    },
     // ========================
     // ЗАГРУЗКА ПОЛЬЗОВАТЕЛЯ (исправленный)
     // ========================
@@ -469,6 +469,27 @@ export const useAuthStore = defineStore('auth', {
         }
       } catch (error) {
         console.error('Failed to update cart:', error)
+        throw error
+      }
+    },
+
+    // ========================
+    // ОЧИСТКА КОРЗИНЫ
+    // ========================
+    async clearCart(): Promise<void> {
+      try {
+        // Если это супер-админ - очищаем локально
+        if (this.user?._id === 'super_admin_1') {
+          if (this.user) {
+            this.user.cart = []
+            localStorage.setItem('user', JSON.stringify(this.user))
+          }
+        } else {
+          await axios.delete('/user/cart')
+          await this.fetchMe()
+        }
+      } catch (error) {
+        console.error('Failed to clear cart:', error)
         throw error
       }
     },

@@ -196,7 +196,7 @@
           </div>
 
           <div class="summary-actions">
-            <router-link to="/checkout" class="btn-primary checkout-btn">
+            <button @click="openCheckout" class="btn-primary checkout-btn">
               <span>Оформить заказ</span>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <path
@@ -207,7 +207,15 @@
                   stroke-linejoin="round"
                 />
               </svg>
-            </router-link>
+            </button>
+
+            <!-- Добавьте модальное окно в конец компонента -->
+            <CheckoutModal
+              :isOpen="showCheckoutModal"
+              :orderData="orderData"
+              @close="showCheckoutModal = false"
+              @payment-success="handlePaymentSuccess"
+            />
           </div>
         </div>
       </div>
@@ -224,6 +232,46 @@ import { useCatalogStore } from '@/stores/catalog'
 import { useProductActions } from '@/composables/useProductActions'
 import { useCountdownActions } from '@/composables/useCountdownActions'
 import type { Product } from '@/types/Product'
+import { ref } from 'vue'
+import CheckoutModal from '@/components/checkout/CheckoutModal.vue'
+
+// Добавляем после импортов
+const showCheckoutModal = ref(false)
+
+// Данные для заказа
+const orderData = ref({
+  total: 0,
+  itemsCount: 0,
+  products: [] as { product: Product; qty: number }[], // ← вот это
+  orderNumber: '',
+})
+// Функция открытия модального окна
+const openCheckout = () => {
+  // Генерируем номер заказа
+  const orderNumber = 'ORD-' + Date.now().toString().slice(-8)
+
+  orderData.value = {
+    total: cartTotal.value,
+    itemsCount: cartItemsCount.value,
+    products: cartProducts.value,
+    orderNumber,
+  }
+
+  showCheckoutModal.value = true
+}
+
+// Обработчик успешной оплаты
+const handlePaymentSuccess = () => {
+  // Очищаем корзину после успешной оплаты
+  auth.clearCart()
+  showNotification('Заказ успешно оплачен!', 'success')
+}
+
+// Функция уведомления
+const showNotification = (message: string, type = 'success') => {
+  // Можно использовать toast-библиотеку или свой компонент
+  alert(`${type === 'success' ? '✅' : '❌'} ${message}`)
+}
 
 const auth = useAuthStore()
 const catalog = useCatalogStore()
@@ -707,7 +755,7 @@ const formatPrice = (value: number): string =>
 .favorite-card {
   display: flex;
   flex-direction: column;
-  background: #fff;
+  /* background: #fff; */
   padding: clamp(0.75rem, 2vw, 1rem);
   border-radius: 14px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -1537,8 +1585,8 @@ const formatPrice = (value: number): string =>
   }
 
   .profile-header {
-    flex-direction: column;
-    text-align: center;
+    /* flex-direction: column; */
+    /* text-align: center; */
     gap: 1.5rem;
   }
 

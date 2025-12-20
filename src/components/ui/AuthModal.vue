@@ -43,7 +43,10 @@
           <!-- ПОДСКАЗКА ДЛЯ СУПЕР-АДМИНА -->
           <div class="admin-hint" v-if="mode === 'login'">
             <p>Для тестирования:</p>
-            <p class="admin-creds">Логин: <code>admin</code> | Пароль: <code>admin</code></p>
+            <p class="admin-creds">
+              Логин: <code>admin@example.com</code><br />
+              Пароль: <code>admin</code>
+            </p>
           </div>
 
           <button type="submit" class="btn-submit" :disabled="loading">
@@ -69,9 +72,20 @@
             <label>Номер телефона</label>
             <input v-model="phone" placeholder="+7 (999) 123-45-67" type="tel" />
           </div>
-          <button @click="sendCode" :disabled="loading || !phone" class="btn-submit">
-            {{ loading ? 'Отправляем...' : 'Отправить код' }}
+          <!-- Обновленная кнопка с более понятным текстом -->
+          <button
+            @click="sendCode"
+            :disabled="!phone"
+            class="btn-submit"
+            style="background-color: #f0ad4e; border-color: #eea236"
+          >
+            {{ phone ? 'Отправить код (временно недоступно)' : 'Введите номер телефона' }}
           </button>
+
+          <!-- Дополнительное пояснение под кнопкой -->
+          <p class="info-text" style="margin-top: 10px; font-size: 14px; color: #888">
+            В данный момент регистрация по телефону не работает. Используйте Email или соцсети.
+          </p>
         </div>
 
         <!-- Шаг 2: ввод кода -->
@@ -205,17 +219,18 @@ const submitEmail = async () => {
   }
 }
 const sendCode = async () => {
-  loading.value = true
-  try {
-    await axios.post('/auth/phone/send', { phone: phone.value })
-    phoneStep.value = 2
-  } catch (error) {
-    alert(getErrorMessage(error))
-  } finally {
-    loading.value = false
-  }
-}
+  // Вместо реальной отправки показываем сообщение
+  successMessage.value =
+    '⚠️ Регистрация по телефону временно недоступна. Пожалуйста, используйте Email или войдите через соцсети.'
 
+  // Очищаем поле телефона для наглядности (опционально)
+  phone.value = ''
+
+  // Через 5 секунд убираем сообщение
+  setTimeout(() => {
+    successMessage.value = ''
+  }, 5000)
+}
 const verifyCode = async () => {
   loading.value = true
   try {
