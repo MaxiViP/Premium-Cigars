@@ -1,4 +1,4 @@
-<!-- <template>
+<template>
   <div class="auth-card">
     <h2>Вход / Регистрация по телефону</h2>
 
@@ -64,4 +64,4 @@ async function verifyCode() {
     loading.value = false
   }
 }
-</script> -->
+</script>
